@@ -22,7 +22,6 @@
     "node_modules/@powerbi-visuals-utils/controls-touchutils/lib/index.d.ts",
     "node_modules/@powerbi-visuals-utils/cssconstants/lib/index.d.ts",
 
-    "node_modules/@powerbi-visuals-utils/datacolorpalette/lib/index.d.ts",
     "node_modules/@powerbi-visuals-utils/datalabelmanager/lib/index.d.ts",
     "node_modules/@powerbi-visuals-utils/datalabelutils/lib/index.d.ts",
     "node_modules/@powerbi-visuals-utils/dataviewobjects/lib/index.d.ts",

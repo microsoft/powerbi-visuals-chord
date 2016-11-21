@@ -78,7 +78,6 @@
 
     "node_modules/@powerbi-visuals-utils/tooltipbuilder/lib/index.js",
 
-    "node_modules/@powerbi-visuals-utils/datacolorpalette/lib/index.js",
     "node_modules/@powerbi-visuals-utils/datalabelmanager/lib/index.js",
     "node_modules/@powerbi-visuals-utils/datalabelutils/lib/index.js",
     "node_modules/@powerbi-visuals-utils/legend/lib/index.js"
