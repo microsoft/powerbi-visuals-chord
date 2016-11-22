@@ -48,11 +48,5 @@ module powerbi.extensibility.visual {
             };
         }
 
-        public static getColorForSeriesValue(colorHelper: ColorHelper, objects: DataViewObjects, fieldIds: powerbi.data.ISQExpr[], value: PrimitiveValue): string {
-            let that = <any>colorHelper;
-            return (that.fillProp && DataViewObjects.getFillColor(objects, that.fillProp))
-                || that.defaultDataPointColor
-                || that.getColorScaleForSeries(fieldIds).getColor(value).value;
-        }
     }
 }

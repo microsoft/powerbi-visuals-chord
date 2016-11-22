@@ -28,8 +28,6 @@ module powerbi.extensibility.visual {
     import converterHelper = powerbi.visuals.converterHelper;
 
     export class ChordChartColumns<T> {
-        public static Roles = Object.freeze(
-            _.mapValues(new ChordChartColumns<string>(), (x, i) => i));
 
         public static getColumnSources(dataView: DataView): ChordChartColumns<DataViewMetadataColumn> {
             return this.getColumnSourcesT<DataViewMetadataColumn>(dataView);
