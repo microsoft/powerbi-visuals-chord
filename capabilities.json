@@ -84,11 +84,7 @@
                 "showAllDataPoints": {
                     "displayName": "Show all",
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "bool": true
                     }
                 },
                 "fill": {

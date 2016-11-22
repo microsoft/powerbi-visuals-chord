@@ -25,110 +25,78 @@
  */
 
 module powerbi.extensibility.visual {
+    import ColorHelper = powerbi.visuals.ColorHelper;
     import dataLabelUtils = powerbi.visuals.dataLabelUtils;
+
+    export interface IAxisSettings {
+        show: boolean;
+    }
+
+    export interface IDataPointSettings {
+        showAllDataPoints: boolean;
+        defaultColor: string;
+    }
+
+    export interface ILabelsSettings {
+        show: boolean;
+        fontSize: number;
+        color: string;
+    }
+
+    export interface IChordChartSettings {
+        axis: IAxisSettings;
+        dataPoint: IDataPointSettings;
+        labels: ILabelsSettings;
+    }
 
     export class ChordChartSettings {
         public static get Default() {
             return new this();
         }
 
-        public static parse(dataView: DataView, properties: any) {
-            let settings = new this();
-            if (!dataView || !dataView.metadata || !dataView.metadata.objects) {
-                return settings;
+        public static parse(objects: DataViewObjects, colors: IColorPalette): IChordChartSettings {
+            let axisSettings = this.axis;
+            let dataPointSettings = this.dataPoint;
+            let labelSettings = this.labels;
+
+            let defaultColor: string = dataPointSettings.defaultColor;
+            if (objects["dataPoint"] &&
+                objects["dataPoint"]["defaultColor"]) {
+                defaultColor = this.getColor(objects, chordChartProperties.dataPoint.defaultColor, dataPointSettings.defaultColor, colors);
             }
 
-            _.each(properties, (settingsValues, objectKey) => {
-                _.each(settingsValues, (propertiesValues, propKey) => {
-
-                    let type = properties[propKey].type;
-                    let getValueFn = this.getValueFnByType(type);
-                    settings[objectKey][propKey] = getValueFn(
-                        dataView.metadata.objects,
-                        properties[objectKey][propKey],
-                        settings[objectKey][propKey]);
-                });
-            });
-            /*
-            for (let objectKey of properties) {
-                for (let propKey of capabilities.objects[objectKey].properties) {
-                    if (!settings[objectKey] || !_.has(settings[objectKey], propKey)) {
-                        continue;
-                    }
-
-                    let type = properties[propKey].type;
-                    let getValueFn = this.getValueFnByType(type);
-                    settings[objectKey][propKey] = getValueFn(
-                        dataView.metadata.objects,
-                        properties[objectKey][propKey],
-                        settings[objectKey][propKey]);
+            return {
+                dataPoint: {
+                    defaultColor: defaultColor,
+                    showAllDataPoints: DataViewObjects.getValue<boolean>(objects, chordChartProperties.dataPoint.showAllDataPoints, dataPointSettings.showAllDataPoints),
+                },
+                axis: {
+                    show: DataViewObjects.getValue<boolean>(objects, chordChartProperties.axis.show, axisSettings.show),
+                },
+                labels: {
+                    show: DataViewObjects.getValue<boolean>(objects, chordChartProperties.labels.show, labelSettings.show),
+                    fontSize: DataViewObjects.getValue<number>(objects, chordChartProperties.labels.fontSize, labelSettings.fontSize),
+                    color: this.getColor(objects, chordChartProperties.labels.color, labelSettings.color, colors),
                 }
-            }
-            */
-
-            return settings;
-        }
-
-        public static createEnumTypeFromEnum(type: any): IEnumType {
-            let even: any = false;
-            return createEnumType(Object.keys(type)
-                .filter((key, i) => ((!!(i % 2)) === even && type[key] === key
-                    && !void (even = !even)) || (!!(i % 2)) !== even)
-                .map(x => <IEnumMember>{ value: x, displayName: x }));
-        }
-
-        private static getValueFnByType(type: any/*DataViewObjectPropertyTypeDescriptor*/) {
-            switch (_.keys(type)[0]) {
-                case "fill":
-                    return DataViewObjects.getFillColor;
-                default:
-                    return DataViewObjects.getValue;
-            }
-        }
-        /*
-        public static enumerateObjectInstances(
-            settings = new this(),
-            options: EnumerateVisualObjectInstancesOptions): ObjectEnumerationBuilder {
-
-            let enumeration = new ObjectEnumerationBuilder();
-            let object = settings && settings[options.objectName];
-            if (!object) {
-                return enumeration;
-            }
-
-            let instance = <VisualObjectInstance>{
-                objectName: options.objectName,
-                selector: null,
-                properties: {}
             };
-
-            for (let key in object) {
-                if (_.has(object, key)) {
-                    instance.properties[key] = object[key];
-                }
-            }
-
-            enumeration.pushInstance(instance);
-            return enumeration;
         }
-        */
 
-        public originalSettings: ChordChartSettings;
-        public createOriginalSettings(): void {
-            this.originalSettings = _.cloneDeep(this);
+        private static getColor(objects: DataViewObjects, properties: any, defaultColor: string, colors: IColorPalette): string {
+            let colorHelper: ColorHelper = new ColorHelper(colors, properties, defaultColor);
+            return colorHelper.getColorForMeasure(objects, "");
         }
 
         //Default Settings
-        public dataPoint = {
+        private static dataPoint = {
             defaultColor: null,
             showAllDataPoints: false
         };
 
-        public axis = {
+        private static axis = {
             show: true
         };
 
-        public labels = {
+        private static labels = {
             show: true,
             color: dataLabelUtils.defaultLabelColor,
             fontSize: dataLabelUtils.DefaultFontSizeInPt
