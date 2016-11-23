@@ -55,13 +55,13 @@ module powerbi.extensibility.visual {
         }
 
         public static parse(objects: DataViewObjects, colors: IColorPalette): IChordChartSettings {
-            let axisSettings = this.axis;
-            let dataPointSettings = this.dataPoint;
-            let labelSettings = this.labels;
+            let axisSettings: IAxisSettings = this.axis;
+            let dataPointSettings: IDataPointSettings = this.dataPoint;
+            let labelSettings: ILabelsSettings = this.labels;
 
             let defaultColor: string = dataPointSettings.defaultColor;
-            if (objects["dataPoint"] &&
-                objects["dataPoint"]["defaultColor"]) {
+            if (_.has(objects, "dataPoint") &&
+                _.has(objects["dataPoint"], "defaultColor")) {
                 defaultColor = this.getColor(objects, chordChartProperties.dataPoint.defaultColor, dataPointSettings.defaultColor, colors);
             }
 
@@ -87,16 +87,16 @@ module powerbi.extensibility.visual {
         }
 
         //Default Settings
-        private static dataPoint = {
+        private static dataPoint: IDataPointSettings = {
             defaultColor: null,
             showAllDataPoints: false
         };
 
-        private static axis = {
+        private static axis: IAxisSettings  = {
             show: true
         };
 
-        private static labels = {
+        private static labels: ILabelsSettings  = {
             show: true,
             color: dataLabelUtils.defaultLabelColor,
             fontSize: dataLabelUtils.DefaultFontSizeInPt

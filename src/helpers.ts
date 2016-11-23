@@ -29,7 +29,7 @@ module powerbi.extensibility.visual {
     import ColorHelper = powerbi.visuals.ColorHelper;
 
     export class ChordChartHelpers {
-        public static interpolateArc(arc: d3.svg.Arc<any>) {
+        public static interpolateArc(arc: d3.svg.Arc<any>): any {
             return function (data) {
                 if (!this.oldData) {
                     this.oldData = data;
@@ -43,9 +43,9 @@ module powerbi.extensibility.visual {
         }
 
         public static addContext(context: any, fn: Function): any {
-            return <any>function () {
-                return fn.apply(context, [this].concat(_.toArray(arguments)));
-            };
+            return <any>function (...arg) {
+                return fn.apply(context, [this].concat(_.toArray(arg)));
+            }
         }
 
     }

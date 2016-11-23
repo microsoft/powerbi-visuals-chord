@@ -26,6 +26,7 @@
 
 module powerbi.extensibility.visual {
     import converterHelper = powerbi.visuals.converterHelper;
+    export type ChordChartCategoricalColumns = DataViewCategoryColumn & DataViewValueColumn[] & DataViewValueColumns;
 
     export class ChordChartColumns<T> {
 
@@ -33,25 +34,25 @@ module powerbi.extensibility.visual {
             return this.getColumnSourcesT<DataViewMetadataColumn>(dataView);
         }
 
-        public static getTableValues(dataView: DataView) {
+        public static getTableValues(dataView: DataView): ChordChartColumns<any> {
             let table: DataViewTable = dataView && dataView.table;
             let columns: ChordChartColumns<any> = this.getColumnSourcesT<any[]>(dataView);
             return columns && table && _.mapValues(
                 columns, (n: DataViewMetadataColumn, i) => n && table.rows.map(row => row[n.index]));
         }
 
-        public static getTableRows(dataView: DataView) {
+        public static getTableRows(dataView: DataView): ChordChartColumns<any>[] {
             let table: DataViewTable = dataView && dataView.table;
             let columns: ChordChartColumns<any> = this.getColumnSourcesT<any[]>(dataView);
             return columns && table && table.rows.map(row =>
                 _.mapValues(columns, (n: DataViewMetadataColumn, i) => n && row[n.index]));
         }
 
-        public static getCategoricalValues(dataView: DataView) {
-            let categorical = dataView && dataView.categorical;
-            let categories = categorical && categorical.categories || [];
-            let values = categorical && categorical.values || <DataViewValueColumns>[];
-            let series = categorical && values.source && this.getSeriesValues(dataView);
+        public static getCategoricalValues(dataView: DataView): ChordChartColumns<any> {
+            let categorical: DataViewCategorical = dataView && dataView.categorical;
+            let categories: DataViewCategoricalColumn[] = categorical && categorical.categories || [];
+            let values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
+            let series: PrimitiveValue[] = categorical && values.source && this.getSeriesValues(dataView);
             return categorical && _.mapValues(new this<any[]>(), (n, i) =>
                 (<DataViewCategoricalColumn[]>_.toArray(categories)).concat(_.toArray(values))
                     .filter(x => x.source.roles && x.source.roles[i]).map(x => x.values)[0]
@@ -63,12 +64,12 @@ module powerbi.extensibility.visual {
                 && dataView.categorical.values.map(x => converterHelper.getSeriesName(x.source));
         }
 
-        public static getCategoricalColumns(dataView: DataView) {
-            let categorical = dataView && dataView.categorical;
-            let categories = categorical && categorical.categories || [];
-            let values = categorical && categorical.values || <DataViewValueColumns>[];
+        public static getCategoricalColumns(dataView: DataView): ChordChartColumns<ChordChartCategoricalColumns> {
+            let categorical: DataViewCategorical = dataView && dataView.categorical;
+            let categories: DataViewCategoricalColumn[] = categorical && categorical.categories || [];
+            let values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
             return categorical && _.mapValues(
-                new this<DataViewCategoryColumn & DataViewValueColumn[] & DataViewValueColumns>(),
+                new this<ChordChartCategoricalColumns>(),
                 (n, i) => {
                     let result: any = categories.filter(x => x.source.roles && x.source.roles[i])[0];
                     if (!result) {
@@ -85,7 +86,7 @@ module powerbi.extensibility.visual {
                 });
         }
 
-        public static getGroupedValueColumns(dataView: DataView) {
+        public static getGroupedValueColumns(dataView: DataView): ChordChartColumns<DataViewValueColumn>[] {
             let categorical = dataView && dataView.categorical;
             let values = categorical && categorical.values;
             let grouped = values && values.grouped();
@@ -94,7 +95,7 @@ module powerbi.extensibility.visual {
                 (n, i) => g.values.filter(v => v.source.roles[i])[0]));
         }
 
-        private static getColumnSourcesT<T>(dataView: DataView) {
+        private static getColumnSourcesT<T>(dataView: DataView): ChordChartColumns<T> {
             let columns = dataView && dataView.metadata && dataView.metadata.columns;
             return columns && _.mapValues(
                 new this<T>(), (n, i) => columns.filter(x => x.roles && x.roles[i])[0]);

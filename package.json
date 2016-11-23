@@ -8,10 +8,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Microsoft/PowerBI-visuals-ChortChart.git"
+    "url": "git+https://github.com/Microsoft/PowerBI-visuals-Chort.git"
   },
   "devDependencies": {
-    "powerbi-visuals-tools": "git+https://github.com/Microsoft/PowerBI-visuals-tools.git",
+    "powerbi-visuals-tools": "1.2.1",
     "typings": "1.4.0",
     "tslint": "^3.15.1"
   },
@@ -63,6 +63,6 @@
     "postinstall": "typings install && pbiviz update 1.2.0",
     "typings": "node node_modules/typings/dist/bin.js i",
     "pbiviz": "node node_modules/powerbi-visuals-tools/bin/pbiviz.js",
-    "lint": "node node_modules/tslint/bin/tslint \"src/**/*.ts\""
+    "lint": "tslint \"src/**/*.ts\""
   }
 }
