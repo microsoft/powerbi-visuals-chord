@@ -8,7 +8,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Microsoft/PowerBI-visuals-Chort.git"
+    "url": "git+https://github.com/Microsoft/powerbi-visuals-chord.git"
   },
   "devDependencies": {
     "powerbi-visuals-tools": "1.2.1",
