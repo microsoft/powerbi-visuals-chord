@@ -111,6 +111,7 @@ module powerbi.extensibility.visual {
         labelColor: string;
         barColor: string;
         isCategory: boolean;
+        isGrouped: boolean;
     }
 
     export interface ChordLabelEnabledDataPoint extends LabelEnabledDataPoint {
@@ -263,6 +264,7 @@ module powerbi.extensibility.visual {
 
                     id = host.createSelectionIdBuilder()
                         .withSeries(columns.Series, (grouped) ? grouped[index] : null)
+                        .withMeasure(seriesNameStr.toString())
                         .createSelectionId();
                     isCategory = false;
 
@@ -274,6 +276,7 @@ module powerbi.extensibility.visual {
                     labelColor: settings.labels.color,
                     barColor: color,
                     isCategory: isCategory,
+                    isGrouped: !!grouped,
                     identity: id,
                     selected: false,
                     labelFontSize: PixelConverter.fromPointToPixel(settings.labels.fontSize)
@@ -511,7 +514,10 @@ module powerbi.extensibility.visual {
                         fill: { solid: { color: data.barColor } }
                     }
                 };
-                instances.push(colorInstance);
+
+                if (data.isCategory || data.isGrouped) {
+                    instances.push(colorInstance);
+                }
             }
 
             return instances;
