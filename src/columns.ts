@@ -101,7 +101,7 @@ module powerbi.extensibility.visual {
                 new this<T>(), (n, i) => columns.filter(x => x.roles && x.roles[i])[0]);
         }
 
-        //Data Roles
+        // Data Roles
         public Category: T = null;
         public Series: T = null;
         public Y: T = null;

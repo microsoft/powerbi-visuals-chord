@@ -45,7 +45,7 @@ module powerbi.extensibility.visual {
         public static addContext(context: any, fn: Function): any {
             return <any>function (...arg) {
                 return fn.apply(context, [this].concat(_.toArray(arg)));
-            }
+            };
         }
 
     }
