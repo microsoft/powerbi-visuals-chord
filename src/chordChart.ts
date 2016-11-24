@@ -199,7 +199,10 @@ module powerbi.extensibility.visual {
 
             categoricalValues.Series = categoricalValues.Series || ChordChartColumns.getSeriesValues(dataView);
 
-            let grouped: DataViewValueColumnGroup[] = columns.Series.grouped();
+            let grouped: DataViewValueColumnGroup[] = null;
+            if (columns.Series) {
+               grouped = columns.Series.grouped();
+            }
 
             let dataMatrix: number[][] = [];
             let renderingDataMatrix: number[][] = [];
@@ -254,12 +257,12 @@ module powerbi.extensibility.visual {
 
                     color = colorHelper.getColorForSeriesValue(thisCategoryObjects, categoricalValues.Category[index])
                 } else if ((index = seriesIndex[totalFields[i]]) !== undefined) {
-                    let seriesData: DataViewValueColumn= columns.Y[index];
-                    let seriesObjects: DataViewObjects = grouped[index].objects;
+                    let seriesObjects: DataViewObjects = (grouped) ? grouped[index].objects : null;
+                    let seriesData: DataViewValueColumn = columns.Y[index];
                     let seriesNameStr: PrimitiveValue = converterHelper.getSeriesName(seriesData.source);
 
                     id = host.createSelectionIdBuilder()
-                        .withSeries(columns.Series, grouped[index])
+                        .withSeries(columns.Series, (grouped) ? grouped[index] : null)
                         .createSelectionId();
                     isCategory = false;
 
