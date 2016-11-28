@@ -1,0 +1,144 @@
+{
+    "dataRoles": [{
+        "displayName": "From",
+        "name": "Category",
+        "kind": "Grouping"
+    }, {
+        "displayName": "To",
+        "name": "Series",
+        "kind": "Grouping"
+    }, {
+        "displayName": "Values",
+        "name": "Y",
+        "kind": "Measure"
+    }],
+    "dataViewMappings": [{
+        "conditions": [{
+            "Category": {
+                "max": 1
+            },
+            "Series": {
+                "max": 0
+            }
+        }, {
+            "Category": {
+                "max": 1
+            },
+            "Series": {
+                "min": 1,
+                "max": 1
+            },
+            "Y": {
+                "max": 1
+            }
+        }, {
+            "Category": {
+                "max": 1
+            },
+            "Series": {
+                "max": 0
+            },
+            "Y": {
+                "min": 0,
+                "max": 1
+            }
+        }],
+        "categorical": {
+            "categories": {
+                "for": {
+                    "in": "Category"
+                },
+                "dataReductionAlgorithm": {
+                    "top": {}
+                }
+            },
+            "values": {
+                "group": {
+                    "by": "Series",
+                    "select": [{
+                        "bind": {
+                            "to": "Y"
+                        }
+                    }],
+                    "dataReductionAlgorithm": {
+                        "top": {}
+                    }
+                }
+            }
+        }
+    }],
+    "objects": {
+        "dataPoint": {
+            "displayName": "Data colors",
+            "properties": {
+                "defaultColor": {
+                    "displayName": "Default color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "showAllDataPoints": {
+                    "displayName": "Show all",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fill": {
+                    "displayName": "Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "axis": {
+            "displayName": "Axis",
+            "properties": {
+                "show": {
+                    "displayName": "Show",
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "labels": {
+            "displayName": "Labels",
+            "properties": {
+                "show": {
+                    "displayName": "Show",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "color": {
+                    "displayName": "Color",
+                    "description": "Set the reference line data label color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Text size",
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
