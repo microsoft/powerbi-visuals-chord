@@ -25,9 +25,6 @@
  */
 
 module powerbi.extensibility.visual {
-    import DataViewObjects = powerbi.DataViewObjects;
-    import ColorHelper = powerbi.visuals.ColorHelper;
-
     export class ChordChartHelpers {
         public static interpolateArc(arc: d3.svg.Arc<any>): any {
             return function (data) {

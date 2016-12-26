@@ -25,8 +25,14 @@
  */
 
 module powerbi.extensibility.visual {
-    import ColorHelper = powerbi.visuals.ColorHelper;
-    import dataLabelUtils = powerbi.visuals.dataLabelUtils;
+    // powerbi.extensibility.utils.color
+    import ColorHelper = powerbi.extensibility.utils.color.ColorHelper;
+
+    // powerbi.extensibility.utils.chart.dataLabel
+    import dataLabelUtils = powerbi.extensibility.utils.chart.dataLabel.utils;
+
+    // powerbi.extensibility.utils.dataview
+    import DataViewObjectsModule = powerbi.extensibility.utils.dataview.DataViewObjects;
 
     export interface IAxisSettings {
         show: boolean;
@@ -60,23 +66,43 @@ module powerbi.extensibility.visual {
             let labelSettings: ILabelsSettings = this.labels;
 
             let defaultColor: string = dataPointSettings.defaultColor;
-            if (_.has(objects, 'dataPoint') &&
-                _.has(objects['dataPoint'], 'defaultColor')) {
-                defaultColor = this.getColor(objects, chordChartProperties.dataPoint.defaultColor, dataPointSettings.defaultColor, colors);
+            if (_.has(objects, 'dataPoint')
+                && _.has(objects['dataPoint'], 'defaultColor')) {
+                defaultColor = this.getColor(
+                    objects,
+                    chordChartProperties.dataPoint.defaultColor,
+                    dataPointSettings.defaultColor,
+                    colors);
             }
 
             return {
                 dataPoint: {
                     defaultColor: defaultColor,
-                    showAllDataPoints: DataViewObjects.getValue<boolean>(objects, chordChartProperties.dataPoint.showAllDataPoints, dataPointSettings.showAllDataPoints),
+                    showAllDataPoints: DataViewObjectsModule.getValue<boolean>(
+                        objects,
+                        chordChartProperties.dataPoint.showAllDataPoints,
+                        dataPointSettings.showAllDataPoints),
                 },
                 axis: {
-                    show: DataViewObjects.getValue<boolean>(objects, chordChartProperties.axis.show, axisSettings.show),
+                    show: DataViewObjectsModule.getValue<boolean>(
+                        objects,
+                        chordChartProperties.axis.show,
+                        axisSettings.show),
                 },
                 labels: {
-                    show: DataViewObjects.getValue<boolean>(objects, chordChartProperties.labels.show, labelSettings.show),
-                    fontSize: DataViewObjects.getValue<number>(objects, chordChartProperties.labels.fontSize, labelSettings.fontSize),
-                    color: this.getColor(objects, chordChartProperties.labels.color, labelSettings.color, colors),
+                    show: DataViewObjectsModule.getValue<boolean>(
+                        objects,
+                        chordChartProperties.labels.show,
+                        labelSettings.show),
+                    fontSize: DataViewObjectsModule.getValue<number>(
+                        objects,
+                        chordChartProperties.labels.fontSize,
+                        labelSettings.fontSize),
+                    color: this.getColor(
+                        objects,
+                        chordChartProperties.labels.color,
+                        labelSettings.color,
+                        colors),
                 }
             };
         }
@@ -92,11 +118,11 @@ module powerbi.extensibility.visual {
             showAllDataPoints: false
         };
 
-        private static axis: IAxisSettings  = {
+        private static axis: IAxisSettings = {
             show: true
         };
 
-        private static labels: ILabelsSettings  = {
+        private static labels: ILabelsSettings = {
             show: true,
             color: dataLabelUtils.defaultLabelColor,
             fontSize: dataLabelUtils.DefaultFontSizeInPt
