@@ -27,9 +27,6 @@
 module powerbi.extensibility.visual {
 
     export let chordChartProperties = {
-        general: {
-             formatString: <DataViewObjectPropertyIdentifier>{ objectName: 'general', propertyName: 'formatString' },
-        },
         dataPoint: {
             defaultColor: <DataViewObjectPropertyIdentifier>{ objectName: 'dataPoint', propertyName: 'defaultColor' },
             showAllDataPoints: <DataViewObjectPropertyIdentifier>{ objectName: 'dataPoint', propertyName: 'showAllDataPoints' },

@@ -25,8 +25,11 @@
  */
 
 module powerbi.extensibility.visual {
-    import IMargin = powerbi.visuals.IMargin;
+    // powerbi
     import IViewport = powerbi.IViewport;
+
+    // powerbi.extensibility.utils.svg
+    import IMargin = powerbi.extensibility.utils.svg.IMargin;
 
     export class VisualLayout {
         private marginValue: IMargin;

@@ -25,11 +25,12 @@
  */
 
 module powerbi.extensibility.visual {
-    import converterHelper = powerbi.visuals.converterHelper;
+    // powerbi.extensibility.utils.dataview
+    import converterHelper = powerbi.extensibility.utils.dataview.converterHelper;
+
     export type ChordChartCategoricalColumns = DataViewCategoryColumn & DataViewValueColumn[] & DataViewValueColumns;
 
     export class ChordChartColumns<T> {
-
         public static getColumnSources(dataView: DataView): ChordChartColumns<DataViewMetadataColumn> {
             return this.getColumnSourcesT<DataViewMetadataColumn>(dataView);
         }

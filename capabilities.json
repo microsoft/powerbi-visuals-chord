@@ -1,72 +1,84 @@
 {
-    "dataRoles": [{
-        "displayName": "From",
-        "name": "Category",
-        "kind": "Grouping"
-    }, {
-        "displayName": "To",
-        "name": "Series",
-        "kind": "Grouping"
-    }, {
-        "displayName": "Values",
-        "name": "Y",
-        "kind": "Measure"
-    }],
-    "dataViewMappings": [{
-        "conditions": [{
-            "Category": {
-                "max": 1
-            },
-            "Series": {
-                "max": 0
-            }
-        }, {
-            "Category": {
-                "max": 1
-            },
-            "Series": {
-                "min": 1,
-                "max": 1
-            },
-            "Y": {
-                "max": 1
-            }
-        }, {
-            "Category": {
-                "max": 1
-            },
-            "Series": {
-                "max": 0
-            },
-            "Y": {
-                "min": 0,
-                "max": 1
-            }
-        }],
-        "categorical": {
-            "categories": {
-                "for": {
-                    "in": "Category"
+    "dataRoles": [
+        {
+            "displayName": "From",
+            "name": "Category",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "To",
+            "name": "Series",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Values",
+            "name": "Y",
+            "kind": "Measure"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "Category": {
+                        "max": 1
+                    },
+                    "Series": {
+                        "max": 0
+                    }
                 },
-                "dataReductionAlgorithm": {
-                    "top": {}
+                {
+                    "Category": {
+                        "max": 1
+                    },
+                    "Series": {
+                        "min": 1,
+                        "max": 1
+                    },
+                    "Y": {
+                        "max": 1
+                    }
+                },
+                {
+                    "Category": {
+                        "max": 1
+                    },
+                    "Series": {
+                        "max": 0
+                    },
+                    "Y": {
+                        "min": 0,
+                        "max": 1
+                    }
                 }
-            },
-            "values": {
-                "group": {
-                    "by": "Series",
-                    "select": [{
-                        "bind": {
-                            "to": "Y"
-                        }
-                    }],
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "Category"
+                    },
                     "dataReductionAlgorithm": {
                         "top": {}
+                    }
+                },
+                "values": {
+                    "group": {
+                        "by": "Series",
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Y"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {}
+                        }
                     }
                 }
             }
         }
-    }],
+    ],
     "objects": {
         "dataPoint": {
             "displayName": "Data colors",
