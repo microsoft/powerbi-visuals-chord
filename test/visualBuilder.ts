@@ -31,12 +31,11 @@ module powerbi.extensibility.visual.test {
     import VisualBuilderBase = powerbi.extensibility.utils.test.VisualBuilderBase;
 
     // ChordChart1444757060245
-    import VisualPlugin = powerbi.visuals.plugins.ChordChart1444757060245;
     import VisualClass = powerbi.extensibility.visual.ChordChart1444757060245.ChordChart;
 
     export class ChordChartBuilder extends VisualBuilderBase<VisualClass> {
         constructor(width: number, height: number) {
-            super(width, height, VisualPlugin.name);
+            super(width, height, "ChordChart1444757060245");
         }
 
         protected build(options: VisualConstructorOptions): VisualClass {
