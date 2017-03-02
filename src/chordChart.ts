@@ -284,7 +284,7 @@ module powerbi.extensibility.visual {
 
                     id = host.createSelectionIdBuilder()
                         .withSeries(columns.Series, (grouped) ? grouped[index] : null)
-                        .withMeasure(seriesNameStr.toString())
+                        .withMeasure(seriesNameStr ? seriesNameStr.toString() : null)
                         .createSelectionId();
                     isCategory = false;
 
