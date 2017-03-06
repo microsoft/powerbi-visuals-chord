@@ -123,6 +123,20 @@ module powerbi.extensibility.visual.test {
                 }, 50);
             });
 
+            it("shouldn't throw any unexpected exceptions when category value is null", (done) => {
+
+                defaultDataViewBuilder.valuesCategoryGroup[5][0] = null;
+                expect(() => {
+                    VisualClass.converter(
+                        defaultDataViewBuilder.getDataView(),
+                        visualBuilder.visualHost,
+                        visualBuilder.visualHost.colorPalette,
+                        false);
+                }).not.toThrow();
+
+                done();
+            });
+
             it("labels shouldn't be cut off", (done) => {
                 visualBuilder.viewport.height = 200;
                 visualBuilder.viewport.width = 200;
