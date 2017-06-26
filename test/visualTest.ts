@@ -70,9 +70,8 @@ module powerbi.extensibility.visual.test {
                         .categorical
                         .values
                         .map((column: DataViewValueColumn) => {
-                            return column.values.filter(_.isNumber).length;
+                            return column.values.length;
                         }));
-
                     const categoriesLength: number = dataView.categorical.values.length
                         + dataView.categorical.categories[0].values.length;
 
@@ -394,5 +393,18 @@ module powerbi.extensibility.visual.test {
                 });
             }
         });
+
+        describe("check if values absent", () => {
+            it("shouldn't throw any unexpected exceptions when values property is undefined", () => {
+                expect(() => {
+                    let chordChartData: ChordChartDataInterface = VisualClass.converter(
+                        defaultDataViewBuilder.getDataView(null, true),
+                        visualBuilder.visualHost,
+                        visualBuilder.visualHost.colorPalette,
+                        false);
+                }).not.toThrow();
+            });
+        });
+
     });
 }

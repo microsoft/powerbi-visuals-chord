@@ -208,18 +208,25 @@ module powerbi.extensibility.visual {
         }
 
         /* Convert a DataView into a view model */
+        public static defaultValue1: number = 1;
         public static converter(dataView: DataView, host: IVisualHost, colors: IColorPalette, prevAxisVisible: boolean): ChordChartData {
             let settings: IChordChartSettings = ChordChartSettings.parse(dataView.metadata.objects, colors);
             let columns: ChordChartColumns<ChordChartCategoricalColumns> = ChordChartColumns.getCategoricalColumns(dataView);
             let sources: ChordChartColumns<DataViewMetadataColumn> = ChordChartColumns.getColumnSources(dataView);
             let categoricalValues: ChordChartColumns<any> = ChordChartColumns.getCategoricalValues(dataView);
-
-            if (!categoricalValues || _.isEmpty(categoricalValues.Category) || _.isEmpty(categoricalValues.Y)) {
+            if (!categoricalValues || _.isEmpty(categoricalValues.Category)) {
                 return null;
             }
 
-            categoricalValues.Series = categoricalValues.Series || ChordChartColumns.getSeriesValues(dataView);
+            if (!categoricalValues.Y) {
+                categoricalValues.Y = [];
+                for (let i: number = 0; i < categoricalValues.Category.length; i++) {
+                    categoricalValues.Series.push(sources.Series.displayName + i);
+                    categoricalValues.Y.push(ChordChart.defaultValue1);
+                }
+            }
 
+            categoricalValues.Series = categoricalValues.Series || ChordChartColumns.getSeriesValues(dataView);
             let grouped: DataViewValueColumnGroup[] = null;
             if (columns.Series) {
                 grouped = columns.Series.grouped();
@@ -229,7 +236,7 @@ module powerbi.extensibility.visual {
             let renderingDataMatrix: number[][] = [];
             let legendData: LegendData = {
                 dataPoints: [],
-                title: sources.Y.displayName || '',
+                title: sources.Y ? (sources.Y.displayName || '') : 'Value',
             };
             let toolTipData: ChordTooltipData[][] = [];
             let sliceTooltipData: ChordTooltipData[] = [];
@@ -256,8 +263,8 @@ module powerbi.extensibility.visual {
                     || sources.Series.format)
             });
             let valueColumnFormatter: IValueFormatter = valueFormatter.create({
-                format: valueFormatter.getFormatStringByColumn(sources.Y, true)
-                || sources.Y.format
+                format: sources.Y ? valueFormatter.getFormatStringByColumn(sources.Y, true)
+                    || sources.Y.format : "0"
             });
 
             for (let i: number = 0, iLength: number = totalFields.length; i < iLength; i++) {
@@ -279,8 +286,18 @@ module powerbi.extensibility.visual {
                     color = colorHelper.getColorForSeriesValue(thisCategoryObjects, categoricalValues.Category[index]);
                 } else if ((index = seriesIndex[totalFields[i]]) !== undefined) {
                     let seriesObjects: DataViewObjects = (grouped) ? grouped[index].objects : null;
-                    let seriesData: DataViewValueColumn = columns.Y[index];
-                    let seriesNameStr: PrimitiveValue = converterHelper.getSeriesName(seriesData.source);
+
+                    let seriesData: DataViewValueColumn = columns.Y ? columns.Y[index] : {
+                        objects: null,
+                        source: {
+                            displayName: "Value",
+                            queryName: "Value",
+                            groupName: "Value",
+                        },
+                        values: [ChordChart.defaultValue1]
+                    };
+
+                    let seriesNameStr: PrimitiveValue = seriesData ? converterHelper.getSeriesName(seriesData.source) : "Value";
 
                     id = host.createSelectionIdBuilder()
                         .withSeries(columns.Series, (grouped) ? grouped[index] : null)
@@ -288,7 +305,7 @@ module powerbi.extensibility.visual {
                         .createSelectionId();
                     isCategory = false;
 
-                    color = colorHelper.getColorForSeriesValue(seriesObjects, seriesNameStr);
+                    color = colorHelper.getColorForSeriesValue(seriesObjects, seriesNameStr ? seriesNameStr : `${ChordChart.defaultValue1 }`);
                 }
 
                 labelData.push({
@@ -315,7 +332,7 @@ module powerbi.extensibility.visual {
                         let row: number = catIndex[totalFields[i]];
                         let col: number = seriesIndex[totalFields[j]];
 
-                        if (columns.Y[col].values[row] !== null) {
+                        if (columns.Y && columns.Y[col].values[row] !== null) {
                             elementValue = <number>columns.Y[col].values[row];
 
                             if (elementValue > max) {
@@ -329,12 +346,25 @@ module powerbi.extensibility.visual {
                                 col,
                                 row);
                         }
+                        else {
+                            max = ChordChart.defaultValue1;
+                            elementValue = ChordChart.defaultValue1;
+                            tooltipInfo = tooltipBuilder.createTooltipInfo(
+                                dataView.categorical,
+                                formattedFromToValue,
+                                valueColumnFormatter.format(`${ChordChart.defaultValue1}`),
+                                col,
+                                row);
+                        }
+
                     } else if (isDiffFromTo && catIndex[totalFields[j]] !== undefined &&
                         seriesIndex[totalFields[i]] !== undefined) {
                         let row: number = catIndex[totalFields[j]];
                         let col: number = seriesIndex[totalFields[i]];
-                        if (columns.Y[col].values[row] !== null) {
+                        if (columns.Y && columns.Y[col].values[row] !== null) {
                             elementValue = <number>columns.Y[col].values[row];
+                        } else {
+                            elementValue = ChordChart.defaultValue1;
                         }
                     }
 
