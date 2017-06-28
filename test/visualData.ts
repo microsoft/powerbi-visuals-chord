@@ -59,7 +59,7 @@ module powerbi.extensibility.visual.test {
 
         public valuesValue: number[] = getRandomNumbers(this.valuesCategoryGroup.length, 50, 100);
 
-        public getDataView(columnNames?: string[]): DataView {
+        public getDataView(columnNames?: string[], emptyValues: boolean = false): DataView {
             return this.createCategoricalDataViewBuilder([
                 {
                     source: {
@@ -67,7 +67,7 @@ module powerbi.extensibility.visual.test {
                         roles: { Category: true },
                         type: ValueType.fromDescriptor({ text: true })
                     },
-                    values: this.valuesCategoryGroup.map((value: string[]) => value[0])
+                    values: emptyValues ? null : this.valuesCategoryGroup.map((value: string[]) => value[0])
                 },
                 {
                     isGroup: true,
@@ -76,7 +76,7 @@ module powerbi.extensibility.visual.test {
                         roles: { Series: true },
                         type: ValueType.fromDescriptor({ text: true })
                     },
-                    values: this.valuesCategoryGroup.map((value: string[]) => value[1]),
+                    values: emptyValues ? null : this.valuesCategoryGroup.map((value: string[]) => value[1]),
                 }
             ], [
                     {
@@ -87,7 +87,7 @@ module powerbi.extensibility.visual.test {
                             type: ValueType.fromDescriptor({ numeric: true }),
                             objects: { dataPoint: { fill: { solid: { color: "purple" } } } },
                         },
-                        values: this.valuesValue
+                        values: emptyValues ? null : this.valuesValue
                     }], columnNames).build();
         }
     }
