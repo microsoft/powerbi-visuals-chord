@@ -29,9 +29,9 @@ module powerbi.extensibility.visual.tooltipBuilder {
     import valueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
 
     const DefaultSeriesIndex: number = 0,
-        DefaultDisplayName: string = '',
-        DisplayNameSeparator: string = '/',
-        HighlightedValueDisplayName: string = 'Highlighted';
+        DefaultDisplayName: string = "",
+        DisplayNameSeparator: string = "/",
+        HighlightedValueDisplayName: string = "Highlighted";
 
     export interface TooltipCategoryDataItem {
         value?: any;

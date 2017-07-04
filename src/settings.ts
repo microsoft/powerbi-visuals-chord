@@ -66,8 +66,8 @@ module powerbi.extensibility.visual {
             let labelSettings: ILabelsSettings = this.labels;
 
             let defaultColor: string = dataPointSettings.defaultColor;
-            if (_.has(objects, 'dataPoint')
-                && _.has(objects['dataPoint'], 'defaultColor')) {
+            if (_.has(objects, "dataPoint")
+                && _.has(objects["dataPoint"], "defaultColor")) {
                 defaultColor = this.getColor(
                     objects,
                     chordChartProperties.dataPoint.defaultColor,
@@ -109,7 +109,7 @@ module powerbi.extensibility.visual {
 
         private static getColor(objects: DataViewObjects, properties: any, defaultColor: string, colors: IColorPalette): string {
             let colorHelper: ColorHelper = new ColorHelper(colors, properties, defaultColor);
-            return colorHelper.getColorForMeasure(objects, '');
+            return colorHelper.getColorForMeasure(objects, "");
         }
 
         // Default Settings
