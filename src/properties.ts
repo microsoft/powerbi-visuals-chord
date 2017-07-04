@@ -28,17 +28,17 @@ module powerbi.extensibility.visual {
 
     export let chordChartProperties = {
         dataPoint: {
-            defaultColor: <DataViewObjectPropertyIdentifier>{ objectName: 'dataPoint', propertyName: 'defaultColor' },
-            showAllDataPoints: <DataViewObjectPropertyIdentifier>{ objectName: 'dataPoint', propertyName: 'showAllDataPoints' },
-            fill: <DataViewObjectPropertyIdentifier>{ objectName: 'dataPoint', propertyName: 'fill' }
+            defaultColor: <DataViewObjectPropertyIdentifier>{ objectName: "dataPoint", propertyName: "defaultColor" },
+            showAllDataPoints: <DataViewObjectPropertyIdentifier>{ objectName: "dataPoint", propertyName: "showAllDataPoints" },
+            fill: <DataViewObjectPropertyIdentifier>{ objectName: "dataPoint", propertyName: "fill" }
         },
         axis: {
-            show: <DataViewObjectPropertyIdentifier>{ objectName: 'axis', propertyName: 'show' }
+            show: <DataViewObjectPropertyIdentifier>{ objectName: "axis", propertyName: "show" }
         },
         labels: {
-            show: <DataViewObjectPropertyIdentifier>{ objectName: 'labels', propertyName: 'show' },
-            color: <DataViewObjectPropertyIdentifier>{ objectName: 'labels', propertyName: 'color' },
-            fontSize: <DataViewObjectPropertyIdentifier>{ objectName: 'labels', propertyName: 'fontSize' }
+            show: <DataViewObjectPropertyIdentifier>{ objectName: "labels", propertyName: "show" },
+            color: <DataViewObjectPropertyIdentifier>{ objectName: "labels", propertyName: "color" },
+            fontSize: <DataViewObjectPropertyIdentifier>{ objectName: "labels", propertyName: "fontSize" }
         }
     };
 }
