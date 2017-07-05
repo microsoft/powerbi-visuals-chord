@@ -48,6 +48,6 @@
     "powerbi-visuals-utils-typeutils": "^0.2.1",
     "tslint": "^3.15.1",    
     "tslint-microsoft-contrib": "^5.0.1",
-    "typescript": "2.1.4",
+    "typescript": "2.1.4"
   }
 }
