@@ -739,7 +739,9 @@ module powerbi.extensibility.visual {
             let path: any = d3.svg.chord()
                 .radius(this.radius);
 
-            let chordShapes: UpdateSelection<ChordLink> = this.svg.select(ChordChart.chordsClass.selectorName)
+            let chordShapes: UpdateSelection<ChordLink> = this.svg
+                .select(ChordChart.chordsClass.selectorName)
+                .selectAll(ChordChart.chordClass.selectorName)
                 .data(this.data.chords);
 
             chordShapes
