@@ -151,28 +151,28 @@ module powerbi.extensibility.visual {
         private static OuterArcRadiusRatio = 0.9;
         private static PolylineOpacity = 0.5;
         private static TicksFontSize = 12;
-        private static VisualClassName = 'chordChart';
+        private static VisualClassName = "chordChart";
         private static FullOpacity: number = 1;
         private static DimmedOpacity: number = 0.3;
-        private static DefaultDY: string = '.35em';
+        private static DefaultDY: string = ".35em";
         private static DefaultTickShiftX: number = 8;
         private static MaxUnitSize: number = 5;
-        private static DefaultFormatValue: string = '0.##';
-        private static DefaultTickLineColorValue: string = '#000';
+        private static DefaultFormatValue: string = "0.##";
+        private static DefaultTickLineColorValue: string = "#000";
 
-        private static chordClass: ClassAndSelector = createClassAndSelector('chord');
-        private static chordsClass: ClassAndSelector = createClassAndSelector('chords');
-        private static labelGraphicsContextClass: ClassAndSelector = createClassAndSelector('labels');
-        private static labelsClass: ClassAndSelector = createClassAndSelector('data-labels');
-        private static lineClass: ClassAndSelector = createClassAndSelector('line-label');
-        private static linesGraphicsContextClass: ClassAndSelector = createClassAndSelector('lines');
-        private static polylineClass: ClassAndSelector = createClassAndSelector('polyline');
-        private static sliceClass: ClassAndSelector = createClassAndSelector('slice');
-        private static sliceTicksClass: ClassAndSelector = createClassAndSelector('slice-ticks');
-        private static tickLineClass: ClassAndSelector = createClassAndSelector('tick-line');
-        private static tickPairClass: ClassAndSelector = createClassAndSelector('tick-pair');
-        private static tickTextClass: ClassAndSelector = createClassAndSelector('tick-text');
-        private static ticksClass: ClassAndSelector = createClassAndSelector('ticks');
+        private static chordClass: ClassAndSelector = createClassAndSelector("chord");
+        private static chordsClass: ClassAndSelector = createClassAndSelector("chords");
+        private static labelGraphicsContextClass: ClassAndSelector = createClassAndSelector("labels");
+        private static labelsClass: ClassAndSelector = createClassAndSelector("data-labels");
+        private static lineClass: ClassAndSelector = createClassAndSelector("line-label");
+        private static linesGraphicsContextClass: ClassAndSelector = createClassAndSelector("lines");
+        private static polylineClass: ClassAndSelector = createClassAndSelector("polyline");
+        private static sliceClass: ClassAndSelector = createClassAndSelector("slice");
+        private static sliceTicksClass: ClassAndSelector = createClassAndSelector("slice-ticks");
+        private static tickLineClass: ClassAndSelector = createClassAndSelector("tick-line");
+        private static tickPairClass: ClassAndSelector = createClassAndSelector("tick-pair");
+        private static tickTextClass: ClassAndSelector = createClassAndSelector("tick-text");
+        private static ticksClass: ClassAndSelector = createClassAndSelector("ticks");
 
         private labels: Selection<any>;
         private lines: Selection<any>;
@@ -236,7 +236,7 @@ module powerbi.extensibility.visual {
             let renderingDataMatrix: number[][] = [];
             let legendData: LegendData = {
                 dataPoints: [],
-                title: sources.Y ? (sources.Y.displayName || '') : 'Value',
+                title: sources.Y ? (sources.Y.displayName || "") : "Value",
             };
             let toolTipData: ChordTooltipData[][] = [];
             let sliceTooltipData: ChordTooltipData[] = [];
@@ -269,7 +269,7 @@ module powerbi.extensibility.visual {
 
             for (let i: number = 0, iLength: number = totalFields.length; i < iLength; i++) {
                 let id: ISelectionId = null;
-                let color: string = '';
+                let color: string = "";
                 let isCategory: boolean = false;
                 let index: number;
                 let formattedFromToValue: string = (sources.Series && i < categoricalValues.Series.length)
@@ -444,20 +444,20 @@ module powerbi.extensibility.visual {
             this.layout.minViewport = ChordChart.DefaultViewPort;
 
             this.svg = d3.select(options.element)
-                .append('svg')
-                .style('position', 'absolute')
+                .append("svg")
+                .style("position", "absolute")
                 .classed(ChordChart.VisualClassName, true);
 
             let svgSelection: Selection<any> = this.mainGraphicsContext = this.svg
-                .append('g');
+                .append("g");
 
             svgSelection
-                .append('g')
-                .classed('chords', true);
+                .append("g")
+                .classed("chords", true);
 
             this.slices = svgSelection
-                .append('g')
-                .classed('slices', true);
+                .append("g")
+                .classed("slices", true);
 
             svgSelection
                 .append('g')
@@ -512,13 +512,13 @@ module powerbi.extensibility.visual {
             let settings: IChordChartSettings = this.settings;
 
             switch (options.objectName) {
-                case 'axis': {
+                case "axis": {
                     return ChordChart.enumerateAxis(settings);
                 }
-                case 'dataPoint': {
+                case "dataPoint": {
                     return ChordChart.enumerateDataPoint(settings, this.data.labelDataPoints);
                 }
-                case 'labels': {
+                case "labels": {
                     return ChordChart.enumerateLabels(settings);
                 }
                 default: {
@@ -530,8 +530,8 @@ module powerbi.extensibility.visual {
         private static enumerateAxis(settings: IChordChartSettings): VisualObjectInstance[] {
             let axisSettings: IAxisSettings = settings.axis,
                 instances: VisualObjectInstance[] = [{
-                    objectName: 'axis',
-                    displayName: 'Axis',
+                    objectName: "axis",
+                    displayName: "Axis",
                     selector: null,
                     properties: {
                         show: axisSettings.show
@@ -546,8 +546,8 @@ module powerbi.extensibility.visual {
 
             let dataPointSettings: IDataPointSettings = settings.dataPoint;
             let instances: VisualObjectInstance[] = [{
-                objectName: 'datapoint',
-                displayName: 'Data colors',
+                objectName: "datapoint",
+                displayName: "Data colors",
                 selector: null,
                 properties: {
                     defaultColor: dataPointSettings.defaultColor,
@@ -563,7 +563,7 @@ module powerbi.extensibility.visual {
                 let data: ChordArcLabelData = labelDataPoint.data;
 
                 let colorInstance: VisualObjectInstance = {
-                    objectName: 'dataPoint',
+                    objectName: "dataPoint",
                     displayName: data.label,
                     selector: ColorHelper.normalizeSelector((data.identity as ISelectionId).getSelector()),
                     properties: {
@@ -582,8 +582,8 @@ module powerbi.extensibility.visual {
         private static enumerateLabels(settings: IChordChartSettings): VisualObjectInstance[] {
             let labelSettings = settings.labels,
                 labels: VisualObjectInstance[] = [{
-                    objectName: 'labels',
-                    displayName: 'Labels',
+                    objectName: "labels",
+                    displayName: "Labels",
                     selector: null,
                     properties: {
                         show: labelSettings.show,
@@ -673,12 +673,12 @@ module powerbi.extensibility.visual {
 
             this.svg
                 .attr({
-                    'width': this.layout.viewport.width,
-                    'height': this.layout.viewport.height
+                    "width": this.layout.viewport.width,
+                    "height": this.layout.viewport.height
                 });
 
             this.mainGraphicsContext
-                .attr('transform', translate(this.layout.viewport.width / 2, this.layout.viewport.height / 2));
+                .attr("transform", translate(this.layout.viewport.width / 2, this.layout.viewport.height / 2));
 
             let sliceShapes: UpdateSelection<ChordTicksArcDescriptor> = this.slices
                 .selectAll('path' + ChordChart.sliceClass.selectorName)
@@ -691,14 +691,14 @@ module powerbi.extensibility.visual {
                 .classed(ChordChart.sliceClass.className, true);
 
             sliceShapes
-                .style('fill', (d, i) => this.data.labelDataPoints[i].data.barColor)
-                .style('stroke', (d, i) => this.data.labelDataPoints[i].data.barColor)
-                .on('click', ChordChartHelpers.addContext(this, (context, d, i) => {
+                .style("fill", (d, i) => this.data.labelDataPoints[i].data.barColor)
+                .style("stroke", (d, i) => this.data.labelDataPoints[i].data.barColor)
+                .on("click", ChordChartHelpers.addContext(this, (context, d, i) => {
                     this.selectionManager.select(this.data.labelDataPoints[i].data.identity).then((ids: extensibility.ISelectionId[]) => {
                         if (ids.length > 0) {
                             this.mainGraphicsContext
                                 .selectAll(chordSelector)
-                                .style('opacity', ChordChart.FullOpacity);
+                                .style("opacity", ChordChart.FullOpacity);
 
                             this.slices
                                 .selectAll('path' + ChordChart.sliceClass.selectorName)
@@ -707,16 +707,16 @@ module powerbi.extensibility.visual {
                             this.mainGraphicsContext
                                 .selectAll(chordSelector)
                                 .filter((d: ChordLink) => d.source.index !== i && d.target.index !== i)
-                                .style('opacity', ChordChart.DimmedOpacity);
+                                .style("opacity", ChordChart.DimmedOpacity);
 
-                            d3.select(context).style('opacity', ChordChart.FullOpacity);
+                            d3.select(context).style("opacity", ChordChart.FullOpacity);
                         } else {
-                            sliceShapes.style('opacity', ChordChart.FullOpacity);
+                            sliceShapes.style("opacity", ChordChart.FullOpacity);
 
                             this.mainGraphicsContext
                                 .selectAll(chordSelector)
                                 .filter((d: ChordLink) => d.source.index !== i && d.target.index !== i)
-                                .style('opacity', ChordChart.FullOpacity);
+                                .style("opacity", ChordChart.FullOpacity);
                         }
                     });
 
@@ -724,7 +724,7 @@ module powerbi.extensibility.visual {
                 }))
                 .transition()
                 .duration(this.duration)
-                .attrTween('d', ChordChartHelpers.interpolateArc(arc));
+                .attrTween("d", ChordChartHelpers.interpolateArc(arc));
 
             sliceShapes
                 .exit()
@@ -739,8 +739,7 @@ module powerbi.extensibility.visual {
             let path: any = d3.svg.chord()
                 .radius(this.radius);
 
-            let chordShapes: UpdateSelection<ChordLink> = this.svg.select(ChordChart.chordsClass.selectorName)
-                .selectAll('path' + ChordChart.chordClass.selectorName)
+            let chordShapes: UpdateSelection<ChordLink> = this.svg.select(ChordChart.chordsClass.selectorName)              
                 .data(this.data.chords);
 
             chordShapes
@@ -750,23 +749,23 @@ module powerbi.extensibility.visual {
 
             chordShapes
                 .style({
-                    'fill': (d: ChordLink) => {
+                    "fill": (d: ChordLink) => {
                         return this.data.labelDataPoints[d.target.index].data.barColor;
                     },
-                    'opacity': ChordChart.FullOpacity
+                    "opacity": ChordChart.FullOpacity
                 })
                 .transition()
                 .duration(this.duration)
-                .attr('d', path as any);
+                .attr("d", path as any);
 
             chordShapes
                 .exit()
                 .remove();
 
             this.svg
-                .on('click', () => this.selectionManager.clear().then(() => {
-                    sliceShapes.style('opacity', ChordChart.FullOpacity);
-                    chordShapes.style('opacity', ChordChart.FullOpacity);
+                .on("click", () => this.selectionManager.clear().then(() => {
+                    sliceShapes.style("opacity", ChordChart.FullOpacity);
+                    chordShapes.style("opacity", ChordChart.FullOpacity);
                 }));
 
             this.drawTicks();
@@ -800,7 +799,7 @@ module powerbi.extensibility.visual {
         private static createTooltipInfo(labelDataPoints: ChordArcDescriptor[], dataMatrix: number[][], source: any) {
             return {
                 displayName: labelDataPoints[source.index].data.label
-                + '->' + labelDataPoints[source.subindex].data.label,
+                + "->" + labelDataPoints[source.subindex].data.label,
                 value: dataMatrix[source.index][source.subindex].toString()
             };
         }
@@ -926,9 +925,10 @@ module powerbi.extensibility.visual {
                     .insert('g')
                     .classed(ChordChart.tickPairClass.className, true);
 
+
                 tickPairs.transition()
                     .duration(animDuration)
-                    .attr('transform', (d) => translateAndRotate(
+                    .attr("transform", (d) => translateAndRotate(
                         this.innerRadius,
                         0,
                         -this.innerRadius,
@@ -959,8 +959,8 @@ module powerbi.extensibility.visual {
                 tickPairs
                     .selectAll('text' + ChordChart.tickTextClass.selectorName)
                     .text(d => d.label)
-                    .style('text-anchor', d => d.angle > Math.PI ? 'end' : null)
-                    .attr('transform', d => d.angle > Math.PI ? 'rotate(180)translate(-16)' : null);
+                    .style("text-anchor", d => d.angle > Math.PI ? "end" : null)
+                    .attr("transform", d => d.angle > Math.PI ? "rotate(180)translate(-16)" : null);
 
                 tickPairs.exit()
                     .remove();
@@ -979,14 +979,14 @@ module powerbi.extensibility.visual {
             isDonut: boolean = false,
             forAnimation: boolean = false): void {
 
-            // Check for a case where resizing leaves no labels - then we need to remove the labels 'g'
+            // Check for a case where resizing leaves no labels - then we need to remove the labels "g"
             if (filteredData.length === 0) {
                 dataLabelUtils.cleanDataLabels(this.labels, true);
 
                 return null;
             }
 
-            // line chart ViewModel has a special 'key' property for point identification since the 'identity' field is set to the series identity
+            // line chart ViewModel has a special "key" property for point identification since the "identity" field is set to the series identity
             let hasKey: boolean = (<any>filteredData)[0].key !== null;
             let hasDataPointIdentity: boolean = (<any>filteredData)[0].identity !== null;
             let dataLabels: UpdateSelection<ChordLabelEnabledDataPoint> = this.labels.selectAll(ChordChart.labelsClass.selectorName).data(filteredData);
@@ -995,8 +995,9 @@ module powerbi.extensibility.visual {
                 .append('text')
                 .classed(ChordChart.labelsClass.className, true);
 
+
             if (forAnimation) {
-                newLabels.style('opacity', 0);
+                newLabels.style("opacity", 0);
             }
 
             dataLabels
@@ -1015,7 +1016,7 @@ module powerbi.extensibility.visual {
 
         private renderLines(filteredData: ChordLabelEnabledDataPoint[], arc: SvgArc<Arc>, outerArc: SvgArc<Arc>): void {
             let lines: UpdateSelection<ChordLabelEnabledDataPoint> = this.lines
-                .selectAll('polyline')
+                .selectAll("polyline")
                 .data(filteredData);
 
             let midAngle = (d: ChordArcDescriptor) => d.startAngle + (d.endAngle - d.startAngle) / 2;
@@ -1025,7 +1026,7 @@ module powerbi.extensibility.visual {
                 .classed(ChordChart.lineClass.className, true);
 
             lines
-                .attr('points', (d: ChordArcDescriptor): any => {
+                .attr("points", (d: ChordArcDescriptor): any => {
                     let textPoint: [number, number] = outerArc.centroid(d as any);
 
                     textPoint[0] = (this.radius + ChordChart.LabelMargin / 2) * (midAngle(d) < Math.PI ? 1 : -1);
@@ -1043,9 +1044,9 @@ module powerbi.extensibility.visual {
                     ];
                 })
                 .style({
-                    'opacity': ChordChart.PolylineOpacity,
-                    'stroke': (d: ChordArcDescriptor) => d.data.labelColor,
-                    'pointer-events': 'none'
+                    "opacity": ChordChart.PolylineOpacity,
+                    "stroke": (d: ChordArcDescriptor) => d.data.labelColor,
+                    "pointer-events": "none"
                 });
 
             lines
@@ -1077,9 +1078,9 @@ module powerbi.extensibility.visual {
                 },
                 filter: (d: ChordArcDescriptor) => (d !== null && d.data !== null && d.data.label !== null),
                 style: {
-                    'fill': (d: ChordArcDescriptor) => d.data.labelColor,
-                    'text-anchor': (d: ChordArcDescriptor) => midAngle(d) < Math.PI ? 'start' : 'end',
-                    'font-size': (d: ChordArcDescriptor) => PixelConverter.fromPoint(this.settings.labels.fontSize),
+                    "fill": (d: ChordArcDescriptor) => d.data.labelColor,
+                    "text-anchor": (d: ChordArcDescriptor) => midAngle(d) < Math.PI ? "start" : "end",
+                    "font-size": (d: ChordArcDescriptor) => PixelConverter.fromPoint(this.settings.labels.fontSize),
                 },
             };
         }

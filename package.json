@@ -10,7 +10,7 @@
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
-    "lint": "node node_modules/tslint/bin/tslint \"+(src|test)/**/*.ts\"",
+    "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts\"",
     "pretest": "pbiviz package --resources --no-minify --no-pbiviz --no-plugin",
     "test": "karma start"
   },
@@ -46,7 +46,8 @@
     "powerbi-visuals-utils-testutils": "^0.2.2",
     "powerbi-visuals-utils-tooltiputils": "^1.0.0",
     "powerbi-visuals-utils-typeutils": "^0.2.1",
-    "tslint": "^3.15.1",
-    "typescript": "2.1.4"
+    "tslint": "^3.15.1",    
+    "tslint-microsoft-contrib": "^5.0.1",
+    "typescript": "2.1.4",
   }
 }
