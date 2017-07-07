@@ -2,16 +2,19 @@
     "dataRoles": [
         {
             "displayName": "From",
+            "displayNameKey": "Role_From",
             "name": "Category",
             "kind": "Grouping"
         },
         {
             "displayName": "To",
+            "displayNameKey": "Role_To",
             "name": "Series",
             "kind": "Grouping"
         },
         {
             "displayName": "Values",
+            "displayNameKey": "Role_Values",
             "name": "Y",
             "kind": "Measure"
         }

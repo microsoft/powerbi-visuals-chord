@@ -1,4 +1,7 @@
 {
+    "Role_From": "From",
+    "Role_To": "To",
+    "Role_Values": "Values",
     "Visual_Data_Colors": "Data colors",
     "Visual_Default_Color": "Default color",
     "Visual_Show_All": "Show all",
