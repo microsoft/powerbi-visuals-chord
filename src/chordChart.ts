@@ -792,21 +792,19 @@ module powerbi.extensibility.visual {
                         tooltipInfo.push(ChordChart.createTooltipInfo(
                             this.data.labelDataPoints,
                             this.data.dataMatrix,
-                            tooltipEvent.data.source,
-                            this.localManager));
+                            tooltipEvent.data.source));
 
                         tooltipInfo.push(ChordChart.createTooltipInfo(
                             this.data.labelDataPoints,
                             this.data.dataMatrix,
-                            tooltipEvent.data.target,
-                            this.localManager));
+                            tooltipEvent.data.target));
                     }
 
                     return tooltipInfo;
                 });
         }
 
-        private static createTooltipInfo(labelDataPoints: ChordArcDescriptor[], dataMatrix: number[][], source: any, localManager: ILocalizationManager) {
+        private static createTooltipInfo(labelDataPoints: ChordArcDescriptor[], dataMatrix: number[][], source: any) {
             return {
                 displayName: labelDataPoints[source.index].data.label
                     + "->" + labelDataPoints[source.subindex].data.label,
