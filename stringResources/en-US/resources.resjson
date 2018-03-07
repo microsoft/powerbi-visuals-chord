@@ -9,5 +9,6 @@
     "Visual_Axis": "Axis",
     "Visual_Show": "Show",
     "Visual_Labels": "Labels",
-    "Visual_Text_Size": "Text size"
+    "Visual_Text_Size": "Text size",
+    "Visual_Tooltip_Highlighted": "Highlighted"
 }

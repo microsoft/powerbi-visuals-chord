@@ -323,6 +323,8 @@ module powerbi.extensibility.visual {
                 dataMatrix.push([]);
                 toolTipData.push([]);
 
+                let localManager = host.createLocalizationManager();
+
                 for (let j: number = 0, jLength: number = totalFields.length; j < jLength; j++) {
                     let elementValue: number = 0;
                     let tooltipInfo: VisualTooltipDataItem[] = [];
@@ -344,7 +346,8 @@ module powerbi.extensibility.visual {
                                 formattedFromToValue,
                                 valueColumnFormatter.format(elementValue),
                                 col,
-                                row);
+                                row,
+                                localManager);
                         }
                         else {
                             max = ChordChart.defaultValue1;
@@ -354,7 +357,8 @@ module powerbi.extensibility.visual {
                                 formattedFromToValue,
                                 valueColumnFormatter.format(`${ChordChart.defaultValue1}`),
                                 col,
-                                row);
+                                row,
+                                localManager);
                         }
 
                     } else if (isDiffFromTo && catIndex[totalFields[j]] !== undefined &&
@@ -509,17 +513,19 @@ module powerbi.extensibility.visual {
                 return [];
             }
 
+            let localManager: ILocalizationManager = this.host.createLocalizationManager();
+
             let settings: IChordChartSettings = this.settings;
 
             switch (options.objectName) {
                 case "axis": {
-                    return ChordChart.enumerateAxis(settings);
+                    return ChordChart.enumerateAxis(settings, localManager);
                 }
                 case "dataPoint": {
-                    return ChordChart.enumerateDataPoint(settings, this.data.labelDataPoints);
+                    return ChordChart.enumerateDataPoint(settings, this.data.labelDataPoints, localManager);
                 }
                 case "labels": {
-                    return ChordChart.enumerateLabels(settings);
+                    return ChordChart.enumerateLabels(settings, localManager);
                 }
                 default: {
                     return [];
@@ -527,11 +533,11 @@ module powerbi.extensibility.visual {
             }
         }
 
-        private static enumerateAxis(settings: IChordChartSettings): VisualObjectInstance[] {
+        private static enumerateAxis(settings: IChordChartSettings, localManager: ILocalizationManager): VisualObjectInstance[] {
             let axisSettings: IAxisSettings = settings.axis,
                 instances: VisualObjectInstance[] = [{
                     objectName: "axis",
-                    displayName: "Axis",
+                    displayName: localManager.getDisplayName("Visual_Axis"),
                     selector: null,
                     properties: {
                         show: axisSettings.show
@@ -542,12 +548,13 @@ module powerbi.extensibility.visual {
 
         private static enumerateDataPoint(
             settings: IChordChartSettings,
-            labelDataPoints: ChordArcDescriptor[]): VisualObjectInstance[] {
+            labelDataPoints: ChordArcDescriptor[],
+            localManager: ILocalizationManager): VisualObjectInstance[] {
 
             let dataPointSettings: IDataPointSettings = settings.dataPoint;
             let instances: VisualObjectInstance[] = [{
                 objectName: "datapoint",
-                displayName: "Data colors",
+                displayName: localManager.getDisplayName("Visual_Data_Colors"),
                 selector: null,
                 properties: {
                     defaultColor: dataPointSettings.defaultColor,
@@ -579,11 +586,11 @@ module powerbi.extensibility.visual {
             return instances;
         }
 
-        private static enumerateLabels(settings: IChordChartSettings): VisualObjectInstance[] {
+        private static enumerateLabels(settings: IChordChartSettings, localManager: ILocalizationManager): VisualObjectInstance[] {
             let labelSettings = settings.labels,
                 labels: VisualObjectInstance[] = [{
                     objectName: "labels",
-                    displayName: "Labels",
+                    displayName: localManager.getDisplayName("Visual_Labels"),
                     selector: null,
                     properties: {
                         show: labelSettings.show,
@@ -773,6 +780,8 @@ module powerbi.extensibility.visual {
             this.drawTicks();
             this.drawCategoryLabels();
 
+            let localManager = this.host.createLocalizationManager();
+
             this.tooltipServiceWrapper.addTooltip(
                 chordShapes,
                 (tooltipEvent: TooltipEventArgs<ChordLink>) => {
@@ -786,19 +795,21 @@ module powerbi.extensibility.visual {
                         tooltipInfo.push(ChordChart.createTooltipInfo(
                             this.data.labelDataPoints,
                             this.data.dataMatrix,
-                            tooltipEvent.data.source));
+                            tooltipEvent.data.source,
+                            localManager));
 
                         tooltipInfo.push(ChordChart.createTooltipInfo(
                             this.data.labelDataPoints,
                             this.data.dataMatrix,
-                            tooltipEvent.data.target));
+                            tooltipEvent.data.target,
+                            localManager));
                     }
 
                     return tooltipInfo;
                 });
         }
 
-        private static createTooltipInfo(labelDataPoints: ChordArcDescriptor[], dataMatrix: number[][], source: any) {
+        private static createTooltipInfo(labelDataPoints: ChordArcDescriptor[], dataMatrix: number[][], source: any, localManager: ILocalizationManager) {
             return {
                 displayName: labelDataPoints[source.index].data.label
                 + "->" + labelDataPoints[source.subindex].data.label,
