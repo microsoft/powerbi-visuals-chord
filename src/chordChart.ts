@@ -190,6 +190,7 @@ module powerbi.extensibility.visual {
 
         private selectionManager: ISelectionManager;
         private host: IVisualHost;
+        private localManager: ILocalizationManager;
 
         private get settings(): IChordChartSettings {
             return this.data && this.data.settings;
@@ -209,7 +210,7 @@ module powerbi.extensibility.visual {
 
         /* Convert a DataView into a view model */
         public static defaultValue1: number = 1;
-        public static converter(dataView: DataView, host: IVisualHost, colors: IColorPalette, prevAxisVisible: boolean): ChordChartData {
+        public static converter(dataView: DataView, host: IVisualHost, colors: IColorPalette, prevAxisVisible: boolean, localManager: ILocalizationManager): ChordChartData {
             let settings: IChordChartSettings = ChordChartSettings.parse(dataView.metadata.objects, colors);
             let columns: ChordChartColumns<ChordChartCategoricalColumns> = ChordChartColumns.getCategoricalColumns(dataView);
             let sources: ChordChartColumns<DataViewMetadataColumn> = ChordChartColumns.getColumnSources(dataView);
@@ -256,7 +257,7 @@ module powerbi.extensibility.visual {
 
             let categoryColumnFormatter: IValueFormatter = valueFormatter.create({
                 format: valueFormatter.getFormatStringByColumn(sources.Category, true)
-                || sources.Category.format
+                    || sources.Category.format
             });
             let seriesColumnFormatter: IValueFormatter = valueFormatter.create({
                 format: sources.Series && (valueFormatter.getFormatStringByColumn(sources.Series, true)
@@ -305,7 +306,7 @@ module powerbi.extensibility.visual {
                         .createSelectionId();
                     isCategory = false;
 
-                    color = colorHelper.getColorForSeriesValue(seriesObjects, seriesNameStr ? seriesNameStr : `${ChordChart.defaultValue1 }`);
+                    color = colorHelper.getColorForSeriesValue(seriesObjects, seriesNameStr ? seriesNameStr : `${ChordChart.defaultValue1}`);
                 }
 
                 labelData.push({
@@ -344,7 +345,8 @@ module powerbi.extensibility.visual {
                                 formattedFromToValue,
                                 valueColumnFormatter.format(elementValue),
                                 col,
-                                row);
+                                row,
+                                localManager);
                         }
                         else {
                             max = ChordChart.defaultValue1;
@@ -354,7 +356,8 @@ module powerbi.extensibility.visual {
                                 formattedFromToValue,
                                 valueColumnFormatter.format(`${ChordChart.defaultValue1}`),
                                 col,
-                                row);
+                                row,
+                                localManager);
                         }
 
                     } else if (isDiffFromTo && catIndex[totalFields[j]] !== undefined &&
@@ -435,6 +438,7 @@ module powerbi.extensibility.visual {
         constructor(options: VisualConstructorOptions) {
             this.selectionManager = options.host.createSelectionManager();
             this.host = options.host;
+            this.localManager = this.host.createLocalizationManager();
 
             this.tooltipServiceWrapper = createTooltipServiceWrapper(
                 this.host.tooltipService,
@@ -487,7 +491,8 @@ module powerbi.extensibility.visual {
                 options.dataViews[0],
                 this.host,
                 this.colors,
-                this.settings && this.settings.axis.show);
+                this.settings && this.settings.axis.show,
+                this.localManager);
 
             if (!this.data) {
                 this.clear();
@@ -513,13 +518,13 @@ module powerbi.extensibility.visual {
 
             switch (options.objectName) {
                 case "axis": {
-                    return ChordChart.enumerateAxis(settings);
+                    return ChordChart.enumerateAxis(settings, this.localManager);
                 }
                 case "dataPoint": {
-                    return ChordChart.enumerateDataPoint(settings, this.data.labelDataPoints);
+                    return ChordChart.enumerateDataPoint(settings, this.data.labelDataPoints, this.localManager);
                 }
                 case "labels": {
-                    return ChordChart.enumerateLabels(settings);
+                    return ChordChart.enumerateLabels(settings, this.localManager);
                 }
                 default: {
                     return [];
@@ -527,11 +532,11 @@ module powerbi.extensibility.visual {
             }
         }
 
-        private static enumerateAxis(settings: IChordChartSettings): VisualObjectInstance[] {
+        private static enumerateAxis(settings: IChordChartSettings, localManager: ILocalizationManager): VisualObjectInstance[] {
             let axisSettings: IAxisSettings = settings.axis,
                 instances: VisualObjectInstance[] = [{
                     objectName: "axis",
-                    displayName: "Axis",
+                    displayName: localManager.getDisplayName("Visual_Axis"),
                     selector: null,
                     properties: {
                         show: axisSettings.show
@@ -542,12 +547,13 @@ module powerbi.extensibility.visual {
 
         private static enumerateDataPoint(
             settings: IChordChartSettings,
-            labelDataPoints: ChordArcDescriptor[]): VisualObjectInstance[] {
+            labelDataPoints: ChordArcDescriptor[],
+            localManager: ILocalizationManager): VisualObjectInstance[] {
 
             let dataPointSettings: IDataPointSettings = settings.dataPoint;
             let instances: VisualObjectInstance[] = [{
                 objectName: "datapoint",
-                displayName: "Data colors",
+                displayName: localManager.getDisplayName("Visual_Data_Colors"),
                 selector: null,
                 properties: {
                     defaultColor: dataPointSettings.defaultColor,
@@ -579,11 +585,11 @@ module powerbi.extensibility.visual {
             return instances;
         }
 
-        private static enumerateLabels(settings: IChordChartSettings): VisualObjectInstance[] {
+        private static enumerateLabels(settings: IChordChartSettings, localManager: ILocalizationManager): VisualObjectInstance[] {
             let labelSettings = settings.labels,
                 labels: VisualObjectInstance[] = [{
                     objectName: "labels",
-                    displayName: "Labels",
+                    displayName: localManager.getDisplayName("Visual_Labels"),
                     selector: null,
                     properties: {
                         show: labelSettings.show,
@@ -801,7 +807,7 @@ module powerbi.extensibility.visual {
         private static createTooltipInfo(labelDataPoints: ChordArcDescriptor[], dataMatrix: number[][], source: any) {
             return {
                 displayName: labelDataPoints[source.index].data.label
-                + "->" + labelDataPoints[source.subindex].data.label,
+                    + "->" + labelDataPoints[source.subindex].data.label,
                 value: dataMatrix[source.index][source.subindex].toString()
             };
         }
