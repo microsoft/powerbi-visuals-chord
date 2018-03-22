@@ -30,6 +30,9 @@ module powerbi.extensibility.visual.test {
     // d3
     import ChordGroup = d3.layout.chord.Group;
 
+    // powerbi.extensibility.utils.interactivity
+    import SelectableDataPoint = powerbi.extensibility.utils.interactivity.SelectableDataPoint;
+
     // powerbi.extensibility.visual.test
     import ChordChartData = powerbi.extensibility.visual.test.ChordChartData;
     import ChordChartBuilder = powerbi.extensibility.visual.test.ChordChartBuilder;
@@ -41,7 +44,10 @@ module powerbi.extensibility.visual.test {
     import getSolidColorStructuralObject = powerbi.extensibility.visual.test.helpers.getSolidColorStructuralObject;
 
     // powerbi.extensibility.utils.test
+    import renderTimeout = powerbi.extensibility.utils.test.helpers.renderTimeout;
     import assertColorsMatch = powerbi.extensibility.utils.test.helpers.color.assertColorsMatch;
+    import MockIVisualHost = powerbi.extensibility.utils.test.mocks.MockIVisualHost;
+    import MockISelectionManager = powerbi.extensibility.utils.test.mocks.MockISelectionManager;
 
     // ChordChart1444757060245
     import VisualClass = powerbi.extensibility.visual.ChordChart1444757060245.ChordChart;
@@ -130,7 +136,9 @@ module powerbi.extensibility.visual.test {
                         defaultDataViewBuilder.getDataView(),
                         visualBuilder.visualHost,
                         visualBuilder.visualHost.colorPalette,
-                        false);
+                        false,
+                        null
+                    );
                 }).not.toThrow();
 
                 done();
@@ -378,7 +386,9 @@ module powerbi.extensibility.visual.test {
                     defaultDataViewBuilder.getDataView(),
                     visualBuilder.visualHost,
                     visualBuilder.visualHost.colorPalette,
-                    false);
+                    false,
+                    null
+                );
 
                 arcDescriptorsShouldntContainNaNValues(chordChartData.groups);
             });
@@ -401,7 +411,9 @@ module powerbi.extensibility.visual.test {
                         defaultDataViewBuilder.getDataView(null, true),
                         visualBuilder.visualHost,
                         visualBuilder.visualHost.colorPalette,
-                        false);
+                        false,
+                        null
+                    );
                 }).not.toThrow();
             });
         });
@@ -427,6 +439,25 @@ module powerbi.extensibility.visual.test {
                 };
 
                 objectsChecker(jsonData);
+            });
+        });
+
+        describe("Selection", () => {
+            describe("Power BI Bookmarks", () => {
+                it("first identity should be selected", (done) => {
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const firstSelectionId: ISelectionId = visualBuilder.instance["data"]["groups"][0]["identity"];
+
+                        visualBuilder.selectionManager.sendSelectionToCallback([firstSelectionId]);
+
+                        const isSelected: boolean = (d3.select(visualBuilder.slices.get(0)).datum() as SelectableDataPoint).selected;
+
+                        expect(isSelected).toBeTruthy();
+
+                        done();
+                    });
+                });
+
             });
         });
     });
