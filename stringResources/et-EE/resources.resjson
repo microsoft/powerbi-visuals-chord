@@ -1,0 +1,14 @@
+{
+	"Role_From": "Saatja",
+	"Role_To": "Adressaat",
+	"Role_Values": "Väärtused",
+	"Visual_Data_Colors": "Andmete värvid",
+	"Visual_Default_Color": "Vaikevärv",
+	"Visual_Show_All": "Kuva kõik",
+	"Visual_Color": "Värv",
+	"Visual_Axis": "Telg",
+	"Visual_Show": "Kuva",
+	"Visual_Labels": "Sildid",
+	"Visual_Text_Size": "Teksti suurus",
+	"Visual_Tooltip_Highlighted": "Esiletõstetud"
+}

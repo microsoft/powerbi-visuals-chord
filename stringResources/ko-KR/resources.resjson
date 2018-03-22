@@ -1,0 +1,14 @@
+{
+	"Role_From": "시작",
+	"Role_To": "받는 사람",
+	"Role_Values": "값",
+	"Visual_Data_Colors": "데이터 색",
+	"Visual_Default_Color": "기본 색",
+	"Visual_Show_All": "모두 표시",
+	"Visual_Color": "색",
+	"Visual_Axis": "축",
+	"Visual_Show": "표시",
+	"Visual_Labels": "레이블",
+	"Visual_Text_Size": "텍스트 크기",
+	"Visual_Tooltip_Highlighted": "강조됨"
+}

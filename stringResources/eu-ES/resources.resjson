@@ -1,0 +1,14 @@
+{
+	"Role_From": "Bidaltzailea",
+	"Role_To": "Hartzailea",
+	"Role_Values": "Balioak",
+	"Visual_Data_Colors": "Datuen koloreak",
+	"Visual_Default_Color": "Kolore lehenetsia",
+	"Visual_Show_All": "Erakutsi guztiak",
+	"Visual_Color": "Kolorea",
+	"Visual_Axis": "Ardatza",
+	"Visual_Show": "Erakutsi",
+	"Visual_Labels": "Etiketak",
+	"Visual_Text_Size": "Testuaren tamaina",
+	"Visual_Tooltip_Highlighted": "Nabarmendua"
+}
