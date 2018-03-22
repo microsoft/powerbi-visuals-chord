@@ -1,0 +1,14 @@
+{
+	"Role_From": "От",
+	"Role_To": "Кому",
+	"Role_Values": "Значения",
+	"Visual_Data_Colors": "Цвета данных",
+	"Visual_Default_Color": "Цвет по умолчанию",
+	"Visual_Show_All": "Показать все",
+	"Visual_Color": "Цвет",
+	"Visual_Axis": "Ось",
+	"Visual_Show": "Показать",
+	"Visual_Labels": "Метки",
+	"Visual_Text_Size": "Размер текста",
+	"Visual_Tooltip_Highlighted": "Выделено"
+}

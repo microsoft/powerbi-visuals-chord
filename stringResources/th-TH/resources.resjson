@@ -1,0 +1,14 @@
+{
+	"Role_From": "จาก",
+	"Role_To": "ถึง",
+	"Role_Values": "มูลค่า",
+	"Visual_Data_Colors": "สีของข้อมูล",
+	"Visual_Default_Color": "สีตามค่าเริ่มต้น",
+	"Visual_Show_All": "แสดงทั้งหมด",
+	"Visual_Color": "สี",
+	"Visual_Axis": "แกน",
+	"Visual_Show": "แสดง",
+	"Visual_Labels": "ป้ายชื่อ",
+	"Visual_Text_Size": "ขนาดของข้อความ",
+	"Visual_Tooltip_Highlighted": "เน้น"
+}

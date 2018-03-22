@@ -1,0 +1,14 @@
+{
+	"Role_From": "От",
+	"Role_To": "До",
+	"Role_Values": "Стойности",
+	"Visual_Data_Colors": "Цветове на данните",
+	"Visual_Default_Color": "Цвят по подразбиране",
+	"Visual_Show_All": "Показване на всички",
+	"Visual_Color": "Цвят",
+	"Visual_Axis": "Ос",
+	"Visual_Show": "Показване",
+	"Visual_Labels": "Етикети",
+	"Visual_Text_Size": "Размер на текста",
+	"Visual_Tooltip_Highlighted": "Осветляване"
+}

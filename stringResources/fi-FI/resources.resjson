@@ -1,0 +1,14 @@
+{
+	"Role_From": "Lähettäjä",
+	"Role_To": "Vastaanottaja",
+	"Role_Values": "Arvot",
+	"Visual_Data_Colors": "Tietojen värit",
+	"Visual_Default_Color": "Oletusväri",
+	"Visual_Show_All": "Näytä kaikki",
+	"Visual_Color": "Väri",
+	"Visual_Axis": "Akseli",
+	"Visual_Show": "Näytä",
+	"Visual_Labels": "Otsikot",
+	"Visual_Text_Size": "Tekstin koko",
+	"Visual_Tooltip_Highlighted": "Korostettu"
+}

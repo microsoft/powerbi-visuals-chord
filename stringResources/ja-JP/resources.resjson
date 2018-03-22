@@ -1,0 +1,14 @@
+{
+	"Role_From": "開始",
+	"Role_To": "移動先:",
+	"Role_Values": "値",
+	"Visual_Data_Colors": "データの色",
+	"Visual_Default_Color": "既定色",
+	"Visual_Show_All": "すべて表示",
+	"Visual_Color": "色",
+	"Visual_Axis": "軸",
+	"Visual_Show": "表示",
+	"Visual_Labels": "ラベル",
+	"Visual_Text_Size": "文字のサイズ",
+	"Visual_Tooltip_Highlighted": "強調表示"
+}
