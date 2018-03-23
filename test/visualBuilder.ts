@@ -29,17 +29,29 @@
 module powerbi.extensibility.visual.test {
     // powerbi.extensibility.utils.test
     import VisualBuilderBase = powerbi.extensibility.utils.test.VisualBuilderBase;
+    import MockISelectionManager = powerbi.extensibility.utils.test.mocks.MockISelectionManager;
 
     // ChordChart1444757060245
     import VisualClass = powerbi.extensibility.visual.ChordChart1444757060245.ChordChart;
 
     export class ChordChartBuilder extends VisualBuilderBase<VisualClass> {
+        public selectionManager: SelectionManagerWithBookmarks;
+
         constructor(width: number, height: number) {
             super(width, height, "ChordChart1444757060245");
         }
 
         protected build(options: VisualConstructorOptions): VisualClass {
+            options.host.createSelectionManager = () => {
+                this.selectionManager = new SelectionManagerWithBookmarks();
+                return this.selectionManager;
+            };
+
             return new VisualClass(options);
+        }
+
+        public get instance(): VisualClass {
+            return this.visual;
         }
 
         public get mainElement(): JQuery {
@@ -70,6 +82,24 @@ module powerbi.extensibility.visual.test {
             return this.mainElement
                 .children("g.slices")
                 .children("path.slice");
+        }
+    }
+
+    export class SelectionManagerWithBookmarks extends MockISelectionManager {
+        private selectionCallback: (ids: ISelectionId[]) => void;
+        private selectedSelectionIds: ISelectionId[] = [];
+
+        public registerOnSelectCallback(callback: (ids: ISelectionId[]) => void): void {
+            this.selectionCallback = callback;
+        }
+
+        public sendSelectionToCallback(selectionIds: ISelectionId[]): void {
+            this.selectedSelectionIds = selectionIds;
+            this.selectionCallback(selectionIds);
+        }
+
+        public getSelectionIds(): visuals.ISelectionId[] {
+            return this.selectedSelectionIds as visuals.ISelectionId[];
         }
     }
 }

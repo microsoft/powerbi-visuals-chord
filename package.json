@@ -1,12 +1,12 @@
 {
   "name": "powerbi-visuals-chordchart",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
   },
   "scripts": {
-    "postinstall": "pbiviz update 1.10.0",
+    "postinstall": "pbiviz update 1.11.0",
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
@@ -36,18 +36,19 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-typescript-preprocessor": "0.3.0",
     "lodash": "4.16.2",
-    "powerbi-visuals-tools": "^1.10.0",
-    "powerbi-visuals-utils-chartutils": "^1.2.0",
-    "powerbi-visuals-utils-colorutils": "^1.0.0",
-    "powerbi-visuals-utils-dataviewutils": "^1.2.0",
-    "powerbi-visuals-utils-formattingutils": "^2.1.0",
-    "powerbi-visuals-utils-interactivityutils": "^1.0.0",
-    "powerbi-visuals-utils-svgutils": "^1.1.0",
-    "powerbi-visuals-utils-testutils": "^1.0.1",
-    "powerbi-visuals-utils-tooltiputils": "^1.0.0",
-    "powerbi-visuals-utils-typeutils": "^1.1.0",
-    "tslint": "^3.15.1",
-    "tslint-microsoft-contrib": "^5.0.1",
+    "powerbi-models": "1.0.3",
+    "powerbi-visuals-tools": "1.11.2",
+    "powerbi-visuals-utils-chartutils": "1.5.1",
+    "powerbi-visuals-utils-colorutils": "1.0.0",
+    "powerbi-visuals-utils-dataviewutils": "1.4.1",
+    "powerbi-visuals-utils-formattingutils": "3.0.1",
+    "powerbi-visuals-utils-interactivityutils": "3.1.0",
+    "powerbi-visuals-utils-svgutils": "1.1.0",
+    "powerbi-visuals-utils-testutils": "1.2.0",
+    "powerbi-visuals-utils-tooltiputils": "1.0.0",
+    "powerbi-visuals-utils-typeutils": "1.1.0",
+    "tslint": "3.15.1",
+    "tslint-microsoft-contrib": "5.0.3",
     "typescript": "2.1.4"
   }
 }
