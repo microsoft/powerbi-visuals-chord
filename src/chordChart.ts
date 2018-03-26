@@ -296,8 +296,12 @@ module powerbi.extensibility.visual {
                     selectionId = host.createSelectionIdBuilder()
                         .withCategory(columns.Category, index)
                         .createSelectionId();
+
                     isCategory = true;
-                    let thisCategoryObjects: DataViewObjects = columns.Category.objects ? columns.Category.objects[index] : undefined;
+
+                    let thisCategoryObjects: DataViewObjects = columns.Category.objects
+                        ? columns.Category.objects[index]
+                        : undefined;
 
                     color = colorHelper.getColorForSeriesValue(thisCategoryObjects, categoricalValues.Category[index]);
                 } else if ((index = seriesIndex[totalFields[i]]) !== undefined) {
@@ -362,8 +366,7 @@ module powerbi.extensibility.visual {
                                 col,
                                 row,
                                 localizationManager);
-                        }
-                        else {
+                        } else if (!columns.Y) {
                             max = ChordChart.defaultValue1;
                             elementValue = ChordChart.defaultValue1;
                             tooltipInfo = tooltipBuilder.createTooltipInfo(
@@ -375,13 +378,16 @@ module powerbi.extensibility.visual {
                                 localizationManager);
                         }
 
-                    } else if (isDiffFromTo && catIndex[totalFields[j]] !== undefined &&
-                        seriesIndex[totalFields[i]] !== undefined) {
+                    } else if (isDiffFromTo
+                        && catIndex[totalFields[j]] !== undefined
+                        && seriesIndex[totalFields[i]] !== undefined
+                    ) {
                         let row: number = catIndex[totalFields[j]];
                         let col: number = seriesIndex[totalFields[i]];
+
                         if (columns.Y && columns.Y[col].values[row] !== null) {
                             elementValue = <number>columns.Y[col].values[row];
-                        } else {
+                        } else if (!columns.Y) {
                             elementValue = ChordChart.defaultValue1;
                         }
                     }
@@ -406,7 +412,6 @@ module powerbi.extensibility.visual {
             let chordLayout: Chord = d3.layout.chord()
                 .padding(ChordChart.ChordLayoutPadding)
                 .matrix(renderingDataMatrix);
-
 
             const groups: ChordArcDescriptor[] = ChordChart.getChordArcDescriptors(
                 ChordChart.copyArcDescriptorsWithoutNaNValues(chordLayout.groups()),
@@ -782,9 +787,9 @@ module powerbi.extensibility.visual {
                     let tooltipInfo: VisualTooltipDataItem[] = [];
 
                     if (this.data.differentFromTo) {
-                        tooltipInfo = this.data.tooltipData[tooltipEvent.data.source.index]
-                        [tooltipEvent.data.source.subindex]
-                            .tooltipInfo;
+                        const { index, subindex } = tooltipEvent.data.source;
+
+                        tooltipInfo = this.data.tooltipData[subindex][index].tooltipInfo;
                     } else {
                         tooltipInfo.push(ChordChart.createTooltipInfo(
                             this.data.groups,
