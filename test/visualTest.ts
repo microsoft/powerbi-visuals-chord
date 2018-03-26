@@ -76,8 +76,13 @@ module powerbi.extensibility.visual.test {
                         .categorical
                         .values
                         .map((column: DataViewValueColumn) => {
-                            return column.values.length;
+                            const notEmptyValues: PrimitiveValue[] = column.values.filter((value: number) => {
+                                return !isNaN(value) && value !== null;
+                            });
+
+                            return notEmptyValues.length;
                         }));
+
                     const categoriesLength: number = dataView.categorical.values.length
                         + dataView.categorical.categories[0].values.length;
 
@@ -405,7 +410,7 @@ module powerbi.extensibility.visual.test {
         });
 
         describe("check if values absent", () => {
-            it("shouldn't throw any unexpected exceptions when values property is undefined", () => {
+            it("shouldn't throw any unexpected exceptions when Values field is undefined", () => {
                 expect(() => {
                     let chordChartData: ChordChartDataInterface = VisualClass.converter(
                         defaultDataViewBuilder.getDataView(null, true),
