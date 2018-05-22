@@ -1,3 +1,6 @@
+## 1.3.0
+* Added localization for all supported languages
+
 ## 1.2.1
 * FIX: Fixes the issue that used to force to render additional chords even if data set doesn't contain such links
 * FIX: Fixes chord's tooltip
