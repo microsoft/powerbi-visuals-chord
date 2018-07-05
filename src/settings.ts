@@ -32,100 +32,69 @@ module powerbi.extensibility.visual {
     import dataLabelUtils = powerbi.extensibility.utils.chart.dataLabel.utils;
 
     // powerbi.extensibility.utils.dataview
-    import DataViewObjectsModule = powerbi.extensibility.utils.dataview.DataViewObjects;
+    import DataViewObjectsParser = powerbi.extensibility.utils.dataview.DataViewObjectsParser;
 
-    export interface IAxisSettings {
-        show: boolean;
+    export class AxisSettings {
+        public show: boolean = true;
+        public color: string = "#212121";
     }
 
-    export interface IDataPointSettings {
-        showAllDataPoints: boolean;
-        defaultColor: string;
+    export class DataPointSettings {
+        public showAllDataPoints: boolean = false;
+        public defaultColor: string = null;
     }
 
-    export interface ILabelsSettings {
-        show: boolean;
-        fontSize: number;
-        color: string;
+    export class LabelsSettings {
+        public show: boolean = true;
+        public color: string = dataLabelUtils.defaultLabelColor;
+        public fontSize: number = dataLabelUtils.DefaultFontSizeInPt;
     }
 
-    export interface IChordChartSettings {
-        axis: IAxisSettings;
-        dataPoint: IDataPointSettings;
-        labels: ILabelsSettings;
+    export class ChordSettings {
+        public strokeColor: string = "#000000";
+        public strokeWidth: number = 0.5;
+        public strokeWidthMin: number = 0.5;
+        public strokeWidthMax: number = 1;
     }
 
-    export class ChordChartSettings {
-        public static get Default() {
-            return new this();
-        }
+    export class Settings extends DataViewObjectsParser {
+        public axis: AxisSettings = new AxisSettings();
+        public dataPoint: DataPointSettings = new DataPointSettings();
+        public labels: LabelsSettings = new LabelsSettings();
+        public chord: ChordSettings = new ChordSettings();
 
-        public static parse(objects: DataViewObjects, colors: IColorPalette): IChordChartSettings {
-            let axisSettings: IAxisSettings = this.axis;
-            let dataPointSettings: IDataPointSettings = this.dataPoint;
-            let labelSettings: ILabelsSettings = this.labels;
+        public static parseSettings(dataView: DataView, colorPalette?: IColorPalette): Settings {
+            const settings: Settings = this.parse<Settings>(dataView);
 
-            let defaultColor: string = dataPointSettings.defaultColor;
-            if (_.has(objects, "dataPoint")
-                && _.has(objects["dataPoint"], "defaultColor")) {
-                defaultColor = this.getColor(
-                    objects,
-                    chordChartProperties.dataPoint.defaultColor,
-                    dataPointSettings.defaultColor,
-                    colors);
+            const colorHelper: ColorHelper = new ColorHelper(colorPalette);
+
+            settings.axis.color = colorHelper.getHighContrastColor(
+                "foreground",
+                settings.axis.color
+            );
+
+            settings.dataPoint.defaultColor = colorHelper.getHighContrastColor(
+                "background",
+                settings.dataPoint.defaultColor
+            );
+
+            settings.labels.color = colorHelper.getHighContrastColor(
+                "foreground",
+                settings.labels.color
+            );
+
+            settings.chord.strokeColor = colorHelper.getHighContrastColor(
+                "foreground",
+                settings.chord.strokeColor
+            );
+
+            if (colorPalette && colorHelper.isHighContrast) {
+                settings.chord.strokeWidth = settings.chord.strokeWidthMax;
+            } else {
+                settings.chord.strokeWidth = settings.chord.strokeWidthMin;
             }
 
-            return {
-                dataPoint: {
-                    defaultColor: defaultColor,
-                    showAllDataPoints: DataViewObjectsModule.getValue<boolean>(
-                        objects,
-                        chordChartProperties.dataPoint.showAllDataPoints,
-                        dataPointSettings.showAllDataPoints),
-                },
-                axis: {
-                    show: DataViewObjectsModule.getValue<boolean>(
-                        objects,
-                        chordChartProperties.axis.show,
-                        axisSettings.show),
-                },
-                labels: {
-                    show: DataViewObjectsModule.getValue<boolean>(
-                        objects,
-                        chordChartProperties.labels.show,
-                        labelSettings.show),
-                    fontSize: DataViewObjectsModule.getValue<number>(
-                        objects,
-                        chordChartProperties.labels.fontSize,
-                        labelSettings.fontSize),
-                    color: this.getColor(
-                        objects,
-                        chordChartProperties.labels.color,
-                        labelSettings.color,
-                        colors),
-                }
-            };
+            return settings;
         }
-
-        private static getColor(objects: DataViewObjects, properties: any, defaultColor: string, colors: IColorPalette): string {
-            let colorHelper: ColorHelper = new ColorHelper(colors, properties, defaultColor);
-            return colorHelper.getColorForMeasure(objects, "");
-        }
-
-        // Default Settings
-        private static dataPoint: IDataPointSettings = {
-            defaultColor: null,
-            showAllDataPoints: false
-        };
-
-        private static axis: IAxisSettings = {
-            show: true
-        };
-
-        private static labels: ILabelsSettings = {
-            show: true,
-            color: dataLabelUtils.defaultLabelColor,
-            fontSize: dataLabelUtils.DefaultFontSizeInPt
-        };
     }
 }

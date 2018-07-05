@@ -1,12 +1,12 @@
 {
   "name": "powerbi-visuals-chordchart",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
   },
   "scripts": {
-    "postinstall": "pbiviz update 1.11.0",
+    "postinstall": "pbiviz update 1.13.0",
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
@@ -37,9 +37,9 @@
     "karma-typescript-preprocessor": "0.3.0",
     "lodash": "4.16.2",
     "powerbi-models": "1.0.3",
-    "powerbi-visuals-tools": "1.11.2",
+    "powerbi-visuals-tools": "1.13.0",
     "powerbi-visuals-utils-chartutils": "1.5.1",
-    "powerbi-visuals-utils-colorutils": "1.0.0",
+    "powerbi-visuals-utils-colorutils": "1.1.0",
     "powerbi-visuals-utils-dataviewutils": "1.4.1",
     "powerbi-visuals-utils-formattingutils": "3.0.1",
     "powerbi-visuals-utils-interactivityutils": "3.1.0",
