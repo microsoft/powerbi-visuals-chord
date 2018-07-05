@@ -47,6 +47,7 @@
     "powerbi-visuals-utils-testutils": "1.2.0",
     "powerbi-visuals-utils-tooltiputils": "1.0.0",
     "powerbi-visuals-utils-typeutils": "1.1.0",
+    "puppeteer": "^1.5.0",
     "tslint": "3.15.1",
     "tslint-microsoft-contrib": "5.0.3",
     "typescript": "2.1.4"
