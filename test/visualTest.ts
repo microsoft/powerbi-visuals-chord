@@ -44,10 +44,7 @@ module powerbi.extensibility.visual.test {
     import getSolidColorStructuralObject = powerbi.extensibility.visual.test.helpers.getSolidColorStructuralObject;
 
     // powerbi.extensibility.utils.test
-    import renderTimeout = powerbi.extensibility.utils.test.helpers.renderTimeout;
     import assertColorsMatch = powerbi.extensibility.utils.test.helpers.color.assertColorsMatch;
-    import MockIVisualHost = powerbi.extensibility.utils.test.mocks.MockIVisualHost;
-    import MockISelectionManager = powerbi.extensibility.utils.test.mocks.MockISelectionManager;
 
     // ChordChart1444757060245
     import VisualClass = powerbi.extensibility.visual.ChordChart1444757060245.ChordChart;
@@ -463,6 +460,60 @@ module powerbi.extensibility.visual.test {
                     });
                 });
 
+            });
+        });
+
+        describe("Accessibility", () => {
+            describe("High contrast mode", () => {
+                const backgroundColor: string = "#000000";
+                const foregroundColor: string = "#ffff00";
+
+                beforeEach(() => {
+                    visualBuilder.visualHost.colorPalette.isHighContrast = true;
+
+                    visualBuilder.visualHost.colorPalette.background = { value: backgroundColor };
+                    visualBuilder.visualHost.colorPalette.foreground = { value: foregroundColor };
+                });
+
+                it("should not use fill style", (done) => {
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const slices: JQuery[] = visualBuilder.slices.toArray().map($);
+                        const chords: JQuery[] = visualBuilder.chords.toArray().map($);
+
+                        expect(isColorAppliedToElements(slices, null, "fill"));
+                        expect(isColorAppliedToElements(chords, null, "fill"));
+
+                        done();
+                    });
+                });
+
+                it("should use stroke style", (done) => {
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const slices: JQuery[] = visualBuilder.slices.toArray().map($);
+                        const chords: JQuery[] = visualBuilder.chords.toArray().map($);
+
+                        expect(isColorAppliedToElements(slices, foregroundColor, "stroke"));
+                        expect(isColorAppliedToElements(chords, foregroundColor, "stroke"));
+
+                        done();
+                    });
+                });
+
+                function isColorAppliedToElements(
+                    elements: JQuery[],
+                    color?: string,
+                    colorStyleName: string = "fill"
+                ): boolean {
+                    return elements.some((element: JQuery) => {
+                        const currentColor: string = element.css(colorStyleName);
+
+                        if (!currentColor || !color) {
+                            return currentColor === color;
+                        }
+
+                        return areColorsEqual(currentColor, color);
+                    });
+                }
             });
         });
     });

@@ -1,3 +1,6 @@
+## 1.4.0
+* Implements High Contrast Mode
+
 ## 1.3.0
 * Added localization for all supported languages
 
