@@ -1,15 +1,16 @@
 {
   "name": "powerbi-visuals-chordchart",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
   },
   "scripts": {
-    "postinstall": "pbiviz update 1.13.0",
+    "postinstall": "pbiviz update 2.1.0",
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
+    "cert": "pbiviz --create-cert",
     "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts\"",
     "pretest": "pbiviz package --resources --no-minify --no-pbiviz --no-plugin",
     "test": "karma start"
@@ -37,7 +38,7 @@
     "karma-typescript-preprocessor": "0.3.0",
     "lodash": "4.16.2",
     "powerbi-models": "1.0.3",
-    "powerbi-visuals-tools": "1.13.0",
+    "powerbi-visuals-tools": "2.1.0",
     "powerbi-visuals-utils-chartutils": "1.5.1",
     "powerbi-visuals-utils-colorutils": "1.1.0",
     "powerbi-visuals-utils-dataviewutils": "1.4.1",
