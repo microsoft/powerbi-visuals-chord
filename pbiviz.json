@@ -4,12 +4,12 @@
     "displayName": "Chord",
     "guid": "ChordChart1444757060245",
     "visualClassName": "ChordChart",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "A chord diagram is a graphical method of displaying the inter-relationships between data in a matrix.",
     "supportUrl": "http://community.powerbi.com",
     "gitHubUrl": "https://github.com/Microsoft/powerbi-visuals-chord"
   },
-  "apiVersion": "1.13.0",
+  "apiVersion": "2.1.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
