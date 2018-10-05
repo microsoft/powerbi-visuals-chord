@@ -24,82 +24,83 @@
  *  THE SOFTWARE.
  */
 
-/// <reference path="_references.ts"/>
+// powerbi
+import powerbi from "powerbi-visuals-api";
+import ISelectionId = powerbi.visuals.ISelectionId;
 
-module powerbi.extensibility.visual.test {
-    // powerbi.extensibility.utils.test
-    import VisualBuilderBase = powerbi.extensibility.utils.test.VisualBuilderBase;
-    import MockISelectionManager = powerbi.extensibility.utils.test.mocks.MockISelectionManager;
+// powerbi.extensibility
+import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 
-    // ChordChart1444757060245
-    import VisualClass = powerbi.extensibility.visual.ChordChart1444757060245.ChordChart;
+// powerbi.extensibility.utils.test
+import { VisualBuilderBase, MockISelectionManager } from "powerbi-visuals-utils-testutils";
 
-    export class ChordChartBuilder extends VisualBuilderBase<VisualClass> {
-        public selectionManager: SelectionManagerWithBookmarks;
+import { ChordChart } from "../src/chordChart";
 
-        constructor(width: number, height: number) {
-            super(width, height, "ChordChart1444757060245");
-        }
+export class ChordChartBuilder extends VisualBuilderBase<ChordChart> {
+    public selectionManager: SelectionManagerWithBookmarks;
 
-        protected build(options: VisualConstructorOptions): VisualClass {
-            options.host.createSelectionManager = () => {
-                this.selectionManager = new SelectionManagerWithBookmarks();
-                return this.selectionManager;
-            };
-
-            return new VisualClass(options);
-        }
-
-        public get instance(): VisualClass {
-            return this.visual;
-        }
-
-        public get mainElement(): JQuery {
-            return this.element
-                .children("svg.chordChart")
-                .children("g");
-        }
-
-        public get dataLabels(): JQuery {
-            return this.mainElement
-                .children("g.labels")
-                .children("text.data-labels");
-        }
-
-        public get sliceTicks(): JQuery {
-            return this.mainElement
-                .children("g.ticks")
-                .children("g.slice-ticks");
-        }
-
-        public get chords(): JQuery {
-            return this.mainElement
-                .children("g.chords")
-                .children("path.chord");
-        }
-
-        public get slices(): JQuery {
-            return this.mainElement
-                .children("g.slices")
-                .children("path.slice");
-        }
+    constructor(width: number, height: number) {
+        super(width, height, "ChordChart1444757060245");
     }
 
-    export class SelectionManagerWithBookmarks extends MockISelectionManager {
-        private selectionCallback: (ids: ISelectionId[]) => void;
-        private selectedSelectionIds: ISelectionId[] = [];
+    protected build(options: VisualConstructorOptions): ChordChart {
+        options.host.createSelectionManager = () => {
+            this.selectionManager = new SelectionManagerWithBookmarks();
+            return this.selectionManager;
+        };
 
-        public registerOnSelectCallback(callback: (ids: ISelectionId[]) => void): void {
-            this.selectionCallback = callback;
-        }
+        return new ChordChart(options);
+    }
 
-        public sendSelectionToCallback(selectionIds: ISelectionId[]): void {
-            this.selectedSelectionIds = selectionIds;
-            this.selectionCallback(selectionIds);
-        }
+    public get instance(): ChordChart {
+        return this.visual;
+    }
 
-        public getSelectionIds(): visuals.ISelectionId[] {
-            return this.selectedSelectionIds as visuals.ISelectionId[];
-        }
+    public get mainElement(): JQuery {
+        return this.element
+            .children("svg.chordChart")
+            .children("g");
+    }
+
+    public get dataLabels(): JQuery {
+        return this.mainElement
+            .children("g.labels")
+            .children("text.data-labels");
+    }
+
+    public get sliceTicks(): JQuery {
+        return this.mainElement
+            .children("g.ticks")
+            .children("g.slice-ticks");
+    }
+
+    public get chords(): JQuery {
+        return this.mainElement
+            .children("g.chords")
+            .children("path.chord");
+    }
+
+    public get slices(): JQuery {
+        return this.mainElement
+            .children("g.slices")
+            .children("path.slice");
+    }
+}
+
+export class SelectionManagerWithBookmarks extends MockISelectionManager {
+    private selectionCallback: (ids: ISelectionId[]) => void;
+    private selectedSelectionIds: ISelectionId[] = [];
+
+    public registerOnSelectCallback(callback: (ids: ISelectionId[]) => void): void {
+        this.selectionCallback = callback;
+    }
+
+    public sendSelectionToCallback(selectionIds: ISelectionId[]): void {
+        this.selectedSelectionIds = selectionIds;
+        this.selectionCallback(selectionIds);
+    }
+
+    public getSelectionIds(): ISelectionId[] {
+        return this.selectedSelectionIds as ISelectionId[];
     }
 }

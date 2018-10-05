@@ -24,76 +24,77 @@
  *  THE SOFTWARE.
  */
 
-module powerbi.extensibility.visual {
-    // powerbi
-    import IViewport = powerbi.IViewport;
+// powerbi
+import powerbi from "powerbi-visuals-api";
+import IViewport = powerbi.IViewport;
 
-    // powerbi.extensibility.utils.svg
-    import IMargin = powerbi.extensibility.utils.svg.IMargin;
+// powerbi.extensibility.utils.svg
+import { IMargin } from "powerbi-visuals-utils-svgutils";
 
-    export class VisualLayout {
-        private marginValue: IMargin;
-        private viewportValue: IViewport;
-        private viewportInValue: IViewport;
-        private minViewportValue: IViewport;
+import { keys as loadshKeys } from "lodash";
 
-        public defaultMargin: IMargin;
-        public defaultViewport: IViewport;
+export class VisualLayout {
+    private marginValue: IMargin;
+    private viewportValue: IViewport;
+    private viewportInValue: IViewport;
+    private minViewportValue: IViewport;
 
-        constructor(defaultViewport?: IViewport, defaultMargin?: IMargin) {
-            this.defaultViewport = defaultViewport || { width: 0, height: 0 };
-            this.defaultMargin = defaultMargin || { top: 0, bottom: 0, right: 0, left: 0 };
-        }
+    public defaultMargin: IMargin;
+    public defaultViewport: IViewport;
 
-        public get margin(): IMargin {
-            return this.marginValue || (this.margin = this.defaultMargin);
-        }
+    constructor(defaultViewport?: IViewport, defaultMargin?: IMargin) {
+        this.defaultViewport = defaultViewport || { width: 0, height: 0 };
+        this.defaultMargin = defaultMargin || { top: 0, bottom: 0, right: 0, left: 0 };
+    }
 
-        public set margin(value: IMargin) {
-            this.marginValue = VisualLayout.restrictToMinMax(value);
-            this.update();
-        }
+    public get margin(): IMargin {
+        return this.marginValue || (this.margin = this.defaultMargin);
+    }
 
-        public get viewport(): IViewport {
-            return this.viewportValue || (this.viewportValue = this.defaultViewport);
-        }
+    public set margin(value: IMargin) {
+        this.marginValue = VisualLayout.restrictToMinMax(value);
+        this.update();
+    }
 
-        public set viewport(value: IViewport) {
-            this.viewportValue = VisualLayout.restrictToMinMax(value, this.minViewport);
-            this.update();
-        }
+    public get viewport(): IViewport {
+        return this.viewportValue || (this.viewportValue = this.defaultViewport);
+    }
 
-        public get viewportIn(): IViewport {
-            return this.viewportInValue || this.viewport;
-        }
+    public set viewport(value: IViewport) {
+        this.viewportValue = VisualLayout.restrictToMinMax(value, this.minViewport);
+        this.update();
+    }
 
-        public get minViewport(): IViewport {
-            return this.minViewportValue;
-        }
+    public get viewportIn(): IViewport {
+        return this.viewportInValue || this.viewport;
+    }
 
-        public set minViewport(value: IViewport) {
-            this.minViewportValue = value;
-        }
+    public get minViewport(): IViewport {
+        return this.minViewportValue;
+    }
 
-        public get viewportInIsZero(): boolean {
-            return this.viewportIn.width === 0 || this.viewportIn.height === 0;
-        }
+    public set minViewport(value: IViewport) {
+        this.minViewportValue = value;
+    }
 
-        public resetMargin(): void {
-            this.margin = this.defaultMargin;
-        }
+    public get viewportInIsZero(): boolean {
+        return this.viewportIn.width === 0 || this.viewportIn.height === 0;
+    }
 
-        private update(): void {
-            this.viewportInValue = VisualLayout.restrictToMinMax({
-                width: this.viewport.width - (this.margin.left + this.margin.right),
-                height: this.viewport.height - (this.margin.top + this.margin.bottom)
-            }, this.minViewportValue);
-        }
+    public resetMargin(): void {
+        this.margin = this.defaultMargin;
+    }
 
-        private static restrictToMinMax<T>(value: T, minValue?: T): T {
-            let result = $.extend({}, value);
-            _.keys(value).forEach(x => result[x] = Math.max(minValue && minValue[x] || 0, value[x]));
-            return result;
-        }
+    private update(): void {
+        this.viewportInValue = VisualLayout.restrictToMinMax({
+            width: this.viewport.width - (this.margin.left + this.margin.right),
+            height: this.viewport.height - (this.margin.top + this.margin.bottom)
+        }, this.minViewportValue);
+    }
+
+    private static restrictToMinMax<T>(value: T, minValue?: T): T {
+        let result = $.extend({}, value);
+        loadshKeys(value).forEach(x => result[x] = Math.max(minValue && minValue[x] || 0, value[x]));
+        return result;
     }
 }

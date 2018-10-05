@@ -24,77 +24,83 @@
  *  THE SOFTWARE.
  */
 
-module powerbi.extensibility.visual {
-    // powerbi.extensibility.utils.color
-    import ColorHelper = powerbi.extensibility.utils.color.ColorHelper;
+// powerbi.extensibility.utils.color
+import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 
-    // powerbi.extensibility.utils.chart.dataLabel
-    import dataLabelUtils = powerbi.extensibility.utils.chart.dataLabel.utils;
+// powerbi.extensibility.utils.chart.dataLabel
+import { dataLabelUtils } from "powerbi-visuals-utils-chartutils";
 
-    // powerbi.extensibility.utils.dataview
-    import DataViewObjectsParser = powerbi.extensibility.utils.dataview.DataViewObjectsParser;
+// powerbi.extensibility.utils.dataview
+import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
+import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
-    export class AxisSettings {
-        public show: boolean = true;
-        public color: string = "#212121";
-    }
+// powerbi
+import powerbi from "powerbi-visuals-api";
+import DataView = powerbi.DataView;
 
-    export class DataPointSettings {
-        public showAllDataPoints: boolean = false;
-        public defaultColor: string = null;
-    }
+// powerbi.extensibility
+import IColorPalette = powerbi.extensibility.IColorPalette;
 
-    export class LabelsSettings {
-        public show: boolean = true;
-        public color: string = dataLabelUtils.defaultLabelColor;
-        public fontSize: number = dataLabelUtils.DefaultFontSizeInPt;
-    }
+export class AxisSettings {
+    public show: boolean = true;
+    public color: string = "#212121";
+}
 
-    export class ChordSettings {
-        public strokeColor: string = "#000000";
-        public strokeWidth: number = 0.5;
-        public strokeWidthMin: number = 0.5;
-        public strokeWidthMax: number = 1;
-    }
+export class DataPointSettings {
+    public showAllDataPoints: boolean = false;
+    public defaultColor: string = null;
+}
 
-    export class Settings extends DataViewObjectsParser {
-        public axis: AxisSettings = new AxisSettings();
-        public dataPoint: DataPointSettings = new DataPointSettings();
-        public labels: LabelsSettings = new LabelsSettings();
-        public chord: ChordSettings = new ChordSettings();
+export class LabelsSettings {
+    public show: boolean = true;
+    public color: string = dataLabelUtils.defaultLabelColor;
+    public fontSize: number = dataLabelUtils.DefaultFontSizeInPt;
+}
 
-        public static parseSettings(dataView: DataView, colorPalette?: IColorPalette): Settings {
-            const settings: Settings = this.parse<Settings>(dataView);
+export class ChordSettings {
+    public strokeColor: string = "#000000";
+    public strokeWidth: number = 0.5;
+    public strokeWidthMin: number = 0.5;
+    public strokeWidthMax: number = 1;
+}
 
-            const colorHelper: ColorHelper = new ColorHelper(colorPalette);
+export class Settings extends DataViewObjectsParser {
+    public axis: AxisSettings = new AxisSettings();
+    public dataPoint: DataPointSettings = new DataPointSettings();
+    public labels: LabelsSettings = new LabelsSettings();
+    public chord: ChordSettings = new ChordSettings();
 
-            settings.axis.color = colorHelper.getHighContrastColor(
-                "foreground",
-                settings.axis.color
-            );
+    public static parseSettings(dataView: DataView, colorPalette?: IColorPalette): Settings {
+        const settings: Settings = this.parse<Settings>(dataView);
 
-            settings.dataPoint.defaultColor = colorHelper.getHighContrastColor(
-                "background",
-                settings.dataPoint.defaultColor
-            );
+        const colorHelper: ColorHelper = new ColorHelper(colorPalette);
 
-            settings.labels.color = colorHelper.getHighContrastColor(
-                "foreground",
-                settings.labels.color
-            );
+        settings.axis.color = colorHelper.getHighContrastColor(
+            "foreground",
+            settings.axis.color
+        );
 
-            settings.chord.strokeColor = colorHelper.getHighContrastColor(
-                "foreground",
-                settings.chord.strokeColor
-            );
+        settings.dataPoint.defaultColor = colorHelper.getHighContrastColor(
+            "background",
+            settings.dataPoint.defaultColor
+        );
 
-            if (colorPalette && colorHelper.isHighContrast) {
-                settings.chord.strokeWidth = settings.chord.strokeWidthMax;
-            } else {
-                settings.chord.strokeWidth = settings.chord.strokeWidthMin;
-            }
+        settings.labels.color = colorHelper.getHighContrastColor(
+            "foreground",
+            settings.labels.color
+        );
 
-            return settings;
+        settings.chord.strokeColor = colorHelper.getHighContrastColor(
+            "foreground",
+            settings.chord.strokeColor
+        );
+
+        if (colorPalette && colorHelper.isHighContrast) {
+            settings.chord.strokeWidth = settings.chord.strokeWidthMax;
+        } else {
+            settings.chord.strokeWidth = settings.chord.strokeWidthMin;
         }
+
+        return settings;
     }
 }
