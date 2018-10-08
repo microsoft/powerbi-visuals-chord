@@ -25,7 +25,7 @@
  */
 
 // d3
-import { select as d3select } from "d3"
+import { select as d3select } from "d3";
 import ChordGroup = d3.ChordGroup;
 
 import powerbi from "powerbi-visuals-api";
@@ -150,7 +150,6 @@ describe("ChordChart", () => {
                     defaultDataViewBuilder.getDataView(),
                     visualBuilder.visualHost,
                     visualBuilder.visualHost.colorPalette,
-                    false,
                     null
                 );
             }).not.toThrow();
@@ -400,7 +399,6 @@ describe("ChordChart", () => {
                 defaultDataViewBuilder.getDataView(),
                 visualBuilder.visualHost,
                 visualBuilder.visualHost.colorPalette,
-                false,
                 null
             );
 
@@ -425,7 +423,6 @@ describe("ChordChart", () => {
                     defaultDataViewBuilder.getDataView(null, true),
                     visualBuilder.visualHost,
                     visualBuilder.visualHost.colorPalette,
-                    false,
                     null
                 );
             }).not.toThrow();

@@ -31,8 +31,6 @@ import IViewport = powerbi.IViewport;
 // powerbi.extensibility.utils.svg
 import { IMargin } from "powerbi-visuals-utils-svgutils";
 
-import { keys as loadshKeys } from "lodash";
-
 export class VisualLayout {
     private marginValue: IMargin;
     private viewportValue: IViewport;
@@ -92,9 +90,9 @@ export class VisualLayout {
         }, this.minViewportValue);
     }
 
-    private static restrictToMinMax<T>(value: T, minValue?: T): T {
-        let result = $.extend({}, value);
-        loadshKeys(value).forEach(x => result[x] = Math.max(minValue && minValue[x] || 0, value[x]));
+    private static restrictToMinMax<T extends Object>(value: T, minValue?: T): T {
+        let result: T = {} as T;
+        Object.keys(value).forEach(x => result[x] = Math.max(minValue && minValue[x] || 0, value[x]));
         return result;
     }
 }
