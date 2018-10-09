@@ -1,3 +1,6 @@
+## 2.0.0
+* Webpack migration
+
 ## 1.5.0
 * API 2.1.0
 

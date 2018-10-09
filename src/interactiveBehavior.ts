@@ -24,84 +24,85 @@
  *  THE SOFTWARE.
  */
 
-module powerbi.extensibility.visual {
-    // d3
-    import Selection = d3.Selection;
-    import ChordLink = d3.layout.chord.Link;
+// d3
+import Selection = d3.Selection;
 
-    // powerbi.extensibility.utils.interactivity
-    import ISelectionHandler = powerbi.extensibility.utils.interactivity.ISelectionHandler;
-    import IInteractiveBehavior = powerbi.extensibility.utils.interactivity.IInteractiveBehavior;
+// powerbi.extensibility.utils.interactivity
+import { interactivityService } from "powerbi-visuals-utils-interactivityutils";
+import IInteractiveBehavior = interactivityService.IInteractiveBehavior;
+import ISelectionHandler = interactivityService.ISelectionHandler;
+import { ChordArcDescriptor } from "./interfaces";
 
-    export interface BehaviorOptions {
-        clearCatcher: Selection<any>;
-        arcSelection: Selection<ChordArcDescriptor>;
-        chordSelection: Selection<ChordLink>;
+export interface BehaviorOptions {
+    clearCatcher: d3.Selection<d3.BaseType, any, any, any>;
+    arcSelection: d3.Selection<d3.BaseType, ChordArcDescriptor, any, any>;
+    chordSelection: Selection<d3.BaseType, any, any, any>;
+}
+
+const getEvent = () => require("d3-selection").event;
+
+export class InteractiveBehavior implements IInteractiveBehavior {
+    public fullOpacity: number = 1;
+    private dimmedOpacity: number = 0.3;
+
+    private behaviorOptions: BehaviorOptions;
+
+    public bindEvents(options: BehaviorOptions, selectionHandler: ISelectionHandler): void {
+        this.behaviorOptions = options;
+
+        this.behaviorOptions.clearCatcher.on("click", selectionHandler.handleClearSelection.bind(selectionHandler));
+
+        this.behaviorOptions.arcSelection.on("click", (dataPoint: ChordArcDescriptor) => {
+            const event: MouseEvent = getEvent() as MouseEvent;
+
+            event.stopPropagation();
+
+            selectionHandler.handleSelection(dataPoint, event && event.ctrlKey);
+        });
     }
 
-    export class InteractiveBehavior implements IInteractiveBehavior {
-        public fullOpacity: number = 1;
-        private dimmedOpacity: number = 0.3;
-
-        private behaviorOptions: BehaviorOptions;
-
-        public bindEvents(options: BehaviorOptions, selectionHandler: ISelectionHandler): void {
-            this.behaviorOptions = options;
-
-            this.behaviorOptions.clearCatcher.on("click", selectionHandler.handleClearSelection.bind(selectionHandler));
-
-            this.behaviorOptions.arcSelection.on("click", (dataPoint: ChordArcDescriptor) => {
-                const event: MouseEvent = d3.event as MouseEvent;
-
-                event.stopPropagation();
-
-                selectionHandler.handleSelection(dataPoint, event && event.ctrlKey);
-            });
+    public renderSelection(hasSelection: boolean): void {
+        if (!this.behaviorOptions) {
+            return;
         }
 
-        public renderSelection(hasSelection: boolean): void {
-            if (!this.behaviorOptions) {
-                return;
-            }
-
-            if (hasSelection) {
-                this.renderDataPointSelection();
-            } else {
-                this.renderClearSelection();
-            }
+        if (hasSelection) {
+            this.renderDataPointSelection();
+        } else {
+            this.renderClearSelection();
         }
+    }
 
-        private renderDataPointSelection(): void {
-            const { arcSelection, chordSelection } = this.behaviorOptions;
+    private renderDataPointSelection(): void {
+        const { arcSelection, chordSelection } = this.behaviorOptions;
 
-            chordSelection.style("opacity", this.dimmedOpacity);
+        chordSelection.style("opacity", this.dimmedOpacity);
 
-            arcSelection.style("opacity", (arcDescriptor: ChordArcDescriptor, arcIndex: number) => {
-                const isArcSelected: boolean = arcDescriptor.selected;
+        arcSelection.style("opacity", (arcDescriptor: ChordArcDescriptor, arcIndex: number) => {
+            const isArcSelected: boolean = arcDescriptor.selected;
 
-                chordSelection
-                    .filter((chordLink: ChordLink) => {
-                        return (chordLink.source.index === arcIndex && isArcSelected
-                            || chordLink.target.index === arcIndex)
-                            && isArcSelected;
-                    })
-                    .style("opacity", this.fullOpacity);
+            chordSelection
+                .filter((chordLink: any) => {
+                    return (chordLink.source.index === arcIndex && isArcSelected
+                        || chordLink.target.index === arcIndex)
+                        && isArcSelected;
+                })
+                .style("opacity", this.fullOpacity);
 
-                return this.getOpacity(arcDescriptor.selected);
-            });
-        }
+            return this.getOpacity(arcDescriptor.selected);
+        });
+    }
 
-        private renderClearSelection(): void {
-            const { arcSelection, chordSelection } = this.behaviorOptions;
+    private renderClearSelection(): void {
+        const { arcSelection, chordSelection } = this.behaviorOptions;
 
-            arcSelection.style("opacity", this.fullOpacity);
-            chordSelection.style("opacity", this.fullOpacity);
-        }
+        arcSelection.style("opacity", this.fullOpacity);
+        chordSelection.style("opacity", this.fullOpacity);
+    }
 
-        private getOpacity(isSelected: boolean): number {
-            return isSelected
-                ? this.fullOpacity
-                : this.dimmedOpacity;
-        }
+    private getOpacity(isSelected: boolean): number {
+        return isSelected
+            ? this.fullOpacity
+            : this.dimmedOpacity;
     }
 }

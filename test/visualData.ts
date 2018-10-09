@@ -23,72 +23,71 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
+import powerbi from "powerbi-visuals-api";
+import DataView = powerbi.DataView;
 
-/// <reference path="_references.ts"/>
+// powerbi.extensibility.utils.test
+import { getRandomNumbers, testDataViewBuilder } from "powerbi-visuals-utils-testutils";
+import TestDataViewBuilder = testDataViewBuilder.TestDataViewBuilder;
 
-module powerbi.extensibility.visual.test {
-    // powerbi.extensibility.utils.test
-    import getRandomNumbers = powerbi.extensibility.utils.test.helpers.getRandomNumbers;
-    import TestDataViewBuilder = powerbi.extensibility.utils.test.dataViewBuilder.TestDataViewBuilder;
+// powerbi.extensibility.utils.type
+import { valueType } from "powerbi-visuals-utils-typeutils";
+import ValueType = valueType.ValueType;
 
-    // powerbi.extensibility.utils.type
-    import ValueType = powerbi.extensibility.utils.type.ValueType;
+export class ChordChartData extends TestDataViewBuilder {
+    public static ColumnCategory: string = "Category";
+    public static ColumnSeries: string = "Series";
+    public static ColumnValues: string = "Y";
 
-    export class ChordChartData extends TestDataViewBuilder {
-        public static ColumnCategory: string = "Category";
-        public static ColumnSeries: string = "Series";
-        public static ColumnValues: string = "Y";
+    public valuesCategoryGroup: string[][] = [
+        ["William", "Aiden"],
+        ["William", "Daniel"],
+        ["William", "Harper"],
 
-        public valuesCategoryGroup: string[][] = [
-            ["William", "Aiden"],
-            ["William", "Daniel"],
-            ["William", "Harper"],
+        ["Olivia", "Aiden"],
+        ["Olivia", "Harper"],
 
-            ["Olivia", "Aiden"],
-            ["Olivia", "Harper"],
+        ["James", "Daniel"],
 
-            ["James", "Daniel"],
+        ["Lucas", "Aiden"],
+        ["Lucas", "Daniel"],
 
-            ["Lucas", "Aiden"],
-            ["Lucas", "Daniel"],
+        ["Henry", "Aiden"],
+        ["Henry", "Daniel"],
+        ["Henry", "Harper"],
+    ];
 
-            ["Henry", "Aiden"],
-            ["Henry", "Daniel"],
-            ["Henry", "Harper"],
-        ];
+    public valuesValue: number[] = getRandomNumbers(this.valuesCategoryGroup.length, 50, 100);
 
-        public valuesValue: number[] = getRandomNumbers(this.valuesCategoryGroup.length, 50, 100);
-
-        public getDataView(columnNames?: string[], emptyValues: boolean = false): DataView {
-            return this.createCategoricalDataViewBuilder([
-                {
-                    source: {
-                        displayName: ChordChartData.ColumnCategory,
-                        roles: { Category: true },
-                        type: ValueType.fromDescriptor({ text: true })
-                    },
-                    values: emptyValues ? null : this.valuesCategoryGroup.map((value: string[]) => value[0])
+    public getDataView(columnNames?: string[], emptyValues: boolean = false): DataView {
+        return this.createCategoricalDataViewBuilder([
+            {
+                source: {
+                    displayName: ChordChartData.ColumnCategory,
+                    roles: { Category: true },
+                    type: ValueType.fromDescriptor({ text: true })
                 },
+                values: emptyValues ? null : this.valuesCategoryGroup.map((value: string[]) => value[0])
+            },
+            {
+                isGroup: true,
+                source: {
+                    displayName: ChordChartData.ColumnSeries,
+                    roles: { Series: true },
+                    type: ValueType.fromDescriptor({ text: true })
+                },
+                values: emptyValues ? null : this.valuesCategoryGroup.map((value: string[]) => value[1]),
+            }
+        ], [
                 {
-                    isGroup: true,
                     source: {
-                        displayName: ChordChartData.ColumnSeries,
-                        roles: { Series: true },
-                        type: ValueType.fromDescriptor({ text: true })
+                        displayName: ChordChartData.ColumnValues,
+                        isMeasure: true,
+                        roles: { Y: true },
+                        type: ValueType.fromDescriptor({ numeric: true }),
+                        objects: { dataPoint: { fill: { solid: { color: "purple" } } } },
                     },
-                    values: emptyValues ? null : this.valuesCategoryGroup.map((value: string[]) => value[1]),
-                }
-            ], [
-                    {
-                        source: {
-                            displayName: ChordChartData.ColumnValues,
-                            isMeasure: true,
-                            roles: { Y: true },
-                            type: ValueType.fromDescriptor({ numeric: true }),
-                            objects: { dataPoint: { fill: { solid: { color: "purple" } } } },
-                        },
-                        values: emptyValues ? null : this.valuesValue
-                    }], columnNames).build();
-        }
+                    values: emptyValues ? null : this.valuesValue
+                }], columnNames).build();
     }
 }

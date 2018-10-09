@@ -24,26 +24,27 @@
  *  THE SOFTWARE.
  */
 
-module powerbi.extensibility.visual {
-    export class ChordChartHelpers {
-        public static interpolateArc(arc: d3.svg.Arc<any>): any {
-            return function (data) {
-                if (!this.oldData) {
-                    this.oldData = data;
-                    return () => arc(data);
-                }
+import { Arc as d3Arc, interpolate as d3Interpolate } from "d3";
+import { toArray as lodashToArray } from "lodash";
 
-                let interpolation = d3.interpolate(this.oldData, data);
-                this.oldData = interpolation(0);
-                return (x) => arc(interpolation(x));
-            };
-        }
+export class ChordChartHelpers {
+    public static interpolateArc(arc: d3Arc<any, any>): any {
+        return function (data) {
+            if (!this.oldData) {
+                this.oldData = data;
+                return () => arc(data);
+            }
 
-        public static addContext(context: any, fn: Function): any {
-            return <any>function (...arg) {
-                return fn.apply(context, [this].concat(_.toArray(arg)));
-            };
-        }
-
+            let interpolation = d3Interpolate(this.oldData, data);
+            this.oldData = interpolation(0);
+            return (x) => arc(interpolation(x));
+        };
     }
+
+    public static addContext(context: any, fn: Function): any {
+        return <any>function (...arg) {
+            return fn.apply(context, [this].concat(lodashToArray(arg)));
+        };
+    }
+
 }
