@@ -1,6 +1,6 @@
 {
   "name": "powerbi-visuals-chordchart",
-  "version": "2.1.0",
+  "version": "2.0.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
@@ -35,10 +35,9 @@
     "jquery": "3.2.1",
     "karma": "2.0.4",
     "karma-chrome-launcher": "2.2.0",
-    "karma-coverage": "1.1.2",
+    "karma-coverage": "^1.1.2",
     "karma-coverage-istanbul-reporter": "^2.0.4",
     "karma-jasmine": "1.1.2",
-    "karma-remap-istanbul": "0.6.0",
     "karma-sourcemap-loader": "0.3.7",
     "karma-typescript": "3.0.12",
     "karma-typescript-preprocessor": "0.3.1",
