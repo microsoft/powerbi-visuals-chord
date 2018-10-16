@@ -47,10 +47,11 @@ module.exports = (config: Config) => {
         frameworks: ["jasmine"],
         reporters: [
             "progress",
+            "junit",
             "coverage-istanbul"
         ],
         coverageIstanbulReporter: {
-            reports: ["html", "lcovonly", "text-summary"],
+            reports: ["html", "lcovonly", "text-summary", "cobertura"],
             combineBrowserReports: true,
             fixWebpackSourcePaths: true
         },
@@ -62,6 +63,7 @@ module.exports = (config: Config) => {
             "karma-jasmine",
             "karma-sourcemap-loader",
             "karma-chrome-launcher",
+            "karma-junit-reporter",
             "karma-coverage-istanbul-reporter"
         ],
         files: [
@@ -82,6 +84,10 @@ module.exports = (config: Config) => {
                 included: false
             }
         ],
+        junitReporter: {
+            outputDir: coverageFolder,
+            useBrowserName: true
+        },
         preprocessors: {
             [testRecursivePath]: ["webpack"],
             [srcRecursivePath]: ["webpack", "coverage"]
