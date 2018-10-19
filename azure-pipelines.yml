@@ -23,8 +23,8 @@ steps:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/TESTS-*.xml' 
     testRunTitle: 'ChortChart tests'
-    #searchFolder: '$(System.DefaultWorkingDirectory)' # Optional
     mergeTestResults: true # Optional
+    #searchFolder: '$(System.DefaultWorkingDirectory)' # Optional
     #buildPlatform: # Optional
     #buildConfiguration: # Optional
     #publishRunAttachments: true # Optional
