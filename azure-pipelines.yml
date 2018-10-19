@@ -34,6 +34,8 @@ steps:
     codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
     summaryFileLocation: '**/*-coverage.xml'
     reportDirectory: '**/html-report'
+    mergeTestResults: true
+    failIfCoverageEmpty: true
     #summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*-coverage.xml'
     #reportDirectory: '$(System.DefaultWorkingDirectory)/**/html-report'
     #additionalCodeCoverageFiles: # Optional
