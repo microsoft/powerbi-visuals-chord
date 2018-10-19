@@ -22,7 +22,7 @@ steps:
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/TESTS-*.xml'
-    testRunTitle: 'ChortChart tests'
+    testRunTitle: 'Custom Visual unit-tests'
     mergeTestResults: true # Optional
     #searchFolder: '$(System.DefaultWorkingDirectory)' # Optional
     #buildPlatform: # Optional
