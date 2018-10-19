@@ -33,6 +33,6 @@ steps:
   inputs:
     codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*-coverage.xml'
-    #reportDirectory: '$(System.DefaultWorkingDirectory)/**/coverage'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/**/html-report'
     #additionalCodeCoverageFiles: # Optional
     #failIfCoverageEmpty: false # Optional
