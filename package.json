@@ -57,12 +57,15 @@
     "powerbi-visuals-utils-testutils": "^2.0.4",
     "powerbi-visuals-utils-tooltiputils": "^2.0.2",
     "powerbi-visuals-utils-typeutils": "2.0.1",
-    "puppeteer": "1.5.0",
+    "puppeteer": "^1.5.0",
     "style-loader": "0.21.0",
     "ts-loader": "4.4.2",
     "ts-node": "7.0.0",
     "tslint": "4.0.2",
     "typescript": "3.0.1",
     "webpack": "4.14.0"
+  },
+  "dependencies": {
+    "karma-junit-reporter": "^1.2.0"
   }
 }
