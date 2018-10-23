@@ -32,10 +32,7 @@ const path = require('path');
 
 const testRecursivePath = "test/visualTest.ts";
 const srcOriginalRecursivePath = "src/**/*.ts";
-const srcRecursivePath = ".tmp/drop/**/*.js";
 const coverageFolder = "coverage";
-const globals = "./test/globals.ts";
-
 
 process.env.CHROME_BIN = require("puppeteer").executablePath();
 
@@ -74,14 +71,13 @@ module.exports = (config: Config) => {
             reports: ["html", "lcovonly", "text-summary", "cobertura"],
             dir: path.join(__dirname, coverageFolder),
             'report-config': {
-                // all options available at: https://github.com/istanbuljs/istanbuljs/blob/aae256fb8b9a3d19414dcf069c592e88712c32c6/packages/istanbul-reports/lib/html/index.js#L135-L137
                 html: {
                     subdir: 'html-report'
                 }
             },
             combineBrowserReports: true,
             fixWebpackSourcePaths: true,
-            verbose: true // output config used by istanbul for debugging
+            verbose: false
         },
         singleRun: true,
         plugins: [
@@ -97,8 +93,6 @@ module.exports = (config: Config) => {
         files: [
             "node_modules/jquery/dist/jquery.min.js",
             "node_modules/jasmine-jquery/lib/jasmine-jquery.js",
-            globals,
-            srcRecursivePath,
             testRecursivePath,
             {
                 pattern: srcOriginalRecursivePath,
@@ -113,8 +107,7 @@ module.exports = (config: Config) => {
             }
         ],
         preprocessors: {
-            [testRecursivePath]: ["webpack"],
-            [srcRecursivePath]: ["webpack", "coverage"]
+            [testRecursivePath]: ["webpack", "coverage"]
         },
         typescriptPreprocessor: {
             options: tsconfig.compilerOptions

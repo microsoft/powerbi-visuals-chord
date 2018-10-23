@@ -1,3 +1,6 @@
+## 2.0.1
+* Update packages
+
 ## 2.0.0
 * Webpack migration
 
