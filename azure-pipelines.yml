@@ -22,7 +22,7 @@ steps:
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/TESTS-*.xml'
-    testRunTitle: 'ChortChart tests'
+    testRunTitle: 'Custom Visual unit-tests'
     mergeTestResults: true # Optional
     #searchFolder: '$(System.DefaultWorkingDirectory)' # Optional
     #buildPlatform: # Optional
@@ -32,7 +32,11 @@ steps:
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*-coverage.xml'
-    #reportDirectory: '$(System.DefaultWorkingDirectory)/**/coverage'
+    summaryFileLocation: '**/*-coverage.xml'
+    reportDirectory: '**/html-report'
+    mergeTestResults: true
+    failIfCoverageEmpty: true
+    #summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*-coverage.xml'
+    #reportDirectory: '$(System.DefaultWorkingDirectory)/**/html-report'
     #additionalCodeCoverageFiles: # Optional
     #failIfCoverageEmpty: false # Optional

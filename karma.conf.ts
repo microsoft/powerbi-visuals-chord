@@ -61,7 +61,7 @@ module.exports = (config: Config) => {
             dir: path.join(__dirname, coverageFolder),
             reporters: [
                 // reporters not supporting the `file` property
-                { type: 'html', subdir: 'html' },
+                { type: 'html', subdir: 'html-report' },
                 { type: 'lcov', subdir: 'lcov' },
                 // reporters supporting the `file` property, use `subdir` to directly
                 // output them in the `dir` directory
@@ -76,7 +76,7 @@ module.exports = (config: Config) => {
             'report-config': {
                 // all options available at: https://github.com/istanbuljs/istanbuljs/blob/aae256fb8b9a3d19414dcf069c592e88712c32c6/packages/istanbul-reports/lib/html/index.js#L135-L137
                 html: {
-                    subdir: 'html'
+                    subdir: 'html-report'
                 }
             },
             combineBrowserReports: true,
