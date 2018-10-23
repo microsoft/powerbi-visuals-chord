@@ -23,20 +23,11 @@ steps:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/TESTS-*.xml'
     testRunTitle: 'Custom Visual unit-tests'
-    mergeTestResults: true # Optional
-    #searchFolder: '$(System.DefaultWorkingDirectory)' # Optional
-    #buildPlatform: # Optional
-    #buildConfiguration: # Optional
-    #publishRunAttachments: true # Optional
-
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
-    summaryFileLocation: '**/*-coverage.xml'
-    reportDirectory: '**/html-report'
     mergeTestResults: true
-    failIfCoverageEmpty: true
-    #summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*-coverage.xml'
-    #reportDirectory: '$(System.DefaultWorkingDirectory)/**/html-report'
-    #additionalCodeCoverageFiles: # Optional
-    #failIfCoverageEmpty: false # Optional
+
+#- task: PublishCodeCoverageResults@1
+#  inputs:
+#    codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
+#    summaryFileLocation: '**/*-coverage.xml'
+#    reportDirectory: '**/html-report'
+#    failIfCoverageEmpty: true

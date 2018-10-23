@@ -214,7 +214,6 @@ export class ChordChart implements IVisual {
     public static defaultValue1: number = 1;
 
     /**
-     * 
      * @param dataView DataView object
      * @param host PBI Host object
      * @param colors Color Palette from PBI

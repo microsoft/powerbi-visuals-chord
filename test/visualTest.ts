@@ -335,8 +335,8 @@ describe("ChordChart", () => {
 
                 visualBuilder.updateFlushAllD3Transitions(dataView);
 
-                const slices: JQuery[] = visualBuilder.slices.toArray().map($),
-                    chords: JQuery[] = visualBuilder.chords.toArray().map($);
+                const slices: JQuery<any>[] = visualBuilder.slices.toArray().map($),
+                    chords: JQuery<any>[] = visualBuilder.chords.toArray().map($);
 
                 colors.forEach((color: string) => {
                     expect(doElementsUseColor(slices, color)).toBeTruthy();
@@ -486,8 +486,8 @@ describe("ChordChart", () => {
 
             it("should not use fill style", (done) => {
                 visualBuilder.updateRenderTimeout(dataView, () => {
-                    const slices: JQuery[] = visualBuilder.slices.toArray().map($);
-                    const chords: JQuery[] = visualBuilder.chords.toArray().map($);
+                    const slices: JQuery<any>[] = visualBuilder.slices.toArray().map($);
+                    const chords: JQuery<any>[] = visualBuilder.chords.toArray().map($);
 
                     expect(isColorAppliedToElements(slices, null, "fill"));
                     expect(isColorAppliedToElements(chords, null, "fill"));
@@ -498,8 +498,8 @@ describe("ChordChart", () => {
 
             it("should use stroke style", (done) => {
                 visualBuilder.updateRenderTimeout(dataView, () => {
-                    const slices: JQuery[] = visualBuilder.slices.toArray().map($);
-                    const chords: JQuery[] = visualBuilder.chords.toArray().map($);
+                    const slices: JQuery<any>[] = visualBuilder.slices.toArray().map($);
+                    const chords: JQuery<any>[] = visualBuilder.chords.toArray().map($);
 
                     expect(isColorAppliedToElements(slices, foregroundColor, "stroke"));
                     expect(isColorAppliedToElements(chords, foregroundColor, "stroke"));
