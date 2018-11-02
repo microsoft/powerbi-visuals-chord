@@ -1,3 +1,6 @@
+## 2.0.2
+* Update the tools to 3.0.5
+
 ## 2.0.1
 * Update packages
 
