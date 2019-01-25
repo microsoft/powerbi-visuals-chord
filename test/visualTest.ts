@@ -37,8 +37,8 @@ import DataViewObjects = powerbi.DataViewObjects;
 import ISelectionId = powerbi.visuals.ISelectionId;
 
 // powerbi.extensibility.utils.interactivity
-import { interactivityService } from "powerbi-visuals-utils-interactivityutils";
-import SelectableDataPoint = interactivityService.SelectableDataPoint;
+import { interactivitySelectionService } from "powerbi-visuals-utils-interactivityutils";
+import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
 
 // powerbi.extensibility.utils.test
 import { assertColorsMatch } from "powerbi-visuals-utils-testutils";

@@ -24,6 +24,7 @@
  *  THE SOFTWARE.
  */
 import "./../style/chordChart.less";
+import "@babel/polyfill";
 
 // d3
 import * as d3 from "d3";
@@ -89,10 +90,10 @@ import { pixelConverter as PixelConverter, double as TypeUtilsDouble } from "pow
 import lessWithPrecision = TypeUtilsDouble.lessWithPrecision;
 
 // powerbi.extensibility.utils.interactivity
-import { interactivityService } from "powerbi-visuals-utils-interactivityutils";
-import SelectableDataPoint = interactivityService.SelectableDataPoint;
-import IInteractivityService = interactivityService.IInteractivityService;
-import createInteractivityService = interactivityService.createInteractivityService;
+import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
+import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
+import IInteractivityService = interactivityBaseService.IInteractivityService;
+import createInteractivityService = interactivitySelectionService.createInteractivitySelectionService;
 
 // powerbi.extensibility.utils.tooltip
 import { TooltipEventArgs, ITooltipServiceWrapper, createTooltipServiceWrapper } from "powerbi-visuals-utils-tooltiputils";
@@ -190,7 +191,7 @@ export class ChordChart implements IVisual {
 
     private host: IVisualHost;
 
-    private interactivityService: IInteractivityService;
+    private interactivityService: IInteractivityService<ChordArcDescriptor>;
     private interactiveBehavior: InteractiveBehavior;
 
     private localizationManager: ILocalizationManager;
@@ -780,9 +781,11 @@ export class ChordChart implements IVisual {
                 clearCatcher: this.svg,
                 arcSelection: sliceShapes,
                 chordSelection: chordShapes,
+                dataPoints: this.data.groups,
+                behavior: this.interactiveBehavior
             };
 
-            this.interactivityService.bind(this.data.groups, this.interactiveBehavior, behaviorOptions);
+            this.interactivityService.bind(behaviorOptions);
         }
 
         this.tooltipServiceWrapper.addTooltip(
