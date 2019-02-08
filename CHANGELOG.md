@@ -1,3 +1,10 @@
+## 2.0.3
+* API was updated upto version 2.3
+* The base libraries were update
+* Was added babel polyfill
+* Was added rendering events
+* Rendering fixes
+
 ## 2.0.2
 * Update the tools to 3.0.5
 

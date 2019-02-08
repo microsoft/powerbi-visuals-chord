@@ -1,6 +1,6 @@
 // powerbi.extensibility.utils.interactivity
-import { interactivityService } from "powerbi-visuals-utils-interactivityutils";
-import SelectableDataPoint = interactivityService.SelectableDataPoint;
+import { interactivitySelectionService } from "powerbi-visuals-utils-interactivityutils";
+import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
 
 import {dataLabelInterfaces} from "powerbi-visuals-utils-chartutils";
 import LabelEnabledDataPoint = dataLabelInterfaces.LabelEnabledDataPoint;

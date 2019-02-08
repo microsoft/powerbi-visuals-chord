@@ -24,6 +24,7 @@
  *  THE SOFTWARE.
  */
 import "./../style/chordChart.less";
+import "@babel/polyfill";
 
 // d3
 import * as d3 from "d3";
@@ -89,10 +90,10 @@ import { pixelConverter as PixelConverter, double as TypeUtilsDouble } from "pow
 import lessWithPrecision = TypeUtilsDouble.lessWithPrecision;
 
 // powerbi.extensibility.utils.interactivity
-import { interactivityService } from "powerbi-visuals-utils-interactivityutils";
-import SelectableDataPoint = interactivityService.SelectableDataPoint;
-import IInteractivityService = interactivityService.IInteractivityService;
-import createInteractivityService = interactivityService.createInteractivityService;
+import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
+import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
+import IInteractivityService = interactivityBaseService.IInteractivityService;
+import createInteractivityService = interactivitySelectionService.createInteractivitySelectionService;
 
 // powerbi.extensibility.utils.tooltip
 import { TooltipEventArgs, ITooltipServiceWrapper, createTooltipServiceWrapper } from "powerbi-visuals-utils-tooltiputils";
@@ -190,7 +191,7 @@ export class ChordChart implements IVisual {
 
     private host: IVisualHost;
 
-    private interactivityService: IInteractivityService;
+    private interactivityService: IInteractivityService<ChordArcDescriptor>;
     private interactiveBehavior: InteractiveBehavior;
 
     private localizationManager: ILocalizationManager;
@@ -520,28 +521,35 @@ export class ChordChart implements IVisual {
             return;
         }
 
-        this.layout.viewport = options.viewport;
+        try {
+            this.host.eventService.renderingStarted(options);
 
-        this.layout.viewport = options.viewport;
+            this.layout.viewport = options.viewport;
 
-        this.data = ChordChart.converter(
-            options.dataViews[0],
-            this.host,
-            this.colors,
-            this.localizationManager);
+            this.layout.viewport = options.viewport;
 
-        if (!this.data) {
-            this.clear();
+            this.data = ChordChart.converter(
+                options.dataViews[0],
+                this.host,
+                this.colors,
+                this.localizationManager);
 
-            return;
+            if (!this.data) {
+                this.clear();
+
+                return;
+            }
+
+            this.layout.resetMargin();
+            this.layout.margin.top
+                = this.layout.margin.bottom
+                = PixelConverter.fromPointToPixel(this.settings.labels.fontSize) / 2;
+
+            this.render();
+        } catch (ex) {
+            this.host.eventService.renderingFailed(options, JSON.stringify(ex));
         }
-
-        this.layout.resetMargin();
-        this.layout.margin.top
-            = this.layout.margin.bottom
-            = PixelConverter.fromPointToPixel(this.settings.labels.fontSize) / 2;
-
-        this.render();
+        this.host.eventService.renderingFinished(options);
     }
 
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
@@ -780,9 +788,11 @@ export class ChordChart implements IVisual {
                 clearCatcher: this.svg,
                 arcSelection: sliceShapes,
                 chordSelection: chordShapes,
+                dataPoints: this.data.groups,
+                behavior: this.interactiveBehavior
             };
 
-            this.interactivityService.bind(this.data.groups, this.interactiveBehavior, behaviorOptions);
+            this.interactivityService.bind(behaviorOptions);
         }
 
         this.tooltipServiceWrapper.addTooltip(
@@ -946,8 +956,10 @@ export class ChordChart implements IVisual {
                 .enter()
                 .append("g")
                 .classed(ChordChart.tickPairClass.className, true)
+                .merge(tickPairs)
                 .transition()
                 .duration(animDuration)
+                .selection()
                 .attr("transform", (d) => translateAndRotate(
                     this.innerRadius,
                     0,
@@ -955,7 +967,6 @@ export class ChordChart implements IVisual {
                     0,
                     d.angle * 180 / Math.PI - 90)
                 )
-                .selection()
                 .merge(tickPairs);
 
             let tickLines = tickPairs
@@ -975,7 +986,7 @@ export class ChordChart implements IVisual {
                 .attr("y1", 0)
                 .attr("x2", 5)
                 .attr("y2", 0)
-                .merge(tickPairs);
+                .merge(tickLines);
 
             let tickText = tickPairs
                 .selectAll("text" + ChordChart.tickTextClass.selectorName)
@@ -988,6 +999,7 @@ export class ChordChart implements IVisual {
             tickText = tickText
                 .enter()
                 .append("text")
+                .merge(tickText)
                 .classed(ChordChart.tickTextClass.className, true)
                 .attr("x", ChordChart.DefaultTickShiftX)
                 .attr("dy", ChordChart.DefaultDY)
@@ -995,7 +1007,7 @@ export class ChordChart implements IVisual {
                 .style("text-anchor", d => (<any>d).angle > Math.PI ? "end" : null)
                 .style("fill", this.settings.axis.color)
                 .attr("transform", d => (<any>d).angle > Math.PI ? "rotate(180)translate(-16)" : null)
-                .merge(tickPairs);
+                .merge(tickText);
         } else {
             this.clearTicks();
         }
@@ -1053,6 +1065,10 @@ export class ChordChart implements IVisual {
 
         let midAngle = (d: ChordArcDescriptor) => d.startAngle + (d.endAngle - d.startAngle) / 2;
 
+        lines
+            .exit()
+            .remove();
+
         lines = lines.enter()
             .append("polyline")
             .classed(ChordChart.lineClass.className, true)
@@ -1079,10 +1095,6 @@ export class ChordChart implements IVisual {
             .style("opacity", ChordChart.PolylineOpacity)
             .style("stroke", (d: ChordArcDescriptor) => d.data.labelColor)
             .style("pointer-events", "none");
-
-        lines
-            .exit()
-            .remove();
     }
 
     /* Get label layout */
