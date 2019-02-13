@@ -521,35 +521,28 @@ export class ChordChart implements IVisual {
             return;
         }
 
-        try {
-            this.host.eventService.renderingStarted(options);
+        this.layout.viewport = options.viewport;
 
-            this.layout.viewport = options.viewport;
+        this.layout.viewport = options.viewport;
 
-            this.layout.viewport = options.viewport;
+        this.data = ChordChart.converter(
+            options.dataViews[0],
+            this.host,
+            this.colors,
+            this.localizationManager);
 
-            this.data = ChordChart.converter(
-                options.dataViews[0],
-                this.host,
-                this.colors,
-                this.localizationManager);
+        if (!this.data) {
+            this.clear();
 
-            if (!this.data) {
-                this.clear();
-
-                return;
-            }
-
-            this.layout.resetMargin();
-            this.layout.margin.top
-                = this.layout.margin.bottom
-                = PixelConverter.fromPointToPixel(this.settings.labels.fontSize) / 2;
-
-            this.render();
-        } catch (ex) {
-            this.host.eventService.renderingFailed(options, JSON.stringify(ex));
+            return;
         }
-        this.host.eventService.renderingFinished(options);
+
+        this.layout.resetMargin();
+        this.layout.margin.top
+            = this.layout.margin.bottom
+            = PixelConverter.fromPointToPixel(this.settings.labels.fontSize) / 2;
+
+        this.render();
     }
 
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
