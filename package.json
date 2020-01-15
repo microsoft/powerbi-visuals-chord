@@ -12,7 +12,9 @@
     "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts\"",
     "pretest": "pbiviz package --resources --no-minify --no-pbiviz --no-plugin",
     "test": "karma start",
-    "cert": "pbiviz --install-cert"
+    "cert": "pbiviz --install-cert",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "license": "MIT",
   "repository": {
@@ -67,6 +69,8 @@
     "powerbi-visuals-utils-interactivityutils": "^5.4.0",
     "powerbi-visuals-utils-svgutils": "^2.1.1",
     "powerbi-visuals-utils-tooltiputils": "^2.0.2",
-    "powerbi-visuals-utils-typeutils": "2.0.1"
-  }
+    "powerbi-visuals-utils-typeutils": "2.0.1",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
