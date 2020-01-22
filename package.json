@@ -70,7 +70,7 @@
     "powerbi-visuals-utils-svgutils": "^2.1.1",
     "powerbi-visuals-utils-tooltiputils": "^2.0.2",
     "powerbi-visuals-utils-typeutils": "2.0.1",
-    "snyk": "^1.189.0"
+    "snyk": "^1.214.0"
   },
   "snyk": true
 }
