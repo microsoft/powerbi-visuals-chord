@@ -25,8 +25,7 @@
  */
 
 // powerbi.extensibility.utils.formatting
-import {valueFormatter as ValueFormatter} from "powerbi-visuals-utils-formattingutils";
-import valueFormatter = ValueFormatter.valueFormatter;
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 
 import powerbi from "powerbi-visuals-api";
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;

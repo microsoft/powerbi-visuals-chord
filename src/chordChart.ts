@@ -71,18 +71,17 @@ import translateAndRotate = manipulation.translateAndRotate;
 import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 
 // powerbi.extensibility.utils.chart
-import { dataLabelInterfaces, legendInterfaces, dataLabelManager, dataLabelArrangeGrid, dataLabelUtils } from "powerbi-visuals-utils-chartutils";
+import { dataLabelInterfaces, legendInterfaces, DataLabelManager, DataLabelArrangeGrid, dataLabelUtils } from "powerbi-visuals-utils-chartutils";
 import LabelEnabledDataPoint = dataLabelInterfaces.LabelEnabledDataPoint;
 import LegendData = legendInterfaces.LegendData;
 import ILabelLayout = dataLabelInterfaces.ILabelLayout;
 import IDataLabelInfo = dataLabelInterfaces.IDataLabelInfo;
-import DataLabelManager = dataLabelManager.DataLabelManager;
-import DataLabelArrangeGrid = dataLabelArrangeGrid.DataLabelArrangeGrid;
 
 // powerbi.extensibility.utils.formatting
 import { valueFormatter as ValueFormatter } from "powerbi-visuals-utils-formattingutils";
 import IValueFormatter = ValueFormatter.IValueFormatter;
-import valueFormatter = ValueFormatter.valueFormatter;
+import create = ValueFormatter.create;
+import getFormatStringByColumn = ValueFormatter.getFormatStringByColumn;
 
 // powerbi.extensibility.utils.type
 import { pixelConverter as PixelConverter, double as TypeUtilsDouble } from "powerbi-visuals-utils-typeutils";
@@ -274,16 +273,16 @@ export class ChordChart implements IVisual {
             isDiffFromTo = true;
         }
 
-        let categoryColumnFormatter: IValueFormatter = valueFormatter.create({
-            format: valueFormatter.getFormatStringByColumn(sources.Category, true)
+        let categoryColumnFormatter: IValueFormatter = create({
+            format: getFormatStringByColumn(sources.Category, true)
                 || sources.Category.format
         });
-        let seriesColumnFormatter: IValueFormatter = valueFormatter.create({
-            format: sources.Series && (valueFormatter.getFormatStringByColumn(sources.Series, true)
+        let seriesColumnFormatter: IValueFormatter = create({
+            format: sources.Series && (getFormatStringByColumn(sources.Series, true)
                 || sources.Series.format)
         });
-        let valueColumnFormatter: IValueFormatter = valueFormatter.create({
-            format: sources.Y ? valueFormatter.getFormatStringByColumn(sources.Y, true)
+        let valueColumnFormatter: IValueFormatter = create({
+            format: sources.Y ? getFormatStringByColumn(sources.Y, true)
                 || sources.Y.format : "0"
         });
 
@@ -726,17 +725,16 @@ export class ChordChart implements IVisual {
             .exit()
             .remove();
 
-        sliceShapes = sliceShapes
+        sliceShapes = sliceShapes.merge(sliceShapes
             .enter()
             .append("path")
-            .classed(ChordChart.sliceClass.className, true)
-            .merge(sliceShapes)
+            .classed(ChordChart.sliceClass.className, true));
+
+        sliceShapes
             .style("fill", (d) => d.data.barFillColor)
             .style("stroke", (d) => d.data.barStrokeColor)
-            .transition()
-            .duration(this.duration)
-            .attrTween("d", ChordChartHelpers.interpolateArc(arc))
-            .selection();
+            .attr("d", ChordChartHelpers.interpolateArc(arc));
+
 
         this.tooltipServiceWrapper.addTooltip(
             sliceShapes,
@@ -756,20 +754,18 @@ export class ChordChart implements IVisual {
             .exit()
             .remove();
 
-        chordShapes = chordShapes
+        chordShapes = chordShapes.merge(chordShapes
             .enter()
             .append("path")
-            .classed(ChordChart.chordClass.className, true)
-            .merge(chordShapes)
+            .classed(ChordChart.chordClass.className, true));
+
+        chordShapes
             .style("fill", (chordLink: any) => {
                 return this.data.groups[chordLink.target.index].data.barFillColor;
             })
             .style("stroke", this.settings.chord.strokeColor)
             .style("stroke-width", PixelConverter.toString(this.settings.chord.strokeWidth))
-            .transition()
-            .duration(this.duration)
-            .attr("d", path)
-            .selection();
+            .attr("d", path);
 
         this.drawTicks();
         this.drawCategoryLabels();
@@ -864,7 +860,7 @@ export class ChordChart implements IVisual {
 
         let radiusCoeff: number = this.radius / Math.abs(maxValue - minValue) * 1.25;
 
-        let formatter: IValueFormatter = valueFormatter.create({
+        let formatter: IValueFormatter = create({
             format: ChordChart.DefaultFormatValue,
             value: maxValue
         });
@@ -928,14 +924,14 @@ export class ChordChart implements IVisual {
                 .selectAll("g" + ChordChart.sliceTicksClass.selectorName)
                 .data(this.data.groups);
 
-            tickShapes.exit()
+            tickShapes
+                .exit()
                 .remove();
 
-            tickShapes = tickShapes
+            tickShapes = tickShapes.merge(tickShapes
                 .enter()
                 .append("g")
-                .classed(ChordChart.sliceTicksClass.className, true)
-                .merge(tickShapes);
+                .classed(ChordChart.sliceTicksClass.className, true));
 
             let tickPairs = tickShapes
                 .selectAll("g" + ChordChart.tickPairClass.selectorName)
@@ -945,22 +941,19 @@ export class ChordChart implements IVisual {
                 .exit()
                 .remove();
 
-            tickPairs = tickPairs
+            tickPairs = tickPairs.merge(tickPairs
                 .enter()
                 .append("g")
-                .classed(ChordChart.tickPairClass.className, true)
-                .merge(tickPairs)
-                .transition()
-                .duration(animDuration)
-                .selection()
+                .classed(ChordChart.tickPairClass.className, true));
+
+            tickPairs
                 .attr("transform", (d) => translateAndRotate(
                     this.innerRadius,
                     0,
                     -this.innerRadius,
                     0,
                     d.angle * 180 / Math.PI - 90)
-                )
-                .merge(tickPairs);
+                );
 
             let tickLines = tickPairs
                 .selectAll("line" + ChordChart.tickLineClass.selectorName)
@@ -969,11 +962,12 @@ export class ChordChart implements IVisual {
             tickLines
                 .exit()
                 .remove();
-
-            tickLines = tickLines
+            tickLines = tickLines.merge(tickLines
                 .enter()
                 .append("line")
-                .classed(ChordChart.tickLineClass.className, true)
+                .classed(ChordChart.tickLineClass.className, true));
+
+            tickLines
                 .style("stroke", ChordChart.DefaultTickLineColorValue)
                 .attr("x1", 1)
                 .attr("y1", 0)
@@ -989,18 +983,18 @@ export class ChordChart implements IVisual {
                 .exit()
                 .remove();
 
-            tickText = tickText
+            tickText = tickText.merge(tickText
                 .enter()
-                .append("text")
-                .merge(tickText)
+                .append("text"));
+
+            tickText
                 .classed(ChordChart.tickTextClass.className, true)
                 .attr("x", ChordChart.DefaultTickShiftX)
                 .attr("dy", ChordChart.DefaultDY)
                 .text(d => (<any>d).label)
                 .style("text-anchor", d => (<any>d).angle > Math.PI ? "end" : null)
                 .style("fill", this.settings.axis.color)
-                .attr("transform", d => (<any>d).angle > Math.PI ? "rotate(180)translate(-16)" : null)
-                .merge(tickText);
+                .attr("transform", d => (<any>d).angle > Math.PI ? "rotate(180)translate(-16)" : null);
         } else {
             this.clearTicks();
         }
@@ -1031,10 +1025,10 @@ export class ChordChart implements IVisual {
             .exit()
             .remove();
 
-        dataLabels = dataLabels.enter()
+        dataLabels = dataLabels.merge(dataLabels
+            .enter()
             .append("text")
-            .classed(ChordChart.labelsClass.className, true)
-            .merge(dataLabels);
+            .classed(ChordChart.labelsClass.className, true));
 
         let newLabels = dataLabels;
 
@@ -1062,10 +1056,10 @@ export class ChordChart implements IVisual {
             .exit()
             .remove();
 
-        lines = lines.enter()
+        lines = lines.merge(lines
+            .enter()
             .append("polyline")
-            .classed(ChordChart.lineClass.className, true)
-            .merge(lines);
+            .classed(ChordChart.lineClass.className, true));
 
         lines
             .attr("points", (d: ChordArcDescriptor): any => {
