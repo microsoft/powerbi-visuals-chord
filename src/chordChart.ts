@@ -733,7 +733,7 @@ export class ChordChart implements IVisual {
         sliceShapes
             .style("fill", (d) => d.data.barFillColor)
             .style("stroke", (d) => d.data.barStrokeColor)
-            .attr("d", ChordChartHelpers.interpolateArc(arc));
+            .attr("d", d => arc(<any>d));
 
 
         this.tooltipServiceWrapper.addTooltip(
