@@ -70,6 +70,9 @@ export class ChordChartColumns<T> {
     public static getCategoricalValues(dataView: DataView): ChordChartColumns<any> {
         let categorical: DataViewCategorical = dataView && dataView.categorical;
         let categories: (DataViewCategoryColumn | DataViewValueColumn)[] = categorical && categorical.categories || [];
+        if (!categorical.values || categorical.values.length === 0) {
+            return null;
+        }
         let values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
         let series: PrimitiveValue[] = categorical && values.source && this.getSeriesValues(dataView);
         return categorical && lodashMapValues(new this<any[]>(), (n, i) =>
