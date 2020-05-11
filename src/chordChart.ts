@@ -515,34 +515,40 @@ export class ChordChart implements IVisual {
 
     // Called for data, size, formatting changes
     public update(options: VisualUpdateOptions): void {
+        this.host.eventService.renderingStarted(options);
+        try {
+            // assert dataView
+            if (!options.dataViews || !options.dataViews[0]) {
+                return;
+            }
 
-        // assert dataView
-        if (!options.dataViews || !options.dataViews[0]) {
-            return;
+            this.layout.viewport = options.viewport;
+
+            this.layout.viewport = options.viewport;
+
+            this.data = ChordChart.CONVERTER(
+                options.dataViews[0],
+                this.host,
+                this.colors,
+                this.localizationManager);
+
+            if (!this.data) {
+                this.clear();
+
+                return;
+            }
+
+            this.layout.resetMargin();
+            this.layout.margin.top
+                = this.layout.margin.bottom
+                = PixelConverter.fromPointToPixel(this.settings.labels.fontSize) / 2;
+
+            this.render();
+            this.host.eventService.renderingFinished(options);
         }
-
-        this.layout.viewport = options.viewport;
-
-        this.layout.viewport = options.viewport;
-
-        this.data = ChordChart.CONVERTER(
-            options.dataViews[0],
-            this.host,
-            this.colors,
-            this.localizationManager);
-
-        if (!this.data) {
-            this.clear();
-
-            return;
+        catch (e) {
+            this.host.eventService.renderingFailed(options, e);
         }
-
-        this.layout.resetMargin();
-        this.layout.margin.top
-            = this.layout.margin.bottom
-            = PixelConverter.fromPointToPixel(this.settings.labels.fontSize) / 2;
-
-        this.render();
     }
 
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
