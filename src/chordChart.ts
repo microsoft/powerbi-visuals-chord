@@ -28,33 +28,33 @@ import "@babel/polyfill";
 
 // d3
 import * as d3 from "d3";
-import SvgArc = d3.Arc;
+import Arc = d3.Arc;
 import ChordLayout = d3.ChordLayout;
 import Selection = d3.Selection;
 import ChordGroup = d3.ChordGroup;
 
 // powerbi
-import powerbi from "powerbi-visuals-api";
-import DataView = powerbi.DataView;
-import IViewport = powerbi.IViewport;
-import DataViewObjects = powerbi.DataViewObjects;
-import DataViewValueColumn = powerbi.DataViewValueColumn;
-import VisualObjectInstance = powerbi.VisualObjectInstance;
-import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
-import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
-import DataViewValueColumnGroup = powerbi.DataViewValueColumnGroup;
-import PrimitiveValue = powerbi.PrimitiveValue;
-import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration;
-import ISelectionId = powerbi.visuals.ISelectionId;
+import powerbiVisualsApi from "powerbi-visuals-api";
+import DataView = powerbiVisualsApi.DataView;
+import IViewport = powerbiVisualsApi.IViewport;
+import DataViewObjects = powerbiVisualsApi.DataViewObjects;
+import DataViewValueColumn = powerbiVisualsApi.DataViewValueColumn;
+import VisualObjectInstance = powerbiVisualsApi.VisualObjectInstance;
+import DataViewMetadataColumn = powerbiVisualsApi.DataViewMetadataColumn;
+import EnumerateVisualObjectInstancesOptions = powerbiVisualsApi.EnumerateVisualObjectInstancesOptions;
+import DataViewValueColumnGroup = powerbiVisualsApi.DataViewValueColumnGroup;
+import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
+import VisualObjectInstanceEnumeration = powerbiVisualsApi.VisualObjectInstanceEnumeration;
+import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
 
 // powerbi.extensibility
-import IColorPalette = powerbi.extensibility.IColorPalette;
-import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-import IVisual = powerbi.extensibility.IVisual;
-import IVisualHost = powerbi.extensibility.visual.IVisualHost;
-import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
-import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
-import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
+import IColorPalette = powerbiVisualsApi.extensibility.IColorPalette;
+import VisualTooltipDataItem = powerbiVisualsApi.extensibility.VisualTooltipDataItem;
+import IVisual = powerbiVisualsApi.extensibility.IVisual;
+import IVisualHost = powerbiVisualsApi.extensibility.visual.IVisualHost;
+import ILocalizationManager = powerbiVisualsApi.extensibility.ILocalizationManager;
+import VisualConstructorOptions = powerbiVisualsApi.extensibility.visual.VisualConstructorOptions;
+import VisualUpdateOptions = powerbiVisualsApi.extensibility.visual.VisualUpdateOptions;
 
 // powerbi.extensibility.utils.dataview
 import { converterHelper as ConverterHelper } from "powerbi-visuals-utils-dataviewutils";
@@ -92,18 +92,18 @@ import lessWithPrecision = TypeUtilsDouble.lessWithPrecision;
 import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
 import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
 import IInteractivityService = interactivityBaseService.IInteractivityService;
-import createInteractivityService = interactivitySelectionService.createInteractivitySelectionService;
+import createInteractivitySelectionService = interactivitySelectionService.createInteractivitySelectionService;
 
 // powerbi.extensibility.utils.tooltip
 import { TooltipEventArgs, ITooltipServiceWrapper, createTooltipServiceWrapper } from "powerbi-visuals-utils-tooltiputils";
 
 import { Settings, AxisSettings, DataPointSettings, LabelsSettings } from "./settings";
 import { ChordArcDescriptor, ChordArcLabelData } from "./interfaces";
-import { VisualLayout } from "./layout";
+import { VisualLayout } from "./visualLayout";
 import { InteractiveBehavior, BehaviorOptions } from "./interactiveBehavior";
 import { ChordChartColumns, ChordChartCategoricalColumns } from "./columns";
 import { createTooltipInfo } from "./tooltipBuilder";
-import { ChordChartHelpers } from "./helpers";
+import { ChordChartHelpers } from "./chordChartHelpers";
 
 import {
     mapValues as lodashMapValues,
@@ -220,16 +220,17 @@ export class ChordChart implements IVisual {
      * @param prevAxisVisible Indicates if the previous axis is visible
      * @param localizationManager Localization Manager
      */
-    public static converter(
+    // tslint:disable-next-line: max-func-body-length
+    public static CONVERTER(
         dataView: DataView,
         host: IVisualHost,
         colors: IColorPalette,
         localizationManager: ILocalizationManager
     ): ChordChartData {
-        const settings: Settings = Settings.parseSettings(dataView, colors);
-        const columns: ChordChartColumns<ChordChartCategoricalColumns> = ChordChartColumns.getCategoricalColumns(dataView);
-        const sources: ChordChartColumns<DataViewMetadataColumn> = ChordChartColumns.getColumnSources(dataView);
-        const categoricalValues: ChordChartColumns<any> = ChordChartColumns.getCategoricalValues(dataView);
+        const settings: Settings = Settings.PARSE_SETTINGS(dataView, colors);
+        const columns: ChordChartColumns<ChordChartCategoricalColumns> = ChordChartColumns.GET_CATEGORICAL_COLUMNS(dataView);
+        const sources: ChordChartColumns<DataViewMetadataColumn> = ChordChartColumns.GET_COLUMN_SOURCES(dataView);
+        const categoricalValues: ChordChartColumns<any> = ChordChartColumns.GET_CATEGORICAL_VALUES(dataView);
         const prevAxisVisible = settings.axis.show;
 
         if (!categoricalValues || lodashIsEmpty(categoricalValues.Category)) {
@@ -244,7 +245,7 @@ export class ChordChart implements IVisual {
             }
         }
 
-        categoricalValues.Series = categoricalValues.Series || ChordChartColumns.getSeriesValues(dataView);
+        categoricalValues.Series = categoricalValues.Series || ChordChartColumns.GET_SERIES_VALUES(dataView);
         let grouped: DataViewValueColumnGroup[] = null;
         if (columns.Series) {
             grouped = columns.Series.grouped();
@@ -255,10 +256,10 @@ export class ChordChart implements IVisual {
         let toolTipData: ChordTooltipData[][] = [];
         let sliceTooltipData: ChordTooltipData[] = [];
         let max: number = ChordChart.MaxValue;
-        let seriesIndex: ChordChartCategoricalDict = this.convertCategoricalToArray(categoricalValues.Series); /* series index array */
-        let catIndex: ChordChartCategoricalDict = this.convertCategoricalToArray(categoricalValues.Category); /* index array for category names */
-        let isDiffFromTo: boolean = false;  /* boolean variable indicates that From and To are different */
-        let labelData: ChordArcLabelData[] = [];    /* label data: !important */
+        let seriesIndex: ChordChartCategoricalDict = this.convertCategoricalToArray(categoricalValues.Series); // series index array
+        let catIndex: ChordChartCategoricalDict = this.convertCategoricalToArray(categoricalValues.Category); // index array for category names
+        let isDiffFromTo: boolean = false;  // boolean variable indicates that From and To are different
+        let labelData: ChordArcLabelData[] = [];    // label data: !important
 
         const colorHelper: ColorHelper = new ColorHelper(
             colors,
@@ -423,7 +424,7 @@ export class ChordChart implements IVisual {
         let chords: d3.Chords = chordLayout(renderingDataMatrix);
 
         const groups: ChordArcDescriptor[] = ChordChart.getChordArcDescriptors(
-            ChordChart.copyArcDescriptorsWithoutNaNValues(chords.groups),
+            ChordChart.COPY_ARC_DESCRIPTORS_WITHOUT_NAN_VALUES(chords.groups),
             labelData,
             selectionIds
         );
@@ -446,7 +447,7 @@ export class ChordChart implements IVisual {
         };
     }
 
-    /* Check every element of the array and returns the count of elements which are valid(not undefined) */
+    // Check every element of the array and returns the count of elements which are valid(not undefined)
     private static getValidArrayLength(array: any[]): number {
         return lodashReduce(array, (total, value) => {
             return (value === undefined) ? total : total + 1;
@@ -463,13 +464,13 @@ export class ChordChart implements IVisual {
             arcDescriptor.identity = selectionIds[index];
         });
 
-        return groups as ChordArcDescriptor[];
+        return <ChordArcDescriptor[]>groups;
     }
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
 
-        this.interactivityService = createInteractivityService(this.host);
+        this.interactivityService = createInteractivitySelectionService(this.host);
         this.interactiveBehavior = new InteractiveBehavior();
 
         this.localizationManager = this.host.createLocalizationManager();
@@ -512,7 +513,7 @@ export class ChordChart implements IVisual {
         this.colors = options.host.colorPalette;
     }
 
-    /* Called for data, size, formatting changes*/
+    // Called for data, size, formatting changes
     public update(options: VisualUpdateOptions): void {
 
         // assert dataView
@@ -524,7 +525,7 @@ export class ChordChart implements IVisual {
 
         this.layout.viewport = options.viewport;
 
-        this.data = ChordChart.converter(
+        this.data = ChordChart.CONVERTER(
             options.dataViews[0],
             this.host,
             this.colors,
@@ -605,7 +606,7 @@ export class ChordChart implements IVisual {
             let colorInstance: VisualObjectInstance = {
                 objectName: "dataPoint",
                 displayName: data.label,
-                selector: ColorHelper.normalizeSelector((labelDataPoint.identity as ISelectionId).getSelector()),
+                selector: ColorHelper.normalizeSelector((<ISelectionId>labelDataPoint.identity).getSelector()),
                 properties: {
                     fill: { solid: { color: data.barFillColor } }
                 }
@@ -634,7 +635,7 @@ export class ChordChart implements IVisual {
         }];
     }
 
-    /* Calculate radius */
+    // Calculate radius
     private calculateRadius(): number {
         if (this.settings.labels.show) {
             // if we have category or data labels, use a sigmoid to blend the desired denominator from 2 to 3.
@@ -649,13 +650,12 @@ export class ChordChart implements IVisual {
     }
 
     private drawCategoryLabels(): void {
-        /** Multiplier to place the end point of the reference line at 0.05 * radius away from the outer edge of the chord/pie. */
-
-        let arc: SvgArc<any, d3.DefaultArcObject> = d3.arc()
+        // Multiplier to place the end point of the reference line at 0.05 * radius away from the outer edge of the chord/pie.
+        let arc: Arc<any, d3.DefaultArcObject> = d3.arc()
             .innerRadius(0)
             .outerRadius(this.innerRadius);
 
-        let outerArc: SvgArc<any, d3.DefaultArcObject> = d3.arc()
+        let outerArc: Arc<any, d3.DefaultArcObject> = d3.arc()
             .innerRadius(this.outerRadius)
             .outerRadius(this.outerRadius);
 
@@ -706,7 +706,7 @@ export class ChordChart implements IVisual {
     private render(): void {
         this.radius = this.calculateRadius();
 
-        let arc: SvgArc<any, d3.DefaultArcObject> = d3.arc()
+        let arc: Arc<any, d3.DefaultArcObject> = d3.arc()
             .innerRadius(this.radius)
             .outerRadius(this.innerRadius);
 
@@ -721,9 +721,7 @@ export class ChordChart implements IVisual {
             .selectAll("path" + ChordChart.sliceClass.selectorName)
             .data(this.getChordTicksArcDescriptors());
 
-        sliceShapes
-            .exit()
-            .remove();
+        sliceShapes.exit().remove();
 
         sliceShapes = sliceShapes.merge(sliceShapes
             .enter()
@@ -742,17 +740,14 @@ export class ChordChart implements IVisual {
                 return this.data.sliceTooltipData[tooltipEvent.data.index].tooltipInfo;
             });
 
-        let path: any = d3.ribbon()
-            .radius(this.radius);
+        let path: any = d3.ribbon().radius(this.radius);
 
         let chordShapes: Selection<d3.BaseType, any, any, any> = this.svg
             .select(ChordChart.chordsClass.selectorName)
             .selectAll(ChordChart.chordClass.selectorName)
             .data(this.data.chords);
 
-        chordShapes
-            .exit()
-            .remove();
+        chordShapes.exit().remove();
 
         chordShapes = chordShapes.merge(chordShapes
             .enter()
@@ -837,7 +832,7 @@ export class ChordChart implements IVisual {
     }
 
     private clearNodes(selectors: ClassAndSelector | ClassAndSelector[]): void {
-        selectors = lodashIsArray(selectors) ? selectors : [selectors] as ClassAndSelector[];
+        selectors = lodashIsArray(selectors) ? selectors : <ClassAndSelector[]>[selectors];
         lodashForEach(selectors, (d: ClassAndSelector) => ChordChart.clearNode(this.mainGraphicsContext, d));
     }
 
@@ -892,7 +887,7 @@ export class ChordChart implements IVisual {
         return <ChordArcDescriptor[]>groups;
     }
 
-    public static copyArcDescriptorsWithoutNaNValues(arcDescriptors: ChordGroup[]): ChordGroup[] {
+    public static COPY_ARC_DESCRIPTORS_WITHOUT_NAN_VALUES(arcDescriptors: ChordGroup[]): ChordGroup[] {
         if (lodashIsEmpty(arcDescriptors)) {
             return arcDescriptors;
         }
@@ -900,7 +895,7 @@ export class ChordChart implements IVisual {
         return arcDescriptors.map((sourceArcDescriptor: ChordGroup) => {
             let targetArcDescriptor: ChordGroup = <ChordGroup>{};
 
-            for (let propertyName in sourceArcDescriptor) {
+            for (let propertyName of Object.keys(sourceArcDescriptor)) {
                 if (!sourceArcDescriptor[propertyName] && isNaN(sourceArcDescriptor[propertyName])) {
                     targetArcDescriptor[propertyName] = 0;
                 } else {
@@ -912,7 +907,7 @@ export class ChordChart implements IVisual {
         });
     }
 
-    /* Draw axis(ticks) around the arc */
+    // Draw axis(ticks) around the arc
     private drawTicks(): void {
         if (this.settings.axis.show) {
             let animDuration: number = (this.data.prevAxisVisible === this.settings.axis.show)
@@ -1045,7 +1040,7 @@ export class ChordChart implements IVisual {
         Object.keys(layout.style).forEach(x => dataLabels.style(x, layout.style[x]));
     }
 
-    private renderLines(filteredData: ChordLabelEnabledDataPoint[], arc: SvgArc<any, d3.DefaultArcObject>, outerArc: SvgArc<any, d3.DefaultArcObject>): void {
+    private renderLines(filteredData: ChordLabelEnabledDataPoint[], arc: Arc<any, d3.DefaultArcObject>, outerArc: Arc<any, d3.DefaultArcObject>): void {
         let lines: Selection<d3.BaseType, ChordLabelEnabledDataPoint, any, any> = this.lines
             .selectAll("polyline")
             .data(filteredData);
@@ -1063,12 +1058,12 @@ export class ChordChart implements IVisual {
 
         lines
             .attr("points", (d: ChordArcDescriptor): any => {
-                let textPoint: [number, number] = outerArc.centroid(d as any);
+                let textPoint: [number, number] = outerArc.centroid(<any>d);
 
                 textPoint[0] = (this.radius + ChordChart.LabelMargin / 2) * (midAngle(d) < Math.PI ? 1 : -1);
 
-                let midPoint: [number, number] = outerArc.centroid(d as any);
-                let chartPoint: [number, number] = arc.centroid(d as any);
+                let midPoint: [number, number] = outerArc.centroid(<any>d);
+                let chartPoint: [number, number] = arc.centroid(<any>d);
 
                 chartPoint[0] *= ChordChart.InnerLinePointMultiplier;
                 chartPoint[1] *= ChordChart.InnerLinePointMultiplier;
@@ -1084,8 +1079,8 @@ export class ChordChart implements IVisual {
             .style("pointer-events", "none");
     }
 
-    /* Get label layout */
-    private getChordChartLabelLayout(outerArc: SvgArc<any, d3.DefaultArcObject>): ILabelLayout {
+    // Get label layout
+    private getChordChartLabelLayout(outerArc: Arc<any, d3.DefaultArcObject>): ILabelLayout {
         let midAngle = (d: ChordArcDescriptor) => d.startAngle + (d.endAngle - d.startAngle) / 2;
         let maxLabelWidth: number = (this.layout.viewportIn.width - this.radius * 2 - ChordChart.LabelMargin * 2) / 1.6;
 
@@ -1102,7 +1097,7 @@ export class ChordChart implements IVisual {
                 x: (d: ChordArcDescriptor) =>
                     (this.radius + ChordChart.LabelMargin) * (midAngle(d) < Math.PI ? 1 : -1),
                 y: (d: ChordArcDescriptor) => {
-                    let pos: [number, number] = outerArc.centroid(d as any);
+                    let pos: [number, number] = outerArc.centroid(<any>d);
                     return pos[1];
                 },
             },
@@ -1115,7 +1110,7 @@ export class ChordChart implements IVisual {
         };
     }
 
-    /* Utility function for union two arrays without duplicates */
+    // Utility function for union two arrays without duplicates
     private static union_arrays(x: any[], y: any[]): any[] {
         let obj: Object = {};
 
@@ -1129,7 +1124,7 @@ export class ChordChart implements IVisual {
 
         let res: string[] = [];
 
-        for (let k in obj) {
+        for (let k of Object.keys(obj)) {
             if (obj.hasOwnProperty(k)) {  // <-- optional
                 res.push(obj[k]);
             }

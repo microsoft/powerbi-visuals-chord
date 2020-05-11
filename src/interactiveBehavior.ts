@@ -55,7 +55,7 @@ export class InteractiveBehavior implements IInteractiveBehavior {
         this.behaviorOptions.clearCatcher.on("click", selectionHandler.handleClearSelection.bind(selectionHandler));
 
         this.behaviorOptions.arcSelection.on("click", (dataPoint: ChordArcDescriptor) => {
-            const event: MouseEvent = getEvent() as MouseEvent;
+            const event: MouseEvent = <MouseEvent>getEvent();
 
             event.stopPropagation();
 
