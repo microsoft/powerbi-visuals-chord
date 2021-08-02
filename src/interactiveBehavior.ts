@@ -26,7 +26,7 @@
 
 // d3
 import * as d3 from "d3";
-import Selection = d3.Selection;
+import { Selection } from 'd3-selection';
 
 // powerbi.extensibility.utils.interactivity
 import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
@@ -37,7 +37,7 @@ import { BaseDataPoint } from "powerbi-visuals-utils-interactivityutils/lib/inte
 
 export interface BehaviorOptions extends interactivityBaseService.IBehaviorOptions<ChordArcDescriptor> {
     clearCatcher: d3.Selection<d3.BaseType, any, any, any>;
-    arcSelection: d3.Selection<d3.BaseType, ChordArcDescriptor, any, any>;
+    arcSelection: Selection<d3.BaseType, any, any, any>;
     chordSelection: Selection<d3.BaseType, any, any, any>;
 }
 
@@ -67,14 +67,14 @@ export class InteractiveBehavior implements IInteractiveBehavior {
 
     protected bindContextMenu(options: BehaviorOptions, selectionHandler: ISelectionHandler) {
         options.arcSelection.on("contextmenu",
-            (datum) => {
-                const mouseEvent: MouseEvent = <MouseEvent>d3.event;
+            (event, datum: ChordArcDescriptor ) => {
+                // const mouseEvent: MouseEvent = <MouseEvent>d3.event;
                 selectionHandler.handleContextMenu(datum, {
-                    x: mouseEvent.clientX,
-                    y: mouseEvent.clientY
+                    x: event.clientX,
+                    y: event.clientY
                 });
-                mouseEvent.preventDefault();
-                mouseEvent.stopPropagation();
+                event.preventDefault();
+                event.stopPropagation();
             });
     }
 
