@@ -1,5 +1,5 @@
 # powerbi-visuals-chord
-[![Build Status](https://travis-ci.org/Microsoft/powerbi-visuals-chord.svg?branch=master)](https://travis-ci.org/Microsoft/powerbi-visuals-chord) [![Coverage Status](https://coveralls.io/repos/github/Microsoft/powerbi-visuals-chord/badge.svg?branch=master)](https://coveralls.io/github/Microsoft/powerbi-visuals-chord?branch=master)
+[![build](https://github.com/microsoft/powerbi-visuals-chord/actions/workflows/build.yml/badge.svg)](https://github.com/microsoft/powerbi-visuals-chord/actions/workflows/build.yml) [![Coverage Status](https://coveralls.io/repos/github/Microsoft/powerbi-visuals-chord/badge.svg?branch=master)](https://coveralls.io/github/Microsoft/powerbi-visuals-chord?branch=master)
 [![Build Status](https://dev.azure.com/customvisuals/public/_apis/build/status/Microsoft.powerbi-visuals-chord)](https://dev.azure.com/customvisuals/public/_build/latest?definitionId=2) [![Known Vulnerabilities](https://snyk.io/test/github/Microsoft/powerbi-visuals-chord/badge.svg)](https://snyk.io/test/github/Microsoft/powerbi-visuals-chord)
 
 > A chord diagram is a graphical method of displaying the inter-relationships between data in a matrix.
