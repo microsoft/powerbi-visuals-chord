@@ -12,4 +12,4 @@ Nodes are arranged around a circle, with the relationships between points connec
 
 Customize data colors, axis, labels and more.
 
-See also [Chord chart at the Microsoft Office store](https://store.office.com/en-us/app.aspx?assetid=WA104380761&sourcecorrid=6ef257f3-686c-4b70-8b23-0dafd318e298&searchapppos=0&ui=en-US&rs=en-US&ad=US&appredirect=false)
+See also [Chord chart at the Microsoft Office store](https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380761)
