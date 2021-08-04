@@ -25,8 +25,8 @@
  */
 
 // d3
-import * as d3 from "d3";
 import { Selection } from 'd3-selection';
+const getEvent = () => require("d3-selection").event;
 
 // powerbi.extensibility.utils.interactivity
 import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
@@ -36,12 +36,10 @@ import { ChordArcDescriptor } from "./interfaces";
 import { BaseDataPoint } from "powerbi-visuals-utils-interactivityutils/lib/interactivityBaseService";
 
 export interface BehaviorOptions extends interactivityBaseService.IBehaviorOptions<ChordArcDescriptor> {
-    clearCatcher: d3.Selection<d3.BaseType, any, any, any>;
-    arcSelection: Selection<d3.BaseType, any, any, any>;
-    chordSelection: Selection<d3.BaseType, any, any, any>;
+    clearCatcher: Selection<any, any, any, any>;
+    arcSelection: Selection<any, any, any, any>;
+    chordSelection: Selection<any, any, any, any>;
 }
-
-const getEvent = () => require("d3-selection").event;
 
 export class InteractiveBehavior implements IInteractiveBehavior {
     public fullOpacity: number = 1;
@@ -54,11 +52,8 @@ export class InteractiveBehavior implements IInteractiveBehavior {
 
         this.behaviorOptions.clearCatcher.on("click", selectionHandler.handleClearSelection.bind(selectionHandler));
 
-        this.behaviorOptions.arcSelection.on("click", (dataPoint: ChordArcDescriptor) => {
-            const event: MouseEvent = <MouseEvent>getEvent();
-
+        this.behaviorOptions.arcSelection.on("click", (event: MouseEvent, dataPoint: ChordArcDescriptor) => {
             event.stopPropagation();
-
             selectionHandler.handleSelection(dataPoint, event && event.ctrlKey);
         });
         this.bindContextMenu(options, selectionHandler);
@@ -67,8 +62,7 @@ export class InteractiveBehavior implements IInteractiveBehavior {
 
     protected bindContextMenu(options: BehaviorOptions, selectionHandler: ISelectionHandler) {
         options.arcSelection.on("contextmenu",
-            (event, datum: ChordArcDescriptor ) => {
-                // const mouseEvent: MouseEvent = <MouseEvent>d3.event;
+            (event: MouseEvent, datum: ChordArcDescriptor ) => {
                 selectionHandler.handleContextMenu(datum, {
                     x: event.clientX,
                     y: event.clientY
