@@ -307,7 +307,7 @@ describe("ChordChart", () => {
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
         visualBuilder.dataLabels.forEach((element: Element) => {
-          assertColorsMatch((element as HTMLElement).style["fill"], color);
+          assertColorsMatch((<HTMLElement>element).style["fill"], color);
         });
       });
 
@@ -319,7 +319,7 @@ describe("ChordChart", () => {
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
         Array.from(visualBuilder.dataLabels).forEach((element: Element) => {
-          expect((element as HTMLElement).style["font-size"]).toBe(
+          expect((<HTMLElement>element).style["font-size"]).toBe(
             expectedFontSize
           );
         });
@@ -339,7 +339,7 @@ describe("ChordChart", () => {
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
         Array.from(visualBuilder.chords).forEach((element: Element) => {
-          assertColorsMatch((element as HTMLElement).style["fill"], color);
+          assertColorsMatch((<HTMLElement>element).style["fill"], color);
         });
       });
 

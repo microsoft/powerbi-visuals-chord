@@ -867,62 +867,49 @@ export class ChordChart implements IVisual {
 
   private render(): void {
     this.radius = this.calculateRadius();
-
     let arcVal: Arc<any, DefaultArcObject> = arc()
       .innerRadius(this.radius)
       .outerRadius(this.innerRadius);
-
     this.svg
       .attr("width", this.layout.viewport.width)
       .attr("height", this.layout.viewport.height);
-
     this.mainGraphicsContext.attr(
       "transform",
       translate(this.layout.viewport.width / 2, this.layout.viewport.height / 2)
     );
-
     let sliceShapes: Selection<any, ChordArcDescriptor, any, any> =
       this.slices
         .selectAll("path" + ChordChart.sliceClass.selectorName)
         .data(this.getChordTicksArcDescriptors());
-
     sliceShapes.exit().remove();
-
     sliceShapes = sliceShapes.merge(
       sliceShapes
         .enter()
         .append("path")
         .classed(ChordChart.sliceClass.className, true)
     );
-
     sliceShapes
       .style("fill", (d) => d.data.barFillColor)
       .style("stroke", (d) => d.data.barStrokeColor)
       .attr("d", (d) => arcVal(<any>d));
-
     this.tooltipServiceWrapper.addTooltip(
       sliceShapes,
       (tooltipEvent: ChordArcDescriptor) => {
         return this.data.sliceTooltipData[tooltipEvent.index].tooltipInfo;
       }
     );
-
     let path: any = ribbon().radius(this.radius);
-
     let chordShapes: Selection<any, any, any, any> = this.svg
       .select(ChordChart.chordsClass.selectorName)
       .selectAll(ChordChart.chordClass.selectorName)
       .data(this.data.chords);
-
     chordShapes.exit().remove();
-
     chordShapes = chordShapes.merge(
       chordShapes
         .enter()
         .append("path")
         .classed(ChordChart.chordClass.className, true)
     );
-
     chordShapes
       .style("fill", (chordLink: any) => {
         return this.data.groups[chordLink.target.index].data.barFillColor;
@@ -933,13 +920,10 @@ export class ChordChart implements IVisual {
         PixelConverter.toString(this.settings.chord.strokeWidth)
       )
       .attr("d", path);
-
     this.drawTicks();
     this.drawCategoryLabels();
-
     if (this.interactivityService) {
       this.interactivityService.applySelectionStateToData(this.data.groups);
-
       const behaviorOptions: BehaviorOptions = {
         clearCatcher: this.svg,
         arcSelection: sliceShapes,
@@ -947,15 +931,12 @@ export class ChordChart implements IVisual {
         dataPoints: this.data.groups,
         behavior: this.interactiveBehavior,
       };
-
       this.interactivityService.bind(behaviorOptions);
     }
-
     this.tooltipServiceWrapper.addTooltip(chordShapes, (chordLink: any) => {
       let tooltipInfo: VisualTooltipDataItem[] = [];
       const index = chordLink?.source?.index;
       const subindex = chordLink?.target?.index;
-
       if (this.data.differentFromTo) {
         if (index !== undefined && subindex !== undefined) {
           tooltipInfo = this.data.tooltipData[subindex][index]?.tooltipInfo;
@@ -969,7 +950,6 @@ export class ChordChart implements IVisual {
             subindex
           )
         );
-
         tooltipInfo.push(
           ChordChart.createTooltipInfo(
             this.data.groups,
@@ -979,7 +959,6 @@ export class ChordChart implements IVisual {
           )
         );
       }
-
       return tooltipInfo;
     });
   }
