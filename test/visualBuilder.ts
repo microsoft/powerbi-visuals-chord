@@ -25,11 +25,11 @@
  */
 
 // powerbi
-import powerbi from "powerbi-visuals-api";
-import ISelectionId = powerbi.visuals.ISelectionId;
+import powerbiVisualsApi from "powerbi-visuals-api";
+import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
 
 // powerbi.extensibility
-import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
+import VisualConstructorOptions = powerbiVisualsApi.extensibility.visual.VisualConstructorOptions;
 
 // powerbi.extensibility.utils.test
 import { VisualBuilderBase, MockISelectionManager } from "powerbi-visuals-utils-testutils";
@@ -56,34 +56,29 @@ export class ChordChartBuilder extends VisualBuilderBase<ChordChart> {
         return this.visual;
     }
 
-    public get mainElement(): JQuery {
+    public get mainElement(): SVGElement {
         return this.element
-            .children("svg.chordChart")
-            .children("g");
+            .querySelector("g");
     }
 
-    public get dataLabels(): JQuery {
+    public get dataLabels(): NodeListOf<SVGElement> {
         return this.mainElement
-            .children("g.labels")
-            .children("text.data-labels");
+            .querySelectorAll("text.data-labels");
     }
 
-    public get sliceTicks(): JQuery {
+    public get sliceTicks(): NodeListOf<SVGElement> {
         return this.mainElement
-            .children("g.ticks")
-            .children("g.slice-ticks");
+            .querySelectorAll("g.slice-ticks");
     }
 
-    public get chords(): JQuery {
+    public get chords(): NodeListOf<SVGElement> {
         return this.mainElement
-            .children("g.chords")
-            .children("path.chord");
+            .querySelectorAll("path.chord");
     }
 
-    public get slices(): JQuery {
+    public get slices(): NodeListOf<SVGElement> {
         return this.mainElement
-            .children("g.slices")
-            .children("path.slice");
+            .querySelectorAll("path.slice");
     }
 }
 
@@ -101,6 +96,6 @@ export class SelectionManagerWithBookmarks extends MockISelectionManager {
     }
 
     public getSelectionIds(): ISelectionId[] {
-        return this.selectedSelectionIds as ISelectionId[];
+        return <ISelectionId[]>this.selectedSelectionIds;
     }
 }
