@@ -134,14 +134,14 @@ import { InteractiveBehavior, BehaviorOptions } from "./interactiveBehavior";
 import { ChordChartColumns, ChordChartCategoricalColumns } from "./columns";
 import { createTooltipInfo } from "./tooltipBuilder";
 
-import mapValues from "lodash.mapvalues";
-import invert from "lodash.invert";
-import isEmpty from "lodash.isempty";
-import reduce from "lodash.reduce";
-import max from "lodash.max";
-import map from "lodash.map";
-import forEach from "lodash.foreach";
-import isArray from "lodash.isarraylike";
+import lodashMapvalues from "lodash.mapvalues";
+import lodashInvert from "lodash.invert";
+import lodashIsempty from "lodash.isempty";
+import lodashReduce from "lodash.reduce";
+import lodashMax from "lodash.max";
+import lodashMap from "lodash.map";
+import lodashForeach from "lodash.foreach";
+import lodashIsarraylike from "lodash.isarraylike";
 
 export interface ChordChartData {
   settings: Settings;
@@ -253,7 +253,7 @@ export class ChordChart implements IVisual {
   private static convertCategoricalToArray(
     values: any[]
   ): ChordChartCategoricalDict {
-    return mapValues(invert(values), (d: string) => parseFloat(d));
+    return lodashMapvalues(lodashInvert(values), (d: string) => parseFloat(d));
   }
 
   public static defaultValue1: number = 1;
@@ -281,7 +281,7 @@ export class ChordChart implements IVisual {
       ChordChartColumns.GET_CATEGORICAL_VALUES(dataView);
     const prevAxisVisible = settings.axis.show;
 
-    if (!categoricalValues || isEmpty(categoricalValues.Category)) {
+    if (!categoricalValues || lodashIsempty(categoricalValues.Category)) {
       return null;
     }
 
@@ -535,7 +535,7 @@ export class ChordChart implements IVisual {
 
   // Check every element of the array and returns the count of elements which are valid(not undefined)
   private static getValidArrayLength(array: any[]): number {
-    return reduce(
+    return lodashReduce(
       array,
       (total, value) => {
         return value === undefined ? total : total + 1;
@@ -1019,10 +1019,10 @@ export class ChordChart implements IVisual {
   }
 
   private clearNodes(selectors: ClassAndSelector | ClassAndSelector[]): void {
-    selectors = isArray(selectors)
+    selectors = lodashIsarraylike(selectors)
       ? selectors
       : <ClassAndSelector[]>[selectors];
-    forEach(selectors, (d: ClassAndSelector) =>
+    lodashForeach(selectors, (d: ClassAndSelector) =>
       ChordChart.clearNode(this.mainGraphicsContext, d)
     );
   }
@@ -1043,9 +1043,9 @@ export class ChordChart implements IVisual {
     let groups: ChordGroup[] = this.data.groups;
 
     let maxValue: number =
-      (!isEmpty(groups) && max(map(groups, (x: ChordGroup) => x.value))) || 0;
+      (!lodashIsempty(groups) && lodashMax(lodashMap(groups, (x: ChordGroup) => x.value))) || 0;
     let minValue: number =
-      (!isEmpty(groups) && max(map(groups, (x: ChordGroup) => x.value))) || 0;
+      (!lodashIsempty(groups) && lodashMax(lodashMap(groups, (x: ChordGroup) => x.value))) || 0;
 
     let radiusCoeff: number =
       (this.radius / Math.abs(maxValue - minValue)) * 1.25;
@@ -1092,7 +1092,7 @@ export class ChordChart implements IVisual {
   public static COPY_ARC_DESCRIPTORS_WITHOUT_NAN_VALUES(
     arcDescriptors: ChordGroup[]
   ): ChordGroup[] {
-    if (isEmpty(arcDescriptors)) {
+    if (lodashIsempty(arcDescriptors)) {
       return arcDescriptors;
     }
 
