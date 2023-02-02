@@ -55,7 +55,7 @@
     "less-loader": "10.0.1",
     "powerbi-models": "^1.9.3",
     "powerbi-visuals-api": "^3.8.2",
-    "powerbi-visuals-tools": "^3.3.1",
+    "powerbi-visuals-tools": "^3.4.3",
     "powerbi-visuals-utils-testutils": "^2.4.1",
     "process": "^0.11.10",
     "puppeteer": "^10.2.0",
@@ -90,7 +90,7 @@
     "powerbi-visuals-utils-tooltiputils": "^2.5.2",
     "powerbi-visuals-utils-typeutils": "2.3.1",
     "regenerator-runtime": "^0.13.9",
-    "snyk": "^1.675.0"
+    "snyk": "^1.1094.0"
   },
   "snyk": true
 }
