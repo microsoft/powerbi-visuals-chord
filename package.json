@@ -55,7 +55,7 @@
     "less-loader": "10.0.1",
     "powerbi-models": "^1.9.3",
     "powerbi-visuals-api": "^3.8.2",
-    "powerbi-visuals-tools": "^3.3.1",
+    "powerbi-visuals-tools": "^3.4.3",
     "powerbi-visuals-utils-testutils": "^2.4.1",
     "process": "^0.11.10",
     "puppeteer": "^10.2.0",
