@@ -27,7 +27,6 @@
     "@types/d3-selection": "3.0.1",
     "@types/d3-shape": "^3.0.2",
     "@types/jasmine": "3.8.2",
-    "@types/jasmine-jquery": "1.5.34",
     "@types/lodash.foreach": "4.5.6",
     "@types/lodash.invert": "4.3.6",
     "@types/lodash.isarray": "4.0.6",
@@ -63,7 +62,6 @@
     "process": "^0.11.10",
     "style-loader": "3.2.1",
     "ts-loader": "9.5.1",
-    "ts-node": "10.1.0",
     "typescript": "^5.4.5",
     "webpack": "5.91.0"
   },
