@@ -26,7 +26,6 @@
 
 // powerbi.extensibility.utils.dataview
 import { converterHelper as ConverterHelper } from "powerbi-visuals-utils-dataviewutils";
-import converterHelper = ConverterHelper.converterHelper;
 
 // powerbi
 import powerbiVisualsApi from "powerbi-visuals-api";
@@ -83,7 +82,7 @@ export class ChordChartColumns<T> {
 
     public static GET_SERIES_VALUES(dataView: DataView) {
         return dataView && dataView.categorical && dataView.categorical.values
-            && dataView.categorical.values.map(x => converterHelper.getSeriesName(x.source));
+            && dataView.categorical.values.map(x => ConverterHelper.getSeriesName(x.source));
     }
 
     public static GET_CATEGORICAL_COLUMNS(dataView: DataView): ChordChartColumns<ChordChartCategoricalColumns> {

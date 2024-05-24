@@ -60,7 +60,7 @@ import IVisualEventService = powerbiVisualsApi.extensibility.IVisualEventService
 
 // powerbi.extensibility.utils.dataview
 import { converterHelper as ConverterHelper } from "powerbi-visuals-utils-dataviewutils";
-import converterHelper = ConverterHelper.converterHelper;
+import getSeriesName = ConverterHelper.getSeriesName;
 
 // powerbi.extensibility.utils.svg
 import {
@@ -391,7 +391,7 @@ export class ChordChart implements IVisual {
             };
 
         const seriesNameStr: PrimitiveValue = seriesData
-          ? converterHelper.getSeriesName(seriesData.source)
+          ? getSeriesName(seriesData.source)
           : "Value";
 
         selectionId = host
@@ -843,15 +843,15 @@ export class ChordChart implements IVisual {
         width: size.width,
         height: size.height,
       };
-      intersection = shapes.Rect.inflate(intersection, {
+      intersection = shapes.inflate(intersection, {
         left: DataLabelManager.InflateAmount,
         top: 0,
         right: DataLabelManager.InflateAmount,
         bottom: 0,
       });
-      intersection = shapes.Rect.intersect(intersection, position);
+      intersection = shapes.intersect(intersection, position);
 
-      if (shapes.Rect.isEmpty(intersection)) {
+      if (shapes.isEmpty(intersection)) {
         return true;
       }
 
