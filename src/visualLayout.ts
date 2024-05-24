@@ -90,8 +90,8 @@ export class VisualLayout {
         }, this.minViewportValue);
     }
 
-    private static restrictToMinMax<T extends Object>(value: T, minValue?: T): T {
-        let result: T = <T>{};
+    private static restrictToMinMax<T extends object>(value: T, minValue?: T): T {
+        const result: T = <T>{};
         Object.keys(value).forEach(x => result[x] = Math.max(minValue && minValue[x] || 0, value[x]));
         return result;
     }

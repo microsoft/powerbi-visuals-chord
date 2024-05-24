@@ -43,7 +43,7 @@ module.exports = (config) => {
     browsers: ["ChromeHeadless"],
     colors: true,
     frameworks: ["jasmine"],
-    reporters: ["progress", "junit", "coverage-istanbul"],
+    reporters: ["progress", "junit"],
     junitReporter: {
       outputDir: path.join(__dirname, coverageFolder),
       outputFile: "TESTS-report.xml",
@@ -58,7 +58,6 @@ module.exports = (config) => {
       "karma-sourcemap-loader",
       "karma-chrome-launcher",
       "karma-junit-reporter",
-      "karma-coverage-istanbul-reporter",
     ],
     files: [
       {
@@ -79,18 +78,6 @@ module.exports = (config) => {
     },
     typescriptPreprocessor: {
       options: tsconfig.compilerOptions,
-    },
-    coverageIstanbulReporter: {
-      reports: ["html", "lcovonly", "text-summary", "cobertura"],
-      dir: path.join(__dirname, coverageFolder),
-      "report-config": {
-        html: {
-          subdir: "html-report",
-        },
-      },
-      combineBrowserReports: true,
-      fixWebpackSourcePaths: true,
-      verbose: false,
     },
     coverageReporter: {
       dir: path.join(__dirname, coverageFolder),

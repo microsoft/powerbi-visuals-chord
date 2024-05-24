@@ -29,7 +29,7 @@ import { Selection } from 'd3-selection';
 const getEvent = () => require("d3-selection").event;
 
 // powerbi.extensibility.utils.interactivity
-import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
+import { interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
 import IInteractiveBehavior = interactivityBaseService.IInteractiveBehavior;
 import ISelectionHandler = interactivityBaseService.ISelectionHandler;
 import { ChordArcDescriptor } from "./interfaces";
