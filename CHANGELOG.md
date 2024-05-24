@@ -1,6 +1,8 @@
 ## 2.3.0
 * Update powerbi-visuals-api to 5.9.1
 * Update powerbi-visuals-tools to 5.4.3
+* Update other powerbi dependencies, 
+* Migrate from puppeteer to playwright-chromium
 * Migrate from tslint to eslint, fix eslint errors
 
 ## 2.2.0
