@@ -166,6 +166,7 @@
             }
         }
     },
+    "privileges": [],
     "supportsHighlight": true,
     "supportsKeyboardFocus": true,
     "supportsMultiVisualSelection": true

@@ -1,6 +1,6 @@
 {
   "name": "powerbi-visuals-chordchart",
-  "version": "2.2.0",
+  "version": "2.3.0.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
@@ -9,7 +9,7 @@
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
-    "pretest": "pbiviz package --resources --no-minify --no-pbiviz --no-plugin",
+    "pretest": "pbiviz package --resources --no-minify --no-pbiviz",
     "eslint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "karma start",
     "cert": "pbiviz --install-cert",
@@ -36,7 +36,7 @@
     "@types/lodash.mapvalues": "4.6.6",
     "@types/lodash.max": "4.0.6",
     "@types/lodash.reduce": "4.6.6",
-    "@types/webpack": "5.28.0",
+    "@types/webpack": "5.28.5",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "coveralls": "3.1.1",
@@ -57,15 +57,15 @@
     "less": "4.1.1",
     "less-loader": "10.0.1",
     "powerbi-models": "^1.9.3",
-    "powerbi-visuals-api": "^3.8.2",
-    "powerbi-visuals-tools": "^3.3.1",
+    "powerbi-visuals-api": "^5.9.1",
+    "powerbi-visuals-tools": "^5.4.3",
     "powerbi-visuals-utils-testutils": "^2.4.1",
     "process": "^0.11.10",
     "puppeteer": "^10.2.0",
     "style-loader": "3.2.1",
     "ts-loader": "9.2.5",
     "ts-node": "10.1.0",
-    "typescript": "4.3.5",
+    "typescript": "^5.4.5",
     "webpack": "5.91.0"
   },
   "dependencies": {

@@ -1,3 +1,12 @@
+## 2.3.0
+* Update powerbi-visuals-api to 5.9.1
+* Update powerbi-visuals-tools to 5.4.3
+* Migrate from tslint to eslint, fix eslint errors
+
+## 2.2.0
+* Add context menu handling
+* Update powerbi-visuals-api to 3.8.2
+
 ## 2.1.0
 * API update
 * browser tab crash fix
