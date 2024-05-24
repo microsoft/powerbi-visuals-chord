@@ -13,7 +13,7 @@
     "eslint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "karma start",
     "cert": "pbiviz --install-cert",
-    "snyk-protect": "snyk protect",
+    "snyk-protect": "snyk-protect",
     "prepare": "npm run snyk-protect"
   },
   "license": "MIT",
@@ -66,6 +66,7 @@
     "webpack": "5.91.0"
   },
   "dependencies": {
+    "@snyk/protect": "^1.1291.0",
     "core-js": "^3.16.0",
     "d3-array": "^3.0.1",
     "d3-chord": "^3.0.1",
@@ -87,8 +88,6 @@
     "powerbi-visuals-utils-svgutils": "^2.3.2",
     "powerbi-visuals-utils-tooltiputils": "^2.5.2",
     "powerbi-visuals-utils-typeutils": "2.3.1",
-    "regenerator-runtime": "^0.13.9",
-    "snyk": "^1.675.0"
-  },
-  "snyk": true
+    "regenerator-runtime": "^0.13.9"
+  }
 }

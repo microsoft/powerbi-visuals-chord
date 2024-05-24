@@ -4,6 +4,7 @@
 * Update other powerbi dependencies, 
 * Migrate from puppeteer to playwright-chromium
 * Migrate from tslint to eslint, fix eslint errors
+* Replace larget package 'snyk' with '@snyk/protect'
 
 ## 2.2.0
 * Add context menu handling
