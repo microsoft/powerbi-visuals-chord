@@ -26,8 +26,7 @@
 
 // d3
 import { select } from "d3-selection";
-import * as d3 from "d3";
-import ChordGroup = d3.ChordGroup;
+import { ChordGroup } from "d3-chord";
 
 import powerbiVisualsApi from "powerbi-visuals-api";
 import DataView = powerbiVisualsApi.DataView;
