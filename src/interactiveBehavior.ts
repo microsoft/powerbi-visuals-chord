@@ -26,7 +26,6 @@
 
 // d3
 import { Selection } from 'd3-selection';
-const getEvent = () => require("d3-selection").event;
 
 // powerbi.extensibility.utils.interactivity
 import { interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
@@ -53,8 +52,12 @@ export class InteractiveBehavior implements IInteractiveBehavior {
         this.behaviorOptions.clearCatcher.on("click", selectionHandler.handleClearSelection.bind(selectionHandler));
 
         this.behaviorOptions.arcSelection.on("click", (event: MouseEvent, dataPoint: ChordArcDescriptor) => {
+            if (!event) {
+                return;
+            }
+
             event.stopPropagation();
-            selectionHandler.handleSelection(dataPoint, event && (event.ctrlKey || event.metaKey));
+            selectionHandler.handleSelection(dataPoint, event.ctrlKey || event.metaKey);
         });
         this.bindContextMenu(options, selectionHandler);
         this.bindContextMenuToClearCatcher(options, selectionHandler);
@@ -83,21 +86,22 @@ export class InteractiveBehavior implements IInteractiveBehavior {
             }
         };
 
-        clearCatcher.on("contextmenu", () => {
-            const event: MouseEvent = <MouseEvent>getEvent() || <MouseEvent>window.event;
-            if (event) {
-                selectionHandler.handleContextMenu(
-                    <BaseDataPoint>{
-                        identity: emptySelection,
-                        selected: false
-                    },
-                    {
-                        x: event.clientX,
-                        y: event.clientY
-                    });
-                event.preventDefault();
-                event.stopPropagation();
+        clearCatcher.on("contextmenu", (event: MouseEvent) => {
+            if (!event) {
+                return;
             }
+
+            selectionHandler.handleContextMenu(
+                <BaseDataPoint>{
+                    identity: emptySelection,
+                    selected: false
+                },
+                {
+                    x: event.clientX,
+                    y: event.clientY
+                });
+            event.preventDefault();
+            event.stopPropagation();
         });
     }
 

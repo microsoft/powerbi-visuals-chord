@@ -186,7 +186,6 @@ export class ChordChart implements IVisual {
   private static MaxUnitSize: number = 5;
   private static DefaultFormatValue: string = "0.##";
   private static DefaultTickLineColorValue: string = "#000";
-  private selectionManager: ISelectionManager;
   private eventService: IVisualEventService;
 
   private static chordClass: ClassAndSelector = createClassAndSelector("chord");
@@ -227,6 +226,7 @@ export class ChordChart implements IVisual {
 
   private host: IVisualHost;
 
+  protected selectionManager: ISelectionManager;
   private interactivityService: IInteractivityService<ChordArcDescriptor>;
   private interactiveBehavior: InteractiveBehavior;
 
@@ -553,22 +553,6 @@ export class ChordChart implements IVisual {
     });
   }
 
-  public handleContextMenu() {
-    this.svg.on("contextmenu", (event) => {
-      const dataPoint: any = select(event.target).datum();
-      this.selectionManager.showContextMenu(
-        dataPoint && dataPoint.selectionIds && dataPoint.selectionIds[0]
-          ? dataPoint.selectionIds[0]
-          : {},
-        {
-          x: event.clientX,
-          y: event.clientY,
-        }
-      );
-      event.preventDefault();
-    });
-  }
-
   constructor(options: VisualConstructorOptions) {
     if (window.location !== window.parent.location) {
       require("core-js/stable");
@@ -576,8 +560,10 @@ export class ChordChart implements IVisual {
 
     this.host = options.host;
 
-    this.interactivityService = createInteractivitySelectionService(this.host);
     this.interactiveBehavior = new InteractiveBehavior();
+    this.interactivityService = createInteractivitySelectionService(this.host);
+    // For some reason, the interactivityService is not being created correctly, which causes `renderSelection` to run twice.
+    this.selectionManager = this.host.createSelectionManager();
 
     this.localizationManager = this.host.createLocalizationManager();
 
@@ -616,8 +602,6 @@ export class ChordChart implements IVisual {
 
     this.colors = options.host.colorPalette;
     this.eventService = options.host.eventService;
-
-    this.handleContextMenu();
   }
 
   // Called for data, size, formatting changes
