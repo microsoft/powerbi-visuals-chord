@@ -64,17 +64,21 @@ import {
   range as lodashRange,
   isNumber as lodashIsNumber,
 } from "lodash";
+import { ChordChartSettingsModel } from '../src/chordChartSettingsModel';
+import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
 describe("ChordChart", () => {
   let visualBuilder: ChordChartBuilder,
     defaultDataViewBuilder: ChordChartData,
-    dataView: DataView;
+    dataView: DataView,
+    settings: ChordChartSettingsModel;
 
   beforeEach(() => {
     visualBuilder = new ChordChartBuilder(1000, 500);
     defaultDataViewBuilder = new ChordChartData();
 
     dataView = defaultDataViewBuilder.getDataView();
+    settings = new FormattingSettingsService().populateFormattingSettingsModel(ChordChartSettingsModel, dataView);
   });
 
   describe("DOM tests", () => {
@@ -173,6 +177,7 @@ describe("ChordChart", () => {
       defaultDataViewBuilder.valuesCategoryGroup[5][0] = null;
       expect(() => {
         ChordChart.CONVERTER(
+          settings,
           defaultDataViewBuilder.getDataView(),
           visualBuilder.visualHost,
           visualBuilder.visualHost.colorPalette,
@@ -433,6 +438,7 @@ describe("ChordChart", () => {
         });
 
       chordChartData = ChordChart.CONVERTER(
+        settings,
         defaultDataViewBuilder.getDataView(),
         visualBuilder.visualHost,
         visualBuilder.visualHost.colorPalette,
@@ -459,6 +465,7 @@ describe("ChordChart", () => {
     it("shouldn't throw any unexpected exceptions when Values field is undefined", () => {
       expect(() => {
         let chordChartData: ChordChartDataInterface = ChordChart.CONVERTER(
+          settings,
           defaultDataViewBuilder.getDataView(null, true),
           visualBuilder.visualHost,
           visualBuilder.visualHost.colorPalette,

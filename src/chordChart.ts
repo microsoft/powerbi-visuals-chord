@@ -39,12 +39,9 @@ import DataView = powerbiVisualsApi.DataView;
 import IViewport = powerbiVisualsApi.IViewport;
 import DataViewObjects = powerbiVisualsApi.DataViewObjects;
 import DataViewValueColumn = powerbiVisualsApi.DataViewValueColumn;
-import VisualObjectInstance = powerbiVisualsApi.VisualObjectInstance;
 import DataViewMetadataColumn = powerbiVisualsApi.DataViewMetadataColumn;
-import EnumerateVisualObjectInstancesOptions = powerbiVisualsApi.EnumerateVisualObjectInstancesOptions;
 import DataViewValueColumnGroup = powerbiVisualsApi.DataViewValueColumnGroup;
 import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
-import VisualObjectInstanceEnumeration = powerbiVisualsApi.VisualObjectInstanceEnumeration;
 import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
 
 // powerbi.extensibility
@@ -118,17 +115,12 @@ import {
   createTooltipServiceWrapper,
 } from "powerbi-visuals-utils-tooltiputils";
 
-import {
-  Settings,
-  AxisSettings,
-  DataPointSettings,
-  LabelsSettings,
-} from "./settings";
 import { ChordArcDescriptor, ChordArcLabelData } from "./interfaces";
 import { VisualLayout } from "./visualLayout";
 import { InteractiveBehavior, BehaviorOptions } from "./interactiveBehavior";
 import { ChordChartColumns, ChordChartCategoricalColumns } from "./columns";
 import { createTooltipInfo } from "./tooltipBuilder";
+import { ChordChartSettingsModel } from "./chordChartSettingsModel";
 
 import lodashMapvalues from "lodash.mapvalues";
 import lodashInvert from "lodash.invert";
@@ -138,9 +130,10 @@ import lodashMax from "lodash.max";
 import lodashMap from "lodash.map";
 import lodashForeach from "lodash.foreach";
 import lodashIsarraylike from "lodash.isarraylike";
+import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
 export interface ChordChartData {
-  settings: Settings;
+  settings: ChordChartSettingsModel;
   dataView: DataView;
   dataMatrix: number[][];
   tooltipData: ChordTooltipData[][];
@@ -229,12 +222,10 @@ export class ChordChart implements IVisual {
   protected selectionManager: ISelectionManager;
   private interactivityService: IInteractivityService<ChordArcDescriptor>;
   private interactiveBehavior: InteractiveBehavior;
+  private formattingSettingsService: FormattingSettingsService;
+  private settings: ChordChartSettingsModel;
 
   private localizationManager: ILocalizationManager;
-
-  private get settings(): Settings {
-    return this.data && this.data.settings;
-  }
 
   private radius: number;
   private get innerRadius(): number {
@@ -252,6 +243,36 @@ export class ChordChart implements IVisual {
 
   public static defaultValue1: number = 1;
 
+  private static setHighContrastMode(settings: ChordChartSettingsModel, colorPalette?: IColorPalette): void {
+    const colorHelper: ColorHelper = new ColorHelper(colorPalette);
+
+    settings.axis.color.value.value = colorHelper.getHighContrastColor(
+      "foreground",
+      settings.axis.color.value.value
+    );
+
+    settings.dataPoint.defaultColor.value.value = colorHelper.getHighContrastColor(
+      "background",
+      settings.dataPoint.defaultColor.value.value
+    );
+
+    settings.labels.color.value.value = colorHelper.getHighContrastColor(
+      "foreground",
+      settings.labels.color.value.value
+    );
+
+    settings.chord.strokeColor.value.value = colorHelper.getHighContrastColor(
+      "foreground",
+      settings.chord.strokeColor.value.value
+    );
+
+    if (colorPalette && colorHelper.isHighContrast) {
+      settings.chord.strokeWidth.value = settings.chord.strokeWidth.options.maxValue.value;
+    } else {
+      settings.chord.strokeWidth.value = settings.chord.strokeWidth.options.minValue.value;
+    }
+  }
+
   /**
    * @param dataView DataView object
    * @param host PBI Host object
@@ -261,19 +282,20 @@ export class ChordChart implements IVisual {
    */
   // eslint-disable-next-line max-lines-per-function
   public static CONVERTER(
+    settings: ChordChartSettingsModel,
     dataView: DataView,
     host: IVisualHost,
     colors: IColorPalette,
     localizationManager: ILocalizationManager
   ): ChordChartData {
-    const settings: Settings = Settings.PARSE_SETTINGS(dataView, colors);
+    this.setHighContrastMode(settings, colors);
     const columns: ChordChartColumns<ChordChartCategoricalColumns> =
       ChordChartColumns.GET_CATEGORICAL_COLUMNS(dataView);
     const sources: ChordChartColumns<DataViewMetadataColumn> =
       ChordChartColumns.GET_COLUMN_SOURCES(dataView);
     const categoricalValues: ChordChartColumns<any> =
       ChordChartColumns.GET_CATEGORICAL_VALUES(dataView);
-    const prevAxisVisible = settings.axis.show;
+    const prevAxisVisible = settings.axis.show.value;
 
     if (!categoricalValues || lodashIsempty(categoricalValues.Category)) {
       return null;
@@ -311,7 +333,7 @@ export class ChordChart implements IVisual {
     const colorHelper: ColorHelper = new ColorHelper(
       colors,
       { objectName: "dataPoint", propertyName: "fill" },
-      settings.dataPoint.defaultColor
+      settings.dataPoint.defaultColor.value.value
     );
 
     const totalFields: any[] = this.union_arrays(
@@ -419,10 +441,10 @@ export class ChordChart implements IVisual {
         isCategory,
         barFillColor,
         barStrokeColor,
-        labelColor: settings.labels.color,
+        labelColor: settings.labels.color.value.value,
         isGrouped: !!grouped,
         labelFontSize: PixelConverter.fromPointToPixel(
-          settings.labels.fontSize
+          settings.labels.fontSize.value
         ),
       });
 
@@ -521,7 +543,7 @@ export class ChordChart implements IVisual {
       tickUnit: Math.pow(10, unitLength),
       differentFromTo: isDiffFromTo,
       prevAxisVisible:
-        prevAxisVisible === undefined ? settings.axis.show : prevAxisVisible,
+        prevAxisVisible === undefined ? settings.axis.show.value : prevAxisVisible,
       groups: groups,
       chords: chords,
     };
@@ -564,6 +586,7 @@ export class ChordChart implements IVisual {
     this.interactivityService = createInteractivitySelectionService(this.host);
     // For some reason, the interactivityService is not being created correctly, which causes `renderSelection` to run twice.
     this.selectionManager = this.host.createSelectionManager();
+    this.formattingSettingsService = new FormattingSettingsService(this.localizationManager);
 
     this.localizationManager = this.host.createLocalizationManager();
 
@@ -615,9 +638,10 @@ export class ChordChart implements IVisual {
 
       this.layout.viewport = options.viewport;
 
-      this.layout.viewport = options.viewport;
+      this.settings = this.formattingSettingsService.populateFormattingSettingsModel(ChordChartSettingsModel, options.dataViews[0]);
 
       this.data = ChordChart.CONVERTER(
+        this.settings,
         options.dataViews[0],
         this.host,
         this.colors,
@@ -632,7 +656,7 @@ export class ChordChart implements IVisual {
 
       this.layout.resetMargin();
       this.layout.margin.top = this.layout.margin.bottom =
-        PixelConverter.fromPointToPixel(this.settings.labels.fontSize) / 2;
+        PixelConverter.fromPointToPixel(this.settings.labels.fontSize.value) / 2;
 
       this.render();
       this.eventService.renderingFinished(options);
@@ -641,125 +665,14 @@ export class ChordChart implements IVisual {
     }
   }
 
-  public enumerateObjectInstances(
-    options: EnumerateVisualObjectInstancesOptions
-  ): VisualObjectInstanceEnumeration {
-    if (!this.data || !this.settings) {
-      return [];
-    }
-
-    switch (options.objectName) {
-      case "axis": {
-        return ChordChart.enumerateAxis(
-          this.settings,
-          this.localizationManager
-        );
-      }
-      case "dataPoint": {
-        return ChordChart.enumerateDataPoint(
-          this.settings,
-          this.data.groups,
-          this.localizationManager
-        );
-      }
-      case "labels": {
-        return ChordChart.enumerateLabels(
-          this.settings,
-          this.localizationManager
-        );
-      }
-      default: {
-        return [];
-      }
-    }
-  }
-
-  private static enumerateAxis(
-    settings: Settings,
-    localManager: ILocalizationManager
-  ): VisualObjectInstance[] {
-    const axisSettings: AxisSettings = settings.axis,
-      instances: VisualObjectInstance[] = [
-        {
-          objectName: "axis",
-          displayName: localManager.getDisplayName("Visual_Axis"),
-          selector: null,
-          properties: {
-            show: axisSettings.show,
-          },
-        },
-      ];
-    return instances;
-  }
-
-  private static enumerateDataPoint(
-    settings: Settings,
-    labelDataPoints: ChordArcDescriptor[],
-    localManager: ILocalizationManager
-  ): VisualObjectInstance[] {
-    const dataPointSettings: DataPointSettings = settings.dataPoint;
-
-    const instances: VisualObjectInstance[] = [
-      {
-        objectName: "datapoint",
-        displayName: localManager.getDisplayName("Visual_Data_Colors"),
-        selector: null,
-        properties: {
-          defaultColor: dataPointSettings.defaultColor,
-          showAllDataPoints: dataPointSettings.showAllDataPoints,
-        },
-      },
-    ];
-
-    if (!dataPointSettings.showAllDataPoints) {
-      return instances;
-    }
-
-    for (const labelDataPoint of labelDataPoints) {
-      const data: ChordArcLabelData = labelDataPoint.data;
-
-      const colorInstance: VisualObjectInstance = {
-        objectName: "dataPoint",
-        displayName: data.label,
-        selector: ColorHelper.normalizeSelector(
-          (<ISelectionId>labelDataPoint.identity).getSelector()
-        ),
-        properties: {
-          fill: { solid: { color: data.barFillColor } },
-        },
-      };
-
-      if (data.isCategory || data.isGrouped) {
-        instances.push(colorInstance);
-      }
-    }
-
-    return instances;
-  }
-
-  private static enumerateLabels(
-    settings: Settings,
-    localManager: ILocalizationManager
-  ): VisualObjectInstance[] {
-    const labelSettings: LabelsSettings = settings.labels;
-
-    return [
-      {
-        objectName: "labels",
-        displayName: localManager.getDisplayName("Visual_Labels"),
-        selector: null,
-        properties: {
-          show: labelSettings.show,
-          color: labelSettings.color,
-          fontSize: labelSettings.fontSize,
-        },
-      },
-    ];
+  public getFormattingModel(): powerbi.visuals.FormattingModel {
+    this.settings.populateDataPoints(this.data.groups);
+    return this.formattingSettingsService.buildFormattingModel(this.settings);
   }
 
   // Calculate radius
   private calculateRadius(): number {
-    if (this.settings.labels.show) {
+    if (this.settings.labels.show.value) {
       // if we have category or data labels, use a sigmoid to blend the desired denominator from 2 to 3.
       // if we are taller than we are wide, we need to use a larger denominator to leave horizontal room for the labels.
       const hw: number =
@@ -787,7 +700,7 @@ export class ChordChart implements IVisual {
       .innerRadius(this.outerRadius)
       .outerRadius(this.outerRadius);
 
-    if (this.settings.labels.show) {
+    if (this.settings.labels.show.value) {
       const labelLayout: ILabelLayout = this.getChordChartLabelLayout(outerArc);
       const filteredData: LabelEnabledDataPoint[] =
         this.getDataLabelManager().hideCollidedLabels(
@@ -892,10 +805,10 @@ export class ChordChart implements IVisual {
       .style("fill", (chordLink: any) => {
         return this.data.groups[chordLink.target.index].data.barFillColor;
       })
-      .style("stroke", this.settings.chord.strokeColor)
+      .style("stroke", this.settings.chord.strokeColor.value.value)
       .style(
         "stroke-width",
-        PixelConverter.toString(this.settings.chord.strokeWidth)
+        PixelConverter.toString(this.settings.chord.strokeWidth.value)
       )
       .attr("d", path);
     this.drawTicks();
@@ -1073,7 +986,7 @@ export class ChordChart implements IVisual {
 
   // Draw axis(ticks) around the arc
   private drawTicks(): void {
-    if (this.settings.axis.show) {
+    if (this.settings.axis.show.value) {
 
       let tickShapes: Selection<any, any, any, any> =
         this.mainGraphicsContext
@@ -1126,7 +1039,7 @@ export class ChordChart implements IVisual {
       );
 
       tickLines
-        .style("stroke", ChordChart.DefaultTickLineColorValue)
+        .style("stroke", this.settings.axis.color?.value?.value || ChordChart.DefaultTickLineColorValue)
         .attr("x1", 1)
         .attr("y1", 0)
         .attr("x2", 5)
@@ -1147,7 +1060,7 @@ export class ChordChart implements IVisual {
         .attr("dy", ChordChart.DefaultDY)
         .text((d) => (<any>d).label)
         .style("text-anchor", (d) => ((<any>d).angle > Math.PI ? "end" : null))
-        .style("fill", this.settings.axis.color)
+        .style("fill", this.settings.axis.color.value.value)
         .attr("transform", (d) =>
           (<any>d).angle > Math.PI ? "rotate(180)translate(-16)" : null
         );
@@ -1265,7 +1178,7 @@ export class ChordChart implements IVisual {
           label: d.data.label,
           maxWidth: maxLabelWidth,
           fontSize: PixelConverter.fromPointToPixel(
-            this.settings.labels.fontSize
+            this.settings.labels.fontSize.value
           ),
         });
       },
@@ -1285,7 +1198,7 @@ export class ChordChart implements IVisual {
         "text-anchor": (d: ChordArcDescriptor) =>
           midAngle(d) < Math.PI ? "start" : "end",
         "font-size": () =>
-          PixelConverter.fromPoint(this.settings.labels.fontSize),
+          PixelConverter.fromPoint(this.settings.labels.fontSize.value),
       },
     };
   }

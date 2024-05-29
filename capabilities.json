@@ -128,6 +128,15 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "color": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -161,6 +170,24 @@
                         "formatting": {
                             "fontSize": true
                         }
+                    }
+                }
+            }
+        },
+        "chord": {
+            "properties": {
+                "strokeColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "strokeWidth": {
+                    "type": {
+                        "numeric": true
                     }
                 }
             }
