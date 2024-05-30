@@ -81,7 +81,7 @@ describe("ChordChart", () => {
 
   describe("DOM tests", () => {
     it("svg element created", () => {
-      expect(visualBuilder.mainElement[0]).toBeInDOM;
+      expect(visualBuilder.mainElement).toBeTruthy();
     });
 
     it("update", (done) => {
@@ -260,7 +260,8 @@ describe("ChordChart", () => {
           return parseFloat(element.getAttribute("x") || "") > 0;
         });
 
-        expect(rightLabels).toBeInDOM;
+        expect(rightLabels).toBeTruthy();
+        expect(rightLabels.length).toBeGreaterThan(0);
 
         done();
       });
@@ -280,12 +281,13 @@ describe("ChordChart", () => {
       it("show", () => {
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.sliceTicks).toBeInDOM;
+        expect(visualBuilder.sliceTicks).toBeTruthy();
+        expect(visualBuilder.sliceTicks.length).toBeGreaterThan(0);
 
         (<any>dataView.metadata.objects).axis.show = false;
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.sliceTicks).not.toBeInDOM;
+        expect(visualBuilder.sliceTicks.length).toBe(0);
       });
     });
 
@@ -301,12 +303,13 @@ describe("ChordChart", () => {
       it("show", () => {
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.dataLabels).toBeInDOM;
+        expect(visualBuilder.dataLabels).toBeTruthy();
+        expect(visualBuilder.dataLabels.length).toBeGreaterThan(0);
 
         (<any>dataView.metadata.objects).labels.show = false;
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.dataLabels).not.toBeInDOM;
+        expect(visualBuilder.dataLabels.length).toBe(0);
       });
 
       it("color", () => {
@@ -394,7 +397,8 @@ describe("ChordChart", () => {
         color: string
       ): boolean {
         return elements.some((element: SVGElement) => {
-          return areColorsEqual(element.style["fill"], color);
+          const fill = getComputedStyle(element).fill;
+          return areColorsEqual(fill, color);
         });
       }
     });
@@ -475,7 +479,7 @@ describe("ChordChart", () => {
       expect(() => {
         let chordChartData: ChordChartDataInterface = ChordChart.CONVERTER(
           settings,
-          defaultDataViewBuilder.getDataView(null, true),
+          defaultDataViewBuilder.getDataView(undefined, true),
           visualBuilder.visualHost,
           visualBuilder.visualHost.colorPalette,
           null
@@ -508,25 +512,33 @@ describe("ChordChart", () => {
   });
 
   describe("Selection", () => {
-    describe("Power BI Bookmarks", () => {
-      it("first identity should be selected", (done) => {
-        visualBuilder.updateRenderTimeout(dataView, () => {
-          const firstSelectionId: ISelectionId = <ISelectionId>(
-            visualBuilder.instance["data"]["groups"][0]["identity"]
-          );
+    it("datapoint should be selected on click", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        const element: SVGElement = visualBuilder.slices[0];
+        element.dispatchEvent(new MouseEvent("click"));
 
-          visualBuilder.selectionManager.sendSelectionToCallback([
-            firstSelectionId,
-          ]);
+        const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();;
 
-          const isSelected: boolean = (<SelectableDataPoint>(
-            select(visualBuilder.slices[0]).datum()
-          )).selected;
+        expect(datum.selected).toBeTrue();
 
-          expect(isSelected).toBeTruthy();
+        done();
+      });
+    })
 
-          done();
-        });
+    it("multiple datapoints should be selected on click", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        const firstElement: SVGElement = visualBuilder.slices[0];
+        const secondElement: SVGElement = visualBuilder.slices[1];
+        firstElement.dispatchEvent(new MouseEvent("click"));
+        secondElement.dispatchEvent(new MouseEvent("click", { ctrlKey: true }));
+
+        const firstDatum: SelectableDataPoint = <SelectableDataPoint>select(firstElement).datum();;
+        const secondDatum: SelectableDataPoint = <SelectableDataPoint>select(secondElement).datum();;
+
+        expect(firstDatum.selected).toBeTrue();
+        expect(secondDatum.selected).toBeTrue();
+
+        done();
       });
     });
   });
@@ -552,8 +564,8 @@ describe("ChordChart", () => {
           const slices: SVGElement[] = Array.from(visualBuilder.slices);
           const chords: SVGElement[] = Array.from(visualBuilder.chords);
 
-          expect(isColorAppliedToElements(slices, null, "fill"));
-          expect(isColorAppliedToElements(chords, null, "fill"));
+          expect(isColorAppliedToElements(slices, undefined, "fill"));
+          expect(isColorAppliedToElements(chords, undefined, "fill"));
 
           done();
         });
