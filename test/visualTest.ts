@@ -36,9 +36,7 @@ import DataViewCategoryColumn = powerbiVisualsApi.DataViewCategoryColumn;
 import DataViewObjects = powerbiVisualsApi.DataViewObjects;
 import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
 
-// powerbi.extensibility.utils.interactivity
-import { interactivitySelectionService } from "powerbi-visuals-utils-interactivityutils";
-import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
+import { SelectableDataPoint } from "../src/behavior";
 
 // powerbi.extensibility.utils.test
 import { assertColorsMatch } from "powerbi-visuals-utils-testutils";
@@ -88,6 +86,11 @@ describe("ChordChart", () => {
 
     it("update", (done) => {
       visualBuilder.updateRenderTimeout(dataView, () => {
+        if (!dataView.categorical || !dataView.categorical.values || !dataView.categorical.categories) {
+          fail("dataView.categorical.values is empty");
+          return;
+        }
+
         const valuesLength: number = lodashSum(
           dataView.categorical.values.map((column: DataViewValueColumn) => {
             const notEmptyValues: PrimitiveValue[] = column.values.filter(
@@ -107,31 +110,31 @@ describe("ChordChart", () => {
         expect(
           visualBuilder.mainElement
             .querySelector("g.chords")
-            .querySelectorAll("path").length
+            ?.querySelectorAll("path").length
         ).toBe(valuesLength);
 
         expect(
           visualBuilder.mainElement
             .querySelector("g.ticks")
-            .querySelectorAll("g.slice-ticks").length
+            ?.querySelectorAll("g.slice-ticks").length
         ).toBe(categoriesLength);
 
         expect(
           visualBuilder.mainElement
             .querySelector("g.slices")
-            .querySelectorAll("path.slice").length
+            ?.querySelectorAll("path.slice").length
         ).toBe(categoriesLength);
 
         expect(
           visualBuilder.element
             .querySelector(".chordChart")
-            .getAttribute("height")
+            ?.getAttribute("height")
         ).toBe(visualBuilder.viewport.height.toString());
 
         expect(
           visualBuilder.element
             .querySelector(".chordChart")
-            .getAttribute("width")
+            ?.getAttribute("width")
         ).toBe(visualBuilder.viewport.width.toString());
 
         done();
@@ -174,6 +177,7 @@ describe("ChordChart", () => {
     });
 
     it("shouldn't throw any unexpected exceptions when category value is null", () => {
+      // @ts-ignore
       defaultDataViewBuilder.valuesCategoryGroup[5][0] = null;
       expect(() => {
         ChordChart.CONVERTER(
@@ -253,7 +257,7 @@ describe("ChordChart", () => {
         const rightLabels: SVGElement[] = Array.from(
           visualBuilder.dataLabels
         ).filter((element: SVGElement) => {
-          return parseFloat(element.getAttribute("x")) > 0;
+          return parseFloat(element.getAttribute("x") || "") > 0;
         });
 
         expect(rightLabels).toBeInDOM;
@@ -349,6 +353,11 @@ describe("ChordChart", () => {
       });
 
       it("colors", () => {
+        if (!dataView.categorical || !dataView.categorical.categories || !dataView.categorical.categories[0]) {
+          fail("dataView.categorical.categories is empty");
+          return;
+        }
+
         dataView.metadata.objects = {
           dataPoint: {
             showAllDataPoints: true,
@@ -362,7 +371,7 @@ describe("ChordChart", () => {
         category.objects = [];
 
         category.values.forEach((value: PrimitiveValue, index: number) => {
-          category.objects[index] = <DataViewObjects>{
+          category.objects![index] = <DataViewObjects>{
             dataPoint: {
               fill: getSolidColorStructuralObject(colors[index]),
             },

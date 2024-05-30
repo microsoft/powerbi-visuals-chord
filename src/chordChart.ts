@@ -52,8 +52,8 @@ import IVisualHost = powerbiVisualsApi.extensibility.visual.IVisualHost;
 import ILocalizationManager = powerbiVisualsApi.extensibility.ILocalizationManager;
 import VisualConstructorOptions = powerbiVisualsApi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbiVisualsApi.extensibility.visual.VisualUpdateOptions;
-import ISelectionManager = powerbiVisualsApi.extensibility.ISelectionManager;
 import IVisualEventService = powerbiVisualsApi.extensibility.IVisualEventService;
+import ISelectionManager = powerbiVisualsApi.extensibility.ISelectionManager;
 
 // powerbi.extensibility.utils.dataview
 import { converterHelper as ConverterHelper } from "powerbi-visuals-utils-dataviewutils";
@@ -101,14 +101,6 @@ import {
 
 import lessWithPrecision = TypeUtilsDouble.lessWithPrecision;
 
-// powerbi.extensibility.utils.interactivity
-import {
-  interactivitySelectionService,
-  interactivityBaseService,
-} from "powerbi-visuals-utils-interactivityutils";
-import IInteractivityService = interactivityBaseService.IInteractivityService;
-import createInteractivitySelectionService = interactivitySelectionService.createInteractivitySelectionService;
-
 // powerbi.extensibility.utils.tooltip
 import {
   ITooltipServiceWrapper,
@@ -117,10 +109,10 @@ import {
 
 import { ChordArcDescriptor, ChordArcLabelData } from "./interfaces";
 import { VisualLayout } from "./visualLayout";
-import { InteractiveBehavior, BehaviorOptions } from "./interactiveBehavior";
 import { ChordChartColumns, ChordChartCategoricalColumns } from "./columns";
 import { createTooltipInfo } from "./tooltipBuilder";
 import { ChordChartSettingsModel } from "./chordChartSettingsModel";
+import { Behavior } from './behavior';
 
 import lodashMapvalues from "lodash.mapvalues";
 import lodashInvert from "lodash.invert";
@@ -131,6 +123,7 @@ import lodashMap from "lodash.map";
 import lodashForeach from "lodash.foreach";
 import lodashIsarraylike from "lodash.isarraylike";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
+import powerbi from 'powerbi-visuals-api';
 
 export interface ChordChartData {
   settings: ChordChartSettingsModel;
@@ -219,9 +212,8 @@ export class ChordChart implements IVisual {
 
   private host: IVisualHost;
 
-  protected selectionManager: ISelectionManager;
-  private interactivityService: IInteractivityService<ChordArcDescriptor>;
-  private interactiveBehavior: InteractiveBehavior;
+  private behavior: Behavior;
+  private selectionManager: ISelectionManager;
   private formattingSettingsService: FormattingSettingsService;
   private settings: ChordChartSettingsModel;
 
@@ -286,7 +278,7 @@ export class ChordChart implements IVisual {
     dataView: DataView,
     host: IVisualHost,
     colors: IColorPalette,
-    localizationManager: ILocalizationManager
+    localizationManager: ILocalizationManager | null
   ): ChordChartData {
     this.setHighContrastMode(settings, colors);
     const columns: ChordChartColumns<ChordChartCategoricalColumns> =
@@ -582,10 +574,8 @@ export class ChordChart implements IVisual {
 
     this.host = options.host;
 
-    this.interactiveBehavior = new InteractiveBehavior();
-    this.interactivityService = createInteractivitySelectionService(this.host);
-    // For some reason, the interactivityService is not being created correctly, which causes `renderSelection` to run twice.
     this.selectionManager = this.host.createSelectionManager();
+    this.behavior = new Behavior(this.selectionManager);
     this.formattingSettingsService = new FormattingSettingsService(this.localizationManager);
 
     this.localizationManager = this.host.createLocalizationManager();
@@ -756,6 +746,7 @@ export class ChordChart implements IVisual {
     }
   }
 
+  // eslint-disable-next-line max-lines-per-function
   private render(): void {
     this.radius = this.calculateRadius();
     const arcVal: Arc<any, DefaultArcObject> = arc()
@@ -813,17 +804,16 @@ export class ChordChart implements IVisual {
       .attr("d", path);
     this.drawTicks();
     this.drawCategoryLabels();
-    if (this.interactivityService) {
-      this.interactivityService.applySelectionStateToData(this.data.groups);
-      const behaviorOptions: BehaviorOptions = {
-        clearCatcher: this.svg,
+
+    if (this.behavior && this.selectionManager) {
+      this.behavior.bindEvents({
+        clearCatcherSelection: this.svg,
         arcSelection: sliceShapes,
         chordSelection: chordShapes,
         dataPoints: this.data.groups,
-        behavior: this.interactiveBehavior,
-      };
-      this.interactivityService.bind(behaviorOptions);
+      })
     }
+
     this.tooltipServiceWrapper.addTooltip(chordShapes, (chordLink: any) => {
       let tooltipInfo: VisualTooltipDataItem[] = [];
       const index = chordLink?.source?.index;
@@ -960,7 +950,7 @@ export class ChordChart implements IVisual {
   }
 
   public static COPY_ARC_DESCRIPTORS_WITHOUT_NAN_VALUES(
-    arcDescriptors: ChordGroup[]
+    arcDescriptors: ChordGroup[] | null | undefined
   ): ChordGroup[] {
     if (lodashIsempty(arcDescriptors)) {
       return arcDescriptors;

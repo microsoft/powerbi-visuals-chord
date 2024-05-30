@@ -6,6 +6,7 @@
 * Migrate from tslint to eslint, fix eslint errors
 * Replace larget package 'snyk' with '@snyk/protect'
 * Update outdated packages
+* Remove powerbi-visuals-interactivity-utils
 
 ## 2.2.0
 * Add context menu handling

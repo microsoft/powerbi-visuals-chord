@@ -1,8 +1,5 @@
-// powerbi.extensibility.utils.interactivity
-import { interactivitySelectionService } from "powerbi-visuals-utils-interactivityutils";
-import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
-
 import {dataLabelInterfaces} from "powerbi-visuals-utils-chartutils";
+import { SelectableDataPoint } from "./behavior";
 import LabelEnabledDataPoint = dataLabelInterfaces.LabelEnabledDataPoint;
 
 import { ChordGroup } from "d3-chord";
