@@ -55,12 +55,8 @@ import {
   isTextElementInOrOutElement,
   getSolidColorStructuralObject,
 } from "./helpers/helpers";
+import { isNumber, range } from '../src/utils';
 
-import {
-  sum as lodashSum,
-  range as lodashRange,
-  isNumber as lodashIsNumber,
-} from "lodash";
 import { ChordChartSettingsModel } from '../src/chordChartSettingsModel';
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
@@ -85,17 +81,15 @@ describe("ChordChart", () => {
 
     it("update", (done) => {
       visualBuilder.updateRenderTimeout(dataView, () => {
-        const valuesLength: number = lodashSum(
-          dataView.categorical!.values!.map((column: DataViewValueColumn) => {
-            const notEmptyValues: PrimitiveValue[] = column.values.filter(
-              (value: any) => {
-                return !isNaN(value) && value !== null;
-              }
-            );
+        const valuesLength: number = dataView.categorical!.values!.map((column: DataViewValueColumn) => {
+          const notEmptyValues: PrimitiveValue[] = column.values.filter(
+            (value: any) => {
+              return !isNaN(value) && value !== null;
+            }
+          );
 
-            return notEmptyValues.length;
-          })
-        );
+          return notEmptyValues.length;
+        }).reduce((a, b) => a + b, 0);
 
         const categoriesLength: number =
           dataView.categorical!.values!.length +
@@ -188,7 +182,7 @@ describe("ChordChart", () => {
       visualBuilder.viewport.height = 200;
       visualBuilder.viewport.width = 200;
 
-      defaultDataViewBuilder.valuesValue = lodashRange(
+      defaultDataViewBuilder.valuesValue = range(
         1,
         defaultDataViewBuilder.valuesCategoryGroup.length
       );
@@ -227,13 +221,13 @@ describe("ChordChart", () => {
       visualBuilder.viewport.height = 500;
       visualBuilder.viewport.width = 500;
 
-      defaultDataViewBuilder.valuesCategoryGroup = lodashRange(20).map(
+      defaultDataViewBuilder.valuesCategoryGroup = range(20).map(
         (value: number) => {
           return [value + "xxxxxxxxxxx", value + "yyyyyyyyyyyyyy"];
         }
       );
 
-      defaultDataViewBuilder.valuesValue = lodashRange(
+      defaultDataViewBuilder.valuesValue = range(
         1,
         defaultDataViewBuilder.valuesCategoryGroup.length
       );
@@ -454,7 +448,7 @@ describe("ChordChart", () => {
     ): void {
       arcDescriptors.forEach((arcDescriptor: ChordGroup) => {
         for (let propertyName of Object.keys(arcDescriptor)) {
-          if (lodashIsNumber(arcDescriptor[propertyName])) {
+          if (isNumber(arcDescriptor[propertyName])) {
             expect(isNaN(arcDescriptor[propertyName])).toBeFalsy();
           }
         }

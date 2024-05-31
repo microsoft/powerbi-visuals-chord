@@ -27,7 +27,7 @@
 // powerbi.extensibility.utils.svg
 import { IRect } from "powerbi-visuals-utils-svgutils";
 
-import { range as lodashRange } from "lodash";
+import { range } from "../../src/utils"
 
 // powerbi.extensibility.utils.test
 import { RgbColor, parseColorString, getRandomNumber } from "powerbi-visuals-utils-testutils";
@@ -76,7 +76,7 @@ export function getHexColorFromNumber(value: number): string {
     const hex: string = value.toString(16).toUpperCase(),
         color: string = hex.length === 6
             ? hex
-            : `${lodashRange(0, 6 - hex.length, 0).join("")}${hex}`;
+            : `${range(0, 6 - hex.length, 0).join("")}${hex}`;
 
     return `#${color}`;
 }

@@ -39,11 +39,7 @@ import DataViewCategorical = powerbiVisualsApi.DataViewCategorical;
 import DataViewCategoricalColumn = powerbiVisualsApi.DataViewCategoricalColumn;
 import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
 
-import {
-    toArray as lodashToArray,
-    mapValues as lodashMapValues,
-    isEmpty as lodashIsEmpty
-} from "lodash";
+import { isEmpty, mapValues } from "./utils";
 
 export type ChordChartCategoricalColumns = DataViewCategoryColumn & DataViewValueColumn[] & DataViewValueColumns;
 
@@ -55,7 +51,8 @@ export class ChordChartColumns<T> {
     public static GET_TABLE_VALUES(dataView: DataView): ChordChartColumns<any> {
         const table: DataViewTable = dataView && dataView.table;
         const columns: ChordChartColumns<any> = this.getColumnSourcesT(dataView);
-        return columns && table && lodashMapValues(
+
+        return columns && table && mapValues(
             columns, (n: DataViewMetadataColumn) => n && table.rows.map(row => row[n.index]));
     }
 
@@ -63,7 +60,7 @@ export class ChordChartColumns<T> {
         const table: DataViewTable = dataView && dataView.table;
         const columns: ChordChartColumns<any> = this.getColumnSourcesT(dataView);
         return columns && table && table.rows.map(row =>
-            lodashMapValues(columns, (n: DataViewMetadataColumn) => n && row[n.index]));
+            mapValues(columns, (n: DataViewMetadataColumn) => n && row[n.index]));
     }
 
     public static GET_CATEGORICAL_VALUES(dataView: DataView): ChordChartColumns<any> {
@@ -74,8 +71,8 @@ export class ChordChartColumns<T> {
         }
         const values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
         const series: PrimitiveValue[] = categorical && values.source && this.GET_SERIES_VALUES(dataView);
-        return categorical && lodashMapValues(new this<any[]>(), (n, i) =>
-            (<(DataViewCategoryColumn | DataViewValueColumn)[]>lodashToArray(categories)).concat(lodashToArray(values))
+        return categorical && mapValues(new this<any[]>(), (n, i) =>
+            (<(DataViewCategoryColumn | DataViewValueColumn)[]>categories).concat(values)
                 .filter(x => x.source.roles && x.source.roles[i]).map(x => x.values)[0]
             || values.source && values.source.roles && values.source.roles[i] && series);
     }
@@ -89,7 +86,7 @@ export class ChordChartColumns<T> {
         const categorical: DataViewCategorical = dataView && dataView.categorical;
         const categories: DataViewCategoricalColumn[] = categorical && categorical.categories || [];
         const values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
-        return categorical && lodashMapValues(
+        return categorical && mapValues(
             new this<ChordChartCategoricalColumns>(),
             (n, i) => {
                 let result: any = categories.filter(x => x.source.roles && x.source.roles[i])[0];
@@ -98,7 +95,7 @@ export class ChordChartColumns<T> {
                 }
                 if (!result) {
                     result = values.filter(x => x.source.roles && x.source.roles[i]);
-                    if (lodashIsEmpty(result)) {
+                    if (isEmpty(result)) {
                         result = undefined;
                     }
                 }
@@ -111,14 +108,14 @@ export class ChordChartColumns<T> {
         const categorical = dataView && dataView.categorical;
         const values = categorical && categorical.values;
         const grouped = values && values.grouped();
-        return grouped && grouped.map(g => lodashMapValues(
+        return grouped && grouped.map(g => mapValues(
             new this<DataViewValueColumn>(),
             (n, i) => g.values.filter(v => v.source.roles[i])[0]));
     }
 
     private static getColumnSourcesT(dataView: DataView): ChordChartColumns<any> {
         const columns = dataView && dataView.metadata && dataView.metadata.columns;
-        return columns && lodashMapValues(
+        return columns && mapValues(
             new this<any>(),
             (n, i) => columns.filter(x => x.roles && x.roles[i])[0]);
     }
