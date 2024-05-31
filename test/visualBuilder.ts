@@ -57,6 +57,10 @@ export class ChordChartBuilder extends VisualBuilderBase<ChordChart> {
         return this.element.querySelector("g")!;
     }
 
+    public get svg(): SVGElement {
+        return this.element.querySelector<SVGElement>("svg.chordChart")!;
+    }
+
     public get dataLabels(): NodeListOf<SVGElement> {
         return this.mainElement
             .querySelectorAll("text.data-labels");

@@ -21,8 +21,8 @@ export interface BehaviorOptions {
 }
 
 export class Behavior {
-    private readonly FullOpacity: number = 1;
-    private readonly DimmedOpacity: number = 0.3;
+    public static readonly FullOpacity: number = 1;
+    public static readonly DimmedOpacity: number = 0.3;
 
     private selectionManager: ISelectionManager;
     private options: BehaviorOptions;
@@ -36,15 +36,11 @@ export class Behavior {
 
         this.bindClick();
         this.bindContextMenu();
-        this.bindContextMentToClearCatcher();
+        this.bindContextMenuToClearCatcher();
     }
 
     private bindClick() {
         this.options.arcSelection.on("click", (event: MouseEvent, dataPoint: ChordArcDescriptor) => {
-            if (!event) {
-                return;
-            }
-
             event.stopPropagation();
             this.select(dataPoint, event.ctrlKey || event.metaKey || event.shiftKey);
         });
@@ -56,10 +52,6 @@ export class Behavior {
 
     private bindContextMenu() {
         this.options.arcSelection.on("contextmenu", (event: MouseEvent, dataPoint: ChordArcDescriptor) => {
-            if (!event) {
-                return;
-            }
-
             this.selectionManager.showContextMenu(dataPoint && dataPoint.identity ? dataPoint.identity : {}, {
                 x: event.clientX,
                 y: event.clientY,
@@ -70,12 +62,8 @@ export class Behavior {
         });
     }
 
-    private bindContextMentToClearCatcher() {
+    private bindContextMenuToClearCatcher() {
         this.options.clearCatcherSelection.on("contextmenu", (event: MouseEvent) => {
-            if (!event) {
-                return;
-            }
-
             this.selectionManager.showContextMenu({}, {
                 x: event.clientX,
                 y: event.clientY,
@@ -142,7 +130,7 @@ export class Behavior {
     private renderDataPointSelection(): void {
         const { arcSelection, chordSelection } = this.options;
 
-        chordSelection.style("opacity", this.DimmedOpacity);
+        chordSelection.style("opacity", Behavior.DimmedOpacity);
 
         arcSelection.style("opacity", (arcDescriptor: ChordArcDescriptor, arcIndex: number) => {
             const isArcSelected = arcDescriptor.selected;
@@ -153,15 +141,15 @@ export class Behavior {
                         || chordLink.target.index === arcIndex)
                         && isArcSelected;
                 })
-                .style("opacity", this.FullOpacity)
+                .style("opacity", Behavior.FullOpacity)
 
-            return isArcSelected ? this.FullOpacity : this.DimmedOpacity;
+            return isArcSelected ? Behavior.FullOpacity : Behavior.DimmedOpacity;
         });
     }
 
     private renderClearSelection(): void {
         const { arcSelection, chordSelection } = this.options;
-        arcSelection.style("opacity", this.FullOpacity);
-        chordSelection.style("opacity", this.FullOpacity);
+        arcSelection.style("opacity", Behavior.FullOpacity);
+        chordSelection.style("opacity", Behavior.FullOpacity);
     }
 }

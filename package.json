@@ -67,7 +67,6 @@
   },
   "dependencies": {
     "@snyk/protect": "^1.1291.0",
-    "core-js": "^3.37.1",
     "d3-array": "^3.0.1",
     "d3-chord": "^3.0.1",
     "d3-selection": "^3.0.0",

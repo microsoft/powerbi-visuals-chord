@@ -34,9 +34,8 @@ import DataViewValueColumn = powerbiVisualsApi.DataViewValueColumn;
 import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
 import DataViewCategoryColumn = powerbiVisualsApi.DataViewCategoryColumn;
 import DataViewObjects = powerbiVisualsApi.DataViewObjects;
-import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
 
-import { SelectableDataPoint } from "../src/behavior";
+import { SelectableDataPoint, Behavior } from "../src/behavior";
 
 // powerbi.extensibility.utils.test
 import { assertColorsMatch } from "powerbi-visuals-utils-testutils";
@@ -86,13 +85,8 @@ describe("ChordChart", () => {
 
     it("update", (done) => {
       visualBuilder.updateRenderTimeout(dataView, () => {
-        if (!dataView.categorical || !dataView.categorical.values || !dataView.categorical.categories) {
-          fail("dataView.categorical.values is empty");
-          return;
-        }
-
         const valuesLength: number = lodashSum(
-          dataView.categorical.values.map((column: DataViewValueColumn) => {
+          dataView.categorical!.values!.map((column: DataViewValueColumn) => {
             const notEmptyValues: PrimitiveValue[] = column.values.filter(
               (value: any) => {
                 return !isNaN(value) && value !== null;
@@ -104,8 +98,8 @@ describe("ChordChart", () => {
         );
 
         const categoriesLength: number =
-          dataView.categorical.values.length +
-          dataView.categorical.categories[0].values.length;
+          dataView.categorical!.values!.length +
+          dataView.categorical!.categories![0].values.length;
 
         expect(
           visualBuilder.mainElement
@@ -356,20 +350,14 @@ describe("ChordChart", () => {
       });
 
       it("colors", () => {
-        if (!dataView.categorical || !dataView.categorical.categories || !dataView.categorical.categories[0]) {
-          fail("dataView.categorical.categories is empty");
-          return;
-        }
-
         dataView.metadata.objects = {
           dataPoint: {
             showAllDataPoints: true,
           },
         };
 
-        const category: DataViewCategoryColumn =
-            dataView.categorical.categories[0],
-          colors: string[] = getRandomUniqueHexColors(category.values.length);
+        const category: DataViewCategoryColumn = dataView.categorical!.categories![0];
+        const colors: string[] = getRandomUniqueHexColors(category.values.length);
 
         category.objects = [];
 
@@ -514,12 +502,15 @@ describe("ChordChart", () => {
   describe("Selection", () => {
     it("datapoint should be selected on click", (done) => {
       visualBuilder.updateRenderTimeout(dataView, () => {
-        const element: SVGElement = visualBuilder.slices[0];
-        element.dispatchEvent(new MouseEvent("click"));
+        const randomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+        const element: SVGElement = visualBuilder.slices[randomIndex];
 
         const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();;
+        const opacity: number = parseFloat(getComputedStyle(element).opacity);
 
+        element.dispatchEvent(new MouseEvent("click"));
         expect(datum.selected).toBeTrue();
+        expect(opacity).toBe(Behavior.FullOpacity);
 
         done();
       });
@@ -527,20 +518,93 @@ describe("ChordChart", () => {
 
     it("multiple datapoints should be selected on click", (done) => {
       visualBuilder.updateRenderTimeout(dataView, () => {
-        const firstElement: SVGElement = visualBuilder.slices[0];
-        const secondElement: SVGElement = visualBuilder.slices[1];
-        firstElement.dispatchEvent(new MouseEvent("click"));
-        secondElement.dispatchEvent(new MouseEvent("click", { ctrlKey: true }));
-
-        const firstDatum: SelectableDataPoint = <SelectableDataPoint>select(firstElement).datum();;
-        const secondDatum: SelectableDataPoint = <SelectableDataPoint>select(secondElement).datum();;
-
-        expect(firstDatum.selected).toBeTrue();
-        expect(secondDatum.selected).toBeTrue();
+        testClickEvent({ ctrlKey: true });
+        testClickEvent({ metaKey: true });
+        testClickEvent({ shiftKey: true });
 
         done();
       });
-    });
+
+      function testClickEvent(eventInitDict: MouseEventInit) {
+        const firstRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+        let secondRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+        if (firstRandomIndex === secondRandomIndex) {
+          secondRandomIndex = (secondRandomIndex + 1) % visualBuilder.slices.length;
+        }
+
+        const firstElement: SVGElement = visualBuilder.slices[firstRandomIndex];
+        const secondElement: SVGElement = visualBuilder.slices[secondRandomIndex];
+
+        firstElement.dispatchEvent(new MouseEvent("click"));
+        secondElement.dispatchEvent(new MouseEvent("click", eventInitDict));
+
+        const firstDatum: SelectableDataPoint = <SelectableDataPoint>select(firstElement).datum();;
+        const secondDatum: SelectableDataPoint = <SelectableDataPoint>select(secondElement).datum();;
+        const firstOpacity: number = parseFloat(getComputedStyle(firstElement).opacity);
+        const secondOpacity: number = parseFloat(getComputedStyle(secondElement).opacity);
+
+        expect(firstDatum.selected).toBeTrue();
+        expect(secondDatum.selected).toBeTrue();
+        expect(firstOpacity).toBe(Behavior.FullOpacity);
+        expect(firstOpacity).toBe(secondOpacity);
+
+        for (let i = 0; i < visualBuilder.slices.length; i++) {
+          if (i === firstRandomIndex || i === secondRandomIndex) {
+            continue;
+          }
+
+          const element: SVGElement = visualBuilder.slices[i];
+          const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();
+          const opacity: number = parseFloat(getComputedStyle(element).opacity);
+
+          expect(datum.selected).toBeFalse();
+          expect(opacity).toBe(Behavior.DimmedOpacity);
+        }
+      }
+    })
+
+    it("clicking on single datapoint makes other style with dimmed opacity", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        const randomIndex = Math.floor(Math.random() * visualBuilder.slices.length);
+        const element: SVGElement = visualBuilder.slices[randomIndex];
+
+        element.dispatchEvent(new MouseEvent("click"));
+        const randomElementOpacity: number = parseFloat(getComputedStyle(element).opacity);
+        expect(randomElementOpacity).toBe(Behavior.FullOpacity);
+
+        for (let i = 0; i < visualBuilder.slices.length; i++) {
+          if (i === randomIndex) continue;
+
+          const opacity: number = parseFloat(getComputedStyle(visualBuilder.slices[i]).opacity);
+          expect(opacity).toBe(Behavior.DimmedOpacity);
+        }
+
+        done();
+      });
+    })
+
+    it("clicking on empty space should clear selection", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        const randomIndex = Math.floor(Math.random() * visualBuilder.slices.length);
+        const element: SVGElement = visualBuilder.slices[randomIndex];
+        const svg: SVGElement = visualBuilder.svg;
+        const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();;
+        
+        expect(datum.selected).toBeFalse();
+        element.dispatchEvent(new MouseEvent("click"));
+        expect(datum.selected).toBeTrue();
+        svg.dispatchEvent(new MouseEvent("click"));
+
+        for (let i = 0; i < visualBuilder.slices.length; i++) {
+          const dataPoint: SelectableDataPoint = <SelectableDataPoint>select(visualBuilder.slices[i]).datum();
+          const opacity: number = parseFloat(getComputedStyle(visualBuilder.slices[i]).opacity);
+          expect(dataPoint.selected).toBeFalse();
+          expect(opacity).toBe(Behavior.FullOpacity);
+        }
+
+        done();
+      });
+    })
   });
 
   describe("Accessibility", () => {

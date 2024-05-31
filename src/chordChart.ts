@@ -238,6 +238,7 @@ export class ChordChart implements IVisual {
   private static setHighContrastMode(settings: ChordChartSettingsModel, colorPalette?: IColorPalette): void {
     const colorHelper: ColorHelper = new ColorHelper(colorPalette);
 
+    if (colorHelper.isHighContrast) {
     settings.axis.color.value.value = colorHelper.getHighContrastColor(
       "foreground",
       settings.axis.color.value.value
@@ -257,6 +258,8 @@ export class ChordChart implements IVisual {
       "foreground",
       settings.chord.strokeColor.value.value
     );
+
+    }
 
     if (colorPalette && colorHelper.isHighContrast) {
       settings.chord.strokeWidth.value = settings.chord.strokeWidth.options.maxValue.value;
@@ -568,10 +571,6 @@ export class ChordChart implements IVisual {
   }
 
   constructor(options: VisualConstructorOptions) {
-    if (window.location !== window.parent.location) {
-      require("core-js/stable");
-    }
-
     this.host = options.host;
 
     this.selectionManager = this.host.createSelectionManager();
