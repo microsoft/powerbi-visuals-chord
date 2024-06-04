@@ -30,7 +30,7 @@ import "./../style/chordChart.less";
 // d3
 import { sum, range } from "d3-array";
 import { arc, Arc, DefaultArcObject } from "d3-shape";
-import { chord, ribbon, Chords, ChordLayout, ChordGroup } from "d3-chord";
+import { chord, ribbon, Chord, Chords, ChordLayout, ChordGroup } from "d3-chord";
 import { select, Selection } from "d3-selection";
 
 // powerbi
@@ -43,6 +43,7 @@ import DataViewMetadataColumn = powerbiVisualsApi.DataViewMetadataColumn;
 import DataViewValueColumnGroup = powerbiVisualsApi.DataViewValueColumnGroup;
 import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
 import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
+import DataViewValueColumns = powerbi.DataViewValueColumns;
 
 // powerbi.extensibility
 import IColorPalette = powerbiVisualsApi.extensibility.IColorPalette;
@@ -122,6 +123,7 @@ export interface ChordChartData {
   settings: ChordChartSettingsModel;
   dataView: DataView;
   dataMatrix: number[][];
+  highlightsMatrix: number[][];
   tooltipData: ChordTooltipData[][];
   sliceTooltipData: ChordTooltipData[];
   tickUnit: number;
@@ -130,7 +132,11 @@ export interface ChordChartData {
   prevAxisVisible: boolean;
 
   groups: ChordArcDescriptor[];
-  chords: any[];
+  chords: Chords;
+}
+
+export interface ChordWithHighlight extends Chord {
+  highlight: number;
 }
 
 export type ChordChartCategoricalDict = NonNullable<unknown>;
@@ -209,6 +215,8 @@ export class ChordChart implements IVisual {
   private selectionManager: ISelectionManager;
   private formattingSettingsService: FormattingSettingsService;
   private settings: ChordChartSettingsModel;
+
+  private hasHighlights: boolean;
 
   private localizationManager: ILocalizationManager;
 
@@ -305,6 +313,7 @@ export class ChordChart implements IVisual {
     }
 
     const dataMatrix: number[][] = [];
+    const highlightsMatrix: number[][] = [];
     const renderingDataMatrix: number[][] = [];
     const toolTipData: ChordTooltipData[][] = [];
     const sliceTooltipData: ChordTooltipData[] = [];
@@ -439,9 +448,11 @@ export class ChordChart implements IVisual {
       renderingDataMatrix.push([]);
       dataMatrix.push([]);
       toolTipData.push([]);
+      highlightsMatrix.push([]);
 
       for (let j: number = 0, jLength: number = totalFields.length; j < jLength; j++) {
         let elementValue: number = 0;
+        let highlightsValue: number = 0;
         let tooltipInfo: VisualTooltipDataItem[] = [];
 
         if (catIndex[totalFields[i]] !== undefined && seriesIndex[totalFields[j]] !== undefined) {
@@ -450,6 +461,7 @@ export class ChordChart implements IVisual {
 
           if (columns.Y && columns.Y[col].values[row] !== null) {
             elementValue = <number>columns.Y[col].values[row];
+            highlightsValue = columns.Y[col].highlights && <number>columns.Y[col].highlights[row] || 0;
 
             if (elementValue > max) {
               max = elementValue;
@@ -485,6 +497,7 @@ export class ChordChart implements IVisual {
 
           if (columns.Y && columns.Y[col].values[row] !== null) {
             elementValue = <number>columns.Y[col].values[row];
+            highlightsValue = columns.Y[col].highlights && <number>columns.Y[col].highlights[row] || 0;
           } else if (!columns.Y) {
             elementValue = ChordChart.defaultValue1;
           }
@@ -492,6 +505,7 @@ export class ChordChart implements IVisual {
 
         renderingDataMatrix[i].push(Math.max(elementValue || 0, 0));
         dataMatrix[i].push(elementValue || 0);
+        highlightsMatrix[i].push(highlightsValue);
         toolTipData[i].push({
           tooltipInfo: tooltipInfo,
         });
@@ -524,6 +538,7 @@ export class ChordChart implements IVisual {
 
     return {
       dataMatrix: dataMatrix,
+      highlightsMatrix: highlightsMatrix,
       dataView: dataView,
       settings: settings,
       tooltipData: toolTipData,
@@ -623,6 +638,7 @@ export class ChordChart implements IVisual {
         this.colors,
         this.localizationManager
       );
+      this.hasHighlights = this.dataViewHasHighlights(options.dataViews[0]);
 
       if (!this.data) {
         this.clear();
@@ -644,6 +660,12 @@ export class ChordChart implements IVisual {
   public getFormattingModel(): powerbi.visuals.FormattingModel {
     this.settings.populateDataPoints(this.data.groups);
     return this.formattingSettingsService.buildFormattingModel(this.settings);
+  }
+
+  private dataViewHasHighlights(dataView: DataView): boolean {
+      const values = (dataView?.categorical?.values?.length && dataView.categorical.values) || <DataViewValueColumns>[];
+      const highlightsExist = values.some(({ highlights }) => highlights?.some(Number.isInteger));
+      return !!highlightsExist;
   }
 
   // Calculate radius
@@ -779,9 +801,7 @@ export class ChordChart implements IVisual {
         .classed(ChordChart.chordClass.className, true)
     );
     chordShapes
-      .style("fill", (chordLink: any) => {
-        return this.data.groups[chordLink.target.index].data.barFillColor;
-      })
+      .style("fill", (chordLink: Chord) => this.data.groups[chordLink.target.index].data.barFillColor)
       .style("stroke", this.settings.chord.strokeColor.value.value)
       .style(
         "stroke-width",
@@ -797,10 +817,15 @@ export class ChordChart implements IVisual {
         arcSelection: sliceShapes,
         chordSelection: chordShapes,
         dataPoints: this.data.groups,
+        hasHighlights: this.hasHighlights,
+        highlightsMatrix: this.data.highlightsMatrix,
       })
+
+      // Check if there is a selection or highlights, and render them if they exist
+      this.behavior.renderSelectionAndHighlights();
     }
 
-    this.tooltipServiceWrapper.addTooltip(chordShapes, (chordLink: any) => {
+    this.tooltipServiceWrapper.addTooltip(chordShapes, (chordLink: Chord) => {
       let tooltipInfo: VisualTooltipDataItem[] = [];
       const index = chordLink?.source?.index;
       const subindex = chordLink?.target?.index;

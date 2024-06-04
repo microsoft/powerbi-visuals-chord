@@ -1,5 +1,6 @@
 import powerbi from "powerbi-visuals-api";
 import { Selection } from "d3-selection";
+import { Chord, Chords } from "d3-chord";
 import { ChordArcDescriptor } from './interfaces';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import ISelectionId = powerbi.visuals.ISelectionId;
@@ -18,6 +19,8 @@ export interface BehaviorOptions {
     arcSelection: Selection<any, any, any, any>;
     chordSelection: Selection<any, any, any, any>;
     dataPoints: SelectableDataPoint[];
+    hasHighlights: boolean;
+    highlightsMatrix: number[][];
 }
 
 export class Behavior {
@@ -39,7 +42,7 @@ export class Behavior {
         this.bindContextMenuToClearCatcher();
     }
 
-    private bindClick() {
+    private bindClick(): void {
         this.options.arcSelection.on("click", (event: MouseEvent, dataPoint: ChordArcDescriptor) => {
             event.stopPropagation();
             this.select(dataPoint, event.ctrlKey || event.metaKey || event.shiftKey);
@@ -50,7 +53,7 @@ export class Behavior {
         });
     }
 
-    private bindContextMenu() {
+    private bindContextMenu(): void {
         this.options.arcSelection.on("contextmenu", (event: MouseEvent, dataPoint: ChordArcDescriptor) => {
             this.selectionManager.showContextMenu(dataPoint && dataPoint.identity ? dataPoint.identity : {}, {
                 x: event.clientX,
@@ -62,7 +65,7 @@ export class Behavior {
         });
     }
 
-    private bindContextMenuToClearCatcher() {
+    private bindContextMenuToClearCatcher(): void {
         this.options.clearCatcherSelection.on("contextmenu", (event: MouseEvent) => {
             this.selectionManager.showContextMenu({}, {
                 x: event.clientX,
@@ -74,17 +77,20 @@ export class Behavior {
         });
     }
 
-    private select(dataPoints: SelectableDataPoint | SelectableDataPoint[], multiSelect: boolean): void {
+    private get hasSelection(): boolean {
+        const selectionIds = this.selectionManager.getSelectionIds();
+        return selectionIds.length > 0;
+    }
+
+    private select(dataPoints: SelectableDataPoint, multiSelect: boolean): void {
         if (!dataPoints) {
             return;
         }
 
-        if (!Array.isArray(dataPoints)) {
-            dataPoints = [dataPoints];
-        }
+        const arrayDataPoints = [dataPoints];
 
         const selectionIdsToSelect: ISelectionId[] = [];
-        for (const dataPoint of dataPoints) {
+        for (const dataPoint of arrayDataPoints) {
             if (!dataPoint || !dataPoint.identity) {
                 continue;
             }
@@ -93,30 +99,24 @@ export class Behavior {
         }
 
         this.selectionManager.select(selectionIdsToSelect, multiSelect);
-        this.syncSelectionState();
-        this.renderSelection();
+        this.renderSelectionAndHighlights();
     }
 
     private clear(): void {
         this.selectionManager.clear();
+        this.renderSelectionAndHighlights();
+    }
+
+    public renderSelectionAndHighlights(): void {
         this.syncSelectionState();
-        this.renderSelection();
-    }
-
-    private get hasSelection(): boolean {
-        const selectionIds = this.selectionManager.getSelectionIds();
-        return selectionIds.length > 0;
-    }
-
-    private renderSelection() {
-        if (this.hasSelection) {
-            this.renderDataPointSelection();
+        if (this.hasSelection || this.options.hasHighlights) {
+            this.renderDataPoints();
         } else {
             this.renderClearSelection();
         }
     }
 
-    private syncSelectionState(): void {
+    public syncSelectionState(): void {
         const selectedIds: ISelectionId[] = <ISelectionId[]>this.selectionManager.getSelectionIds();
         for (const dataPoint of this.options.dataPoints) { 
             dataPoint.selected = this.isDataPointSelected(dataPoint, selectedIds);
@@ -127,23 +127,33 @@ export class Behavior {
         return selectedIds.some((value: ISelectionId) => value.includes(<ISelectionId>dataPoint.identity));
     }
 
-    private renderDataPointSelection(): void {
+    private renderDataPoints(): void {
         const { arcSelection, chordSelection } = this.options;
 
         chordSelection.style("opacity", Behavior.DimmedOpacity);
 
         arcSelection.style("opacity", (arcDescriptor: ChordArcDescriptor, arcIndex: number) => {
             const isArcSelected = arcDescriptor.selected;
+            const chords: Chords = <Chords>chordSelection.data();
 
             chordSelection
-                .filter((chordLink: any) => {
+                .filter((chordLink: Chord) => {
+                    const hasHighlights = this.options.highlightsMatrix[chordLink.source.index][chordLink.target.index] > 0;
+                    if (hasHighlights) return true;
+
                     return (chordLink.source.index === arcIndex && isArcSelected
                         || chordLink.target.index === arcIndex)
                         && isArcSelected;
                 })
                 .style("opacity", Behavior.FullOpacity)
 
-            return isArcSelected ? Behavior.FullOpacity : Behavior.DimmedOpacity;
+            if (isArcSelected) {
+                return Behavior.FullOpacity;
+            }
+            if (this.options.hasHighlights && this.isArcHighlighted(chords, arcIndex)) {
+                return Behavior.FullOpacity;
+            }
+            return Behavior.DimmedOpacity;
         });
     }
 
@@ -151,5 +161,21 @@ export class Behavior {
         const { arcSelection, chordSelection } = this.options;
         arcSelection.style("opacity", Behavior.FullOpacity);
         chordSelection.style("opacity", Behavior.FullOpacity);
+    }
+
+
+    private isArcHighlighted(chords: Chords, arcIndex: number): boolean {
+        const arcChords = chords.filter((chordLink: Chord) => chordLink.source.index === arcIndex || chordLink.target.index === arcIndex);
+        if (arcChords.length === 0) {
+            return false;
+        }
+
+        for (const chord of arcChords) {
+            const highlightValue = this.options.highlightsMatrix[chord.source.index][chord.target.index];
+            if (highlightValue <= 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }
