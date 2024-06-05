@@ -71,6 +71,9 @@ class LabelsSettingsCard extends Card {
         displayName: "Text size",
         displayNameKey: "Visual_Text_Size",
         value: 9,
+        options: {
+            minValue: { value: 0, type: ValidatorType.Min },
+        }
     });
 
     name: string = "labels";
