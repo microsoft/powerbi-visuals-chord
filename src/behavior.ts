@@ -1,5 +1,5 @@
 import powerbi from "powerbi-visuals-api";
-import { Selection } from "d3-selection";
+import { Selection, select as d3Select } from "d3-selection";
 import { Chord, Chords } from "d3-chord";
 import { ChordArcDescriptor } from './interfaces';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
@@ -16,8 +16,8 @@ export interface SelectableDataPoint extends BaseDataPoint {
 
 export interface BehaviorOptions {
     clearCatcherSelection: Selection<any, any, any, any>;
-    arcSelection: Selection<any, any, any, any>;
-    chordSelection: Selection<any, any, any, any>;
+    arcSelection: Selection<any, ChordArcDescriptor, any, any>;
+    chordSelection: Selection<any, Chord, any, any>;
     dataPoints: SelectableDataPoint[];
     hasHighlights: boolean;
     highlightsMatrix: number[][];
@@ -45,7 +45,7 @@ export class Behavior {
     private bindClick(): void {
         this.options.arcSelection.on("click", (event: MouseEvent, dataPoint: ChordArcDescriptor) => {
             event.stopPropagation();
-            this.select(dataPoint, event.ctrlKey || event.metaKey || event.shiftKey);
+            this.selectDataPoint(dataPoint, event.ctrlKey || event.metaKey || event.shiftKey);
         });
 
         this.options.clearCatcherSelection.on("click", () => {
@@ -82,22 +82,12 @@ export class Behavior {
         return selectionIds.length > 0;
     }
 
-    private select(dataPoints: SelectableDataPoint, multiSelect: boolean): void {
-        if (!dataPoints) {
+    private selectDataPoint(dataPoint: SelectableDataPoint, multiSelect: boolean): void {
+        if (!dataPoint) {
             return;
         }
 
-        const arrayDataPoints = [dataPoints];
-
-        const selectionIdsToSelect: ISelectionId[] = [];
-        for (const dataPoint of arrayDataPoints) {
-            if (!dataPoint || !dataPoint.identity) {
-                continue;
-            }
-
-            selectionIdsToSelect.push(dataPoint.identity);
-        }
-
+        const selectionIdsToSelect: ISelectionId[] = [dataPoint.identity];
         this.selectionManager.select(selectionIdsToSelect, multiSelect);
         this.renderSelectionAndHighlights();
     }
@@ -124,36 +114,46 @@ export class Behavior {
     }
 
     private isDataPointSelected(dataPoint: SelectableDataPoint, selectedIds: ISelectionId[]): boolean {
-        return selectedIds.some((value: ISelectionId) => value.includes(<ISelectionId>dataPoint.identity));
+        return selectedIds.some((value: ISelectionId) => value.equals(<ISelectionId>dataPoint.identity));
     }
 
     private renderDataPoints(): void {
         const { arcSelection, chordSelection } = this.options;
+        const arcs: ChordArcDescriptor[] = <ChordArcDescriptor[]>arcSelection.data();
+        const chords: Chords = <Chords>chordSelection.data();
 
-        chordSelection.style("opacity", Behavior.DimmedOpacity);
+        arcSelection.each((arc: ChordArcDescriptor, arcIndex: number, nodes: HTMLElement[]) => {
+            const arcPoint = d3Select(nodes[arcIndex]);
 
-        arcSelection.style("opacity", (arcDescriptor: ChordArcDescriptor, arcIndex: number) => {
-            const isArcSelected = arcDescriptor.selected;
-            const chords: Chords = <Chords>chordSelection.data();
-
-            chordSelection
-                .filter((chordLink: Chord) => {
-                    const hasHighlights = this.options.highlightsMatrix[chordLink.source.index][chordLink.target.index] > 0;
-                    if (hasHighlights) return true;
-
-                    return (chordLink.source.index === arcIndex && isArcSelected
-                        || chordLink.target.index === arcIndex)
-                        && isArcSelected;
-                })
-                .style("opacity", Behavior.FullOpacity)
-
-            if (isArcSelected) {
-                return Behavior.FullOpacity;
+            let arcOpacity: number;
+            if (arc.selected) {
+                arcOpacity = Behavior.FullOpacity;
+            } else if (this.options.hasHighlights && this.isArcHighlighted(chords, arcIndex)) {
+                arcOpacity = Behavior.FullOpacity;
+            } else {
+                arcOpacity = Behavior.DimmedOpacity;
             }
-            if (this.options.hasHighlights && this.isArcHighlighted(chords, arcIndex)) {
-                return Behavior.FullOpacity;
+            arcPoint.style("opacity", arcOpacity);
+        });
+
+        chordSelection.each((chordLink: Chord, chordIndex: number, nodes: HTMLElement[]) => {
+            const chordPoint = d3Select(nodes[chordIndex]);
+            const chordArcs: ChordArcDescriptor[] = arcs.filter((arc: ChordArcDescriptor) => arc.index === chordLink.source.index || arc.index === chordLink.target.index);
+
+            const isChordHighlighted = this.options.highlightsMatrix[chordLink.source.index][chordLink.target.index] > 0;
+            if (isChordHighlighted) {
+                chordPoint.style("opacity", Behavior.FullOpacity);
+                return;
             }
-            return Behavior.DimmedOpacity;
+
+            let isChordSelected = false;
+            for (const arc of chordArcs) {
+                isChordSelected = arc.selected && (chordLink.source.index === arc.index || chordLink.target.index === arc.index);
+                if (isChordSelected) {
+                    break;
+                }
+            }
+            chordPoint.style("opacity", isChordSelected ? Behavior.FullOpacity : Behavior.DimmedOpacity)
         });
     }
 

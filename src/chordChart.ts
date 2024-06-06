@@ -135,9 +135,6 @@ export interface ChordChartData {
   chords: Chords;
 }
 
-export interface ChordWithHighlight extends Chord {
-  highlight: number;
-}
 
 export type ChordChartCategoricalDict = NonNullable<unknown>;
 
@@ -198,7 +195,7 @@ export class ChordChart implements IVisual {
   private labels: Selection<any, any, any, any>;
   private lines: Selection<any, any, any, any>;
   private mainGraphicsContext: Selection<any, any, any, any>;
-  private slices: Selection<any, any, any, any>;
+  private arcs: Selection<any, any, any, any>;
   private svg: Selection<any, any, any, any>;
 
   private colors: IColorPalette;
@@ -602,7 +599,7 @@ export class ChordChart implements IVisual {
 
     svgSelection.append("g").classed("chords", true);
 
-    this.slices = svgSelection.append("g").classed("slices", true);
+    this.arcs = svgSelection.append("g").classed("slices", true);
 
     svgSelection.append("g").classed(ChordChart.ticksClass.className, true);
 
@@ -767,29 +764,29 @@ export class ChordChart implements IVisual {
       "transform",
       translate(this.layout.viewport.width / 2, this.layout.viewport.height / 2)
     );
-    let sliceShapes: Selection<any, ChordArcDescriptor, any, any> =
-      this.slices
+    let arcShapes: Selection<any, ChordArcDescriptor, any, any> =
+      this.arcs
         .selectAll("path" + ChordChart.sliceClass.selectorName)
         .data(this.getChordTicksArcDescriptors());
-    sliceShapes.exit().remove();
-    sliceShapes = sliceShapes.merge(
-      sliceShapes
+    arcShapes.exit().remove();
+    arcShapes = arcShapes.merge(
+      arcShapes
         .enter()
         .append("path")
         .classed(ChordChart.sliceClass.className, true)
     );
-    sliceShapes
+    arcShapes
       .style("fill", (d) => d.data.barFillColor)
       .style("stroke", (d) => d.data.barStrokeColor)
       .attr("d", (d) => arcVal(<any>d));
     this.tooltipServiceWrapper.addTooltip(
-      sliceShapes,
+      arcShapes,
       (tooltipEvent: ChordArcDescriptor) => {
         return this.data.sliceTooltipData[tooltipEvent.index].tooltipInfo;
       }
     );
     const path: any = ribbon().radius(this.radius);
-    let chordShapes: Selection<any, any, any, any> = this.svg
+    let chordShapes: Selection<any, Chord, any, any> = this.svg
       .select(ChordChart.chordsClass.selectorName)
       .selectAll(ChordChart.chordClass.selectorName)
       .data(this.data.chords);
@@ -814,7 +811,7 @@ export class ChordChart implements IVisual {
     if (this.behavior && this.selectionManager) {
       this.behavior.bindEvents({
         clearCatcherSelection: this.svg,
-        arcSelection: sliceShapes,
+        arcSelection: arcShapes,
         chordSelection: chordShapes,
         dataPoints: this.data.groups,
         hasHighlights: this.hasHighlights,
@@ -918,7 +915,8 @@ export class ChordChart implements IVisual {
       maxValue = minValue = 0;
     }
     maxValue = Math.max.apply(null, groups.map((g: ChordGroup) => g.value));
-    minValue = maxValue;
+    minValue = Math.min.apply(null, groups.map((g: ChordGroup) => g.value));
+    // minValue = maxValue;
     // TODO: old code contained only 'max' calculation for minValue - check if it's correct
     // minValue = Math.max.apply(null, groups.map((g: ChordGroup) => g.value));
 
