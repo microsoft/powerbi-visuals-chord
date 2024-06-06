@@ -20,6 +20,7 @@ export interface BehaviorOptions {
     chordSelection: Selection<any, Chord, any, any>;
     dataPoints: SelectableDataPoint[];
     hasHighlights: boolean;
+    hasHighlightsObject: boolean;
     highlightsMatrix: number[][];
 }
 
@@ -101,6 +102,8 @@ export class Behavior {
         this.syncSelectionState();
         if (this.hasSelection || this.options.hasHighlights) {
             this.renderDataPoints();
+        } else if (!this.hasSelection && !this.options.hasHighlights && this.options.hasHighlightsObject) {
+            this.renderEmptyHighlights();
         } else {
             this.renderClearSelection();
         }
@@ -161,6 +164,12 @@ export class Behavior {
         const { arcSelection, chordSelection } = this.options;
         arcSelection.style("opacity", Behavior.FullOpacity);
         chordSelection.style("opacity", Behavior.FullOpacity);
+    }
+
+    private renderEmptyHighlights(): void {
+        const { arcSelection, chordSelection } = this.options;
+        arcSelection.style("opacity", Behavior.DimmedOpacity);
+        chordSelection.style("opacity", Behavior.DimmedOpacity);
     }
 
 

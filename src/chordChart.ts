@@ -214,6 +214,7 @@ export class ChordChart implements IVisual {
   private settings: ChordChartSettingsModel;
 
   private hasHighlights: boolean;
+  private hasHighlightsObject: boolean;
 
   private localizationManager: ILocalizationManager;
 
@@ -636,6 +637,7 @@ export class ChordChart implements IVisual {
         this.localizationManager
       );
       this.hasHighlights = this.dataViewHasHighlights(options.dataViews[0]);
+      this.hasHighlightsObject = this.dataViewHasHighlightsObject(options.dataViews[0]);
 
       if (!this.data) {
         this.clear();
@@ -663,6 +665,19 @@ export class ChordChart implements IVisual {
       const values = (dataView?.categorical?.values?.length && dataView.categorical.values) || <DataViewValueColumns>[];
       const highlightsExist = values.some(({ highlights }) => highlights?.some(Number.isInteger));
       return !!highlightsExist;
+  }
+
+  private dataViewHasHighlightsObject(dataView: DataView): boolean {
+    const values = (dataView?.categorical?.values?.length && dataView.categorical.values) || <DataViewValueColumns>[];
+    let highlightsObjectExists = false;
+    for (const valuesArray of values) {
+      if (valuesArray.highlights && valuesArray.highlights.length) {
+        highlightsObjectExists = true;
+        break;
+      }
+    }
+
+    return highlightsObjectExists;
   }
 
   // Calculate radius
@@ -815,6 +830,7 @@ export class ChordChart implements IVisual {
         chordSelection: chordShapes,
         dataPoints: this.data.groups,
         hasHighlights: this.hasHighlights,
+        hasHighlightsObject: this.hasHighlightsObject,
         highlightsMatrix: this.data.highlightsMatrix,
       })
 
