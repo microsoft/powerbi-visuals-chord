@@ -28,7 +28,7 @@ import "regenerator-runtime/runtime.js";
 import "./../style/chordChart.less";
 
 // d3
-import { sum, range } from "d3-array";
+import { sum } from "d3-array";
 import { arc, Arc, DefaultArcObject } from "d3-shape";
 import { chord, ribbon, Chord, Chords, ChordLayout, ChordGroup } from "d3-chord";
 import { select, Selection } from "d3-selection";
@@ -924,20 +924,9 @@ export class ChordChart implements IVisual {
 
   private getChordTicksArcDescriptors(): ChordArcDescriptor[] {
     const groups: ChordGroup[] = this.data.groups;
+    const chords: Chords = this.data.chords;
 
-    let maxValue: number;
-    let minValue: number;
-    if (isEmpty(groups)) {
-      maxValue = minValue = 0;
-    }
-    maxValue = Math.max.apply(null, groups.map((g: ChordGroup) => g.value));
-    minValue = Math.min.apply(null, groups.map((g: ChordGroup) => g.value));
-    // minValue = maxValue;
-    // TODO: old code contained only 'max' calculation for minValue - check if it's correct
-    // minValue = Math.max.apply(null, groups.map((g: ChordGroup) => g.value));
-
-    const radiusCoeff: number =
-      (this.radius / Math.abs(maxValue - minValue)) * 1.25;
+    const maxValue = isEmpty(groups) ? 0 : Math.max.apply(null, groups.map((g: ChordGroup) => g.value));
 
     const formatter: IValueFormatter = create({
       format: ChordChart.DefaultFormatValue,
@@ -945,30 +934,25 @@ export class ChordChart implements IVisual {
     });
 
     groups.forEach((x: ChordArcDescriptor) => {
+      const sourceChords = chords
+        .filter((chord: Chord) => chord.source.index === x.index)
+        .map((chord: Chord) => chord.source.value)
+
+      const targetChords = chords
+        .filter((chord: Chord) => chord.target.index === x.index)
+        .map((chord: Chord) => chord.target.value)
+
+      for (let i = 1; i < sourceChords.length; i++) {
+        sourceChords[i] = sourceChords[i] + sourceChords[i - 1];
+      }
+
+      for (let i = 1; i < targetChords.length; i++) {
+        targetChords[i] = targetChords[i] + targetChords[i - 1];
+      }
+
+      const rangeValue: number[] = [0].concat(sourceChords, targetChords);
+
       const k: number = (x.endAngle - x.startAngle) / x.value;
-      const absValue: number = Math.abs(x.value);
-        let rangeValue: number[] = range(
-          0,
-          absValue,
-          absValue - 1 < 0.15 ? 0.15 : absValue - 1
-        );
-
-      if (x.value < 0) {
-        rangeValue = rangeValue.map((x) => x * -1).reverse();
-      }
-
-      for (let i: number = 1; i < rangeValue.length; i++) {
-        const gapSize: number = Math.abs(rangeValue[i] - rangeValue[i - 1]) * radiusCoeff;
-
-        if (gapSize < ChordChart.TicksFontSize) {
-          if (rangeValue.length > 2 && i === rangeValue.length - 1) {
-            rangeValue.splice(--i, 1);
-          } else {
-            rangeValue.splice(i--, 1);
-          }
-        }
-      }
-
       x.angleLabels = rangeValue.map(
         (v) =>
           <any>{ angle: v * k + x.startAngle, label: formatter.format(v) }

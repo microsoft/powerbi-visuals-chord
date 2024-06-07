@@ -7,6 +7,7 @@
 * Replace larget package 'snyk' with '@snyk/protect'
 * Update outdated packages
 * Remove powerbi-visuals-interactivity-utils
+* Refactor 'getChordTicksArcDescriptors' to show ticks for each chord
 
 ## 2.2.0
 * Add context menu handling
