@@ -24,6 +24,14 @@ export interface BehaviorOptions {
     highlightsMatrix: number[][];
 }
 
+export interface HighlightedChord extends Chord {
+    hasHighlight: boolean;
+}
+
+export interface ChordsHighlighted extends Chords {
+    highlightedChords: HighlightedChord[];
+}
+
 export class Behavior {
     public static readonly FullOpacity: number = 1;
     public static readonly DimmedOpacity: number = 0.3;
@@ -123,7 +131,7 @@ export class Behavior {
     private renderDataPoints(): void {
         const { arcSelection, chordSelection } = this.options;
         const arcs: ChordArcDescriptor[] = <ChordArcDescriptor[]>arcSelection.data();
-        const chords: Chords = <Chords>chordSelection.data();
+        const chords: ChordsHighlighted = <ChordsHighlighted>chordSelection.data();
 
         arcSelection.each((arc: ChordArcDescriptor, arcIndex: number, nodes: HTMLElement[]) => {
             const arcPoint = d3Select(nodes[arcIndex]);
@@ -139,13 +147,14 @@ export class Behavior {
             arcPoint.style("opacity", arcOpacity);
         });
 
-        chordSelection.each((chordLink: Chord, chordIndex: number, nodes: HTMLElement[]) => {
+        chordSelection.each((chordLink: HighlightedChord, chordIndex: number, nodes: HTMLElement[]) => {
             const chordPoint = d3Select(nodes[chordIndex]);
             const chordArcs: ChordArcDescriptor[] = arcs.filter((arc: ChordArcDescriptor) => arc.index === chordLink.source.index || arc.index === chordLink.target.index);
 
             const isChordHighlighted = this.options.highlightsMatrix[chordLink.source.index][chordLink.target.index] > 0;
             if (isChordHighlighted) {
                 chordPoint.style("opacity", Behavior.FullOpacity);
+                chordLink.hasHighlight = true;
                 return;
             }
 
@@ -157,6 +166,7 @@ export class Behavior {
                 }
             }
             chordPoint.style("opacity", isChordSelected ? Behavior.FullOpacity : Behavior.DimmedOpacity)
+            chordLink.hasHighlight = isChordHighlighted || isChordSelected;
         });
     }
 

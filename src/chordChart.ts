@@ -113,7 +113,7 @@ import { VisualLayout } from "./visualLayout";
 import { ChordChartColumns, ChordChartCategoricalColumns } from "./columns";
 import { createTooltipInfo } from "./tooltipBuilder";
 import { ChordChartSettingsModel } from "./chordChartSettingsModel";
-import { Behavior } from './behavior';
+import { Behavior, HighlightedChord, ChordsHighlighted } from './behavior';
 
 import { mapValues, invert, isEmpty } from "./utils";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
@@ -199,7 +199,7 @@ export class ChordChart implements IVisual {
   private svg: Selection<any, any, any, any>;
 
   private colors: IColorPalette;
-  private data: ChordChartData;
+  public data: ChordChartData;
   private layout: VisualLayout;
 
   private duration: number = 250;
@@ -525,8 +525,11 @@ export class ChordChart implements IVisual {
     chordLayout.padAngle(ChordChart.ChordLayoutPadding);
     const chords: Chords = chordLayout(renderingDataMatrix);
 
+    const highlightedChords: HighlightedChord[] = chords.map((chord) => Object.assign({}, chord, { hasHighlight: false }) );
+    const chordsWithHighlight: ChordsHighlighted = Object.assign(chords, { highlightedChords: highlightedChords });
+
     const groups: ChordArcDescriptor[] = ChordChart.getChordArcDescriptors(
-      ChordChart.COPY_ARC_DESCRIPTORS_WITHOUT_NAN_VALUES(chords.groups),
+      ChordChart.COPY_ARC_DESCRIPTORS_WITHOUT_NAN_VALUES(chordsWithHighlight.groups),
       labelData,
       selectionIds
     );
@@ -546,7 +549,7 @@ export class ChordChart implements IVisual {
       prevAxisVisible:
         prevAxisVisible === undefined ? settings.axis.show.value : prevAxisVisible,
       groups: groups,
-      chords: chords,
+      chords: chordsWithHighlight,
     };
   }
 

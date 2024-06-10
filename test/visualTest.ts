@@ -26,7 +26,7 @@
 
 // d3
 import { select } from "d3-selection";
-import { ChordGroup } from "d3-chord";
+import { Chord, ChordGroup } from "d3-chord";
 
 import powerbiVisualsApi from "powerbi-visuals-api";
 import DataView = powerbiVisualsApi.DataView;
@@ -35,7 +35,7 @@ import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
 import DataViewCategoryColumn = powerbiVisualsApi.DataViewCategoryColumn;
 import DataViewObjects = powerbiVisualsApi.DataViewObjects;
 
-import { SelectableDataPoint, Behavior } from "../src/behavior";
+import { SelectableDataPoint, Behavior, HighlightedChord } from '../src/behavior';
 
 // powerbi.extensibility.utils.test
 import { assertColorsMatch } from "powerbi-visuals-utils-testutils";
@@ -499,8 +499,7 @@ describe("ChordChart", () => {
         const randomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
         const element: SVGElement = visualBuilder.slices[randomIndex];
 
-        const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();;
-        const opacity: number = parseFloat(getComputedStyle(element).opacity);
+        const { datum, opacity } = getDatumAndOpacity(element);
 
         element.dispatchEvent(new MouseEvent("click"));
         expect(datum.selected).toBeTrue();
@@ -519,42 +518,6 @@ describe("ChordChart", () => {
         done();
       });
 
-      function testClickEvent(eventInitDict: MouseEventInit) {
-        const firstRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
-        let secondRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
-        if (firstRandomIndex === secondRandomIndex) {
-          secondRandomIndex = (secondRandomIndex + 1) % visualBuilder.slices.length;
-        }
-
-        const firstElement: SVGElement = visualBuilder.slices[firstRandomIndex];
-        const secondElement: SVGElement = visualBuilder.slices[secondRandomIndex];
-
-        firstElement.dispatchEvent(new MouseEvent("click"));
-        secondElement.dispatchEvent(new MouseEvent("click", eventInitDict));
-
-        const firstDatum: SelectableDataPoint = <SelectableDataPoint>select(firstElement).datum();;
-        const secondDatum: SelectableDataPoint = <SelectableDataPoint>select(secondElement).datum();;
-        const firstOpacity: number = parseFloat(getComputedStyle(firstElement).opacity);
-        const secondOpacity: number = parseFloat(getComputedStyle(secondElement).opacity);
-
-        expect(firstDatum.selected).toBeTrue();
-        expect(secondDatum.selected).toBeTrue();
-        expect(firstOpacity).toBe(Behavior.FullOpacity);
-        expect(firstOpacity).toBe(secondOpacity);
-
-        for (let i = 0; i < visualBuilder.slices.length; i++) {
-          if (i === firstRandomIndex || i === secondRandomIndex) {
-            continue;
-          }
-
-          const element: SVGElement = visualBuilder.slices[i];
-          const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();
-          const opacity: number = parseFloat(getComputedStyle(element).opacity);
-
-          expect(datum.selected).toBeFalse();
-          expect(opacity).toBe(Behavior.DimmedOpacity);
-        }
-      }
     })
 
     it("clicking on single datapoint makes other style with dimmed opacity", (done) => {
@@ -583,15 +546,14 @@ describe("ChordChart", () => {
         const element: SVGElement = visualBuilder.slices[randomIndex];
         const svg: SVGElement = visualBuilder.svg;
         const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();;
-        
+
         expect(datum.selected).toBeFalse();
         element.dispatchEvent(new MouseEvent("click"));
         expect(datum.selected).toBeTrue();
         svg.dispatchEvent(new MouseEvent("click"));
 
         for (let i = 0; i < visualBuilder.slices.length; i++) {
-          const dataPoint: SelectableDataPoint = <SelectableDataPoint>select(visualBuilder.slices[i]).datum();
-          const opacity: number = parseFloat(getComputedStyle(visualBuilder.slices[i]).opacity);
+          const { datum: dataPoint, opacity } = getDatumAndOpacity(visualBuilder.slices[i]);
           expect(dataPoint.selected).toBeFalse();
           expect(opacity).toBe(Behavior.FullOpacity);
         }
@@ -599,6 +561,40 @@ describe("ChordChart", () => {
         done();
       });
     })
+
+    function testClickEvent(eventInitDict: MouseEventInit) {
+      const firstRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+      let secondRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+      if (firstRandomIndex === secondRandomIndex) {
+        secondRandomIndex = (secondRandomIndex + 1) % visualBuilder.slices.length;
+      }
+
+      const firstElement: SVGElement = visualBuilder.slices[firstRandomIndex];
+      const secondElement: SVGElement = visualBuilder.slices[secondRandomIndex];
+
+      firstElement.dispatchEvent(new MouseEvent("click"));
+      secondElement.dispatchEvent(new MouseEvent("click", eventInitDict));
+
+      const { datum: firstDatum, opacity: firstOpacity } = getDatumAndOpacity(firstElement);
+      const { datum: secondDatum, opacity: secondOpacity } = getDatumAndOpacity(secondElement);
+
+      expect(firstDatum.selected).toBeTrue();
+      expect(secondDatum.selected).toBeTrue();
+      expect(firstOpacity).toBe(Behavior.FullOpacity);
+      expect(firstOpacity).toBe(secondOpacity);
+
+      for (let i = 0; i < visualBuilder.slices.length; i++) {
+        if (i === firstRandomIndex || i === secondRandomIndex) {
+          continue;
+        }
+
+        const element: SVGElement = visualBuilder.slices[i];
+        const { datum, opacity } : { datum: SelectableDataPoint, opacity: number } = getDatumAndOpacity(element);
+
+        expect(datum.selected).toBeFalse();
+        expect(opacity).toBe(Behavior.DimmedOpacity);
+      }
+    }
   });
 
   describe("Accessibility", () => {
@@ -659,3 +655,43 @@ describe("ChordChart", () => {
     });
   });
 });
+
+describe("ChordChart highlights", () => {
+  let visualBuilder: ChordChartBuilder,
+    defaultDataViewBuilder: ChordChartData,
+    dataView: DataView;
+
+  it("should highlight data points", (done) => {
+    visualBuilder = new ChordChartBuilder(1000, 500);
+    defaultDataViewBuilder = new ChordChartData();
+
+    dataView = defaultDataViewBuilder.getDataView();
+
+    if (!dataView?.categorical?.values) return;
+
+    dataView.categorical.values[0].highlights = dataView.categorical.values[0].values;
+
+    visualBuilder.updateRenderTimeout(dataView, () => {
+      for (let i = 0; i < visualBuilder.chords.length; i++) {
+        const chord: HighlightedChord = <HighlightedChord>select(visualBuilder.chords[i]).datum();
+        const opacity: number = parseFloat(getComputedStyle(visualBuilder.chords[i]).opacity);
+
+        if (chord.hasHighlight) {
+          expect(opacity).toBe(Behavior.FullOpacity);
+        } else {
+          expect(opacity).toBe(Behavior.DimmedOpacity);
+        }
+      }
+
+      done();
+    })
+  });
+});
+
+
+function getDatumAndOpacity(element: SVGElement) {
+  const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();
+  const opacity: number = parseFloat(getComputedStyle(element).opacity);
+
+  return { datum, opacity };
+}
