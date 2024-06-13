@@ -128,6 +128,15 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "color": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -164,8 +173,27 @@
                     }
                 }
             }
+        },
+        "chord": {
+            "properties": {
+                "strokeColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "strokeWidth": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
         }
     },
+    "privileges": [],
     "supportsHighlight": true,
     "supportsKeyboardFocus": true,
     "supportsMultiVisualSelection": true

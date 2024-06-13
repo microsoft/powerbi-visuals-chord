@@ -26,7 +26,7 @@
 
 // d3
 import { select } from "d3-selection";
-import ChordGroup = d3.ChordGroup;
+import { Chord, ChordGroup } from "d3-chord";
 
 import powerbiVisualsApi from "powerbi-visuals-api";
 import DataView = powerbiVisualsApi.DataView;
@@ -34,11 +34,8 @@ import DataViewValueColumn = powerbiVisualsApi.DataViewValueColumn;
 import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
 import DataViewCategoryColumn = powerbiVisualsApi.DataViewCategoryColumn;
 import DataViewObjects = powerbiVisualsApi.DataViewObjects;
-import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
 
-// powerbi.extensibility.utils.interactivity
-import { interactivitySelectionService } from "powerbi-visuals-utils-interactivityutils";
-import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
+import { SelectableDataPoint, Behavior, HighlightedChord } from '../src/behavior';
 
 // powerbi.extensibility.utils.test
 import { assertColorsMatch } from "powerbi-visuals-utils-testutils";
@@ -58,76 +55,74 @@ import {
   isTextElementInOrOutElement,
   getSolidColorStructuralObject,
 } from "./helpers/helpers";
+import { isNumber, range } from '../src/utils';
 
-import {
-  sum as lodashSum,
-  range as lodashRange,
-  isNumber as lodashIsNumber,
-} from "lodash";
+import { ChordChartSettingsModel } from '../src/chordChartSettingsModel';
+import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
 describe("ChordChart", () => {
   let visualBuilder: ChordChartBuilder,
     defaultDataViewBuilder: ChordChartData,
-    dataView: DataView;
+    dataView: DataView,
+    settings: ChordChartSettingsModel;
 
   beforeEach(() => {
     visualBuilder = new ChordChartBuilder(1000, 500);
     defaultDataViewBuilder = new ChordChartData();
 
     dataView = defaultDataViewBuilder.getDataView();
+    settings = new FormattingSettingsService().populateFormattingSettingsModel(ChordChartSettingsModel, dataView);
   });
 
   describe("DOM tests", () => {
     it("svg element created", () => {
-      expect(visualBuilder.mainElement[0]).toBeInDOM;
+      expect(visualBuilder.mainElement).toBeTruthy();
     });
 
     it("update", (done) => {
       visualBuilder.updateRenderTimeout(dataView, () => {
-        const valuesLength: number = lodashSum(
-          dataView.categorical.values.map((column: DataViewValueColumn) => {
-            const notEmptyValues: PrimitiveValue[] = column.values.filter(
-              (value: any) => {
-                return !isNaN(value) && value !== null;
-              }
-            );
+        const valuesLength: number = dataView.categorical!.values!.map((column: DataViewValueColumn) => {
+          const notEmptyValues: PrimitiveValue[] = column.values.filter(
+            (value: any) => {
+              return !isNaN(value) && value !== null;
+            }
+          );
 
-            return notEmptyValues.length;
-          })
-        );
+          return notEmptyValues.length;
+        }).reduce((a, b) => a + b, 0);
 
         const categoriesLength: number =
-          dataView.categorical.values.length +
-          dataView.categorical.categories[0].values.length;
+          dataView.categorical!.values!.length +
+          dataView.categorical!.categories![0].values.length;
 
         expect(
           visualBuilder.mainElement
             .querySelector("g.chords")
-            .querySelectorAll("path").length
+            ?.querySelectorAll("path").length
         ).toBe(valuesLength);
 
         expect(
           visualBuilder.mainElement
             .querySelector("g.ticks")
-            .querySelectorAll("g.slice-ticks").length
+            ?.querySelectorAll("g.slice-ticks").length
         ).toBe(categoriesLength);
 
         expect(
           visualBuilder.mainElement
             .querySelector("g.slices")
-            .querySelectorAll("path.slice").length
+            ?.querySelectorAll("path.slice").length
         ).toBe(categoriesLength);
 
         expect(
           visualBuilder.element
             .querySelector(".chordChart")
-            .getAttribute("height")
+            ?.getAttribute("height")
         ).toBe(visualBuilder.viewport.height.toString());
 
         expect(
           visualBuilder.element
             .querySelector(".chordChart")
-            .getAttribute("width")
+            ?.getAttribute("width")
         ).toBe(visualBuilder.viewport.width.toString());
 
         done();
@@ -170,9 +165,11 @@ describe("ChordChart", () => {
     });
 
     it("shouldn't throw any unexpected exceptions when category value is null", () => {
+      // @ts-ignore
       defaultDataViewBuilder.valuesCategoryGroup[5][0] = null;
       expect(() => {
         ChordChart.CONVERTER(
+          settings,
           defaultDataViewBuilder.getDataView(),
           visualBuilder.visualHost,
           visualBuilder.visualHost.colorPalette,
@@ -185,7 +182,7 @@ describe("ChordChart", () => {
       visualBuilder.viewport.height = 200;
       visualBuilder.viewport.width = 200;
 
-      defaultDataViewBuilder.valuesValue = lodashRange(
+      defaultDataViewBuilder.valuesValue = range(
         1,
         defaultDataViewBuilder.valuesCategoryGroup.length
       );
@@ -224,13 +221,13 @@ describe("ChordChart", () => {
       visualBuilder.viewport.height = 500;
       visualBuilder.viewport.width = 500;
 
-      defaultDataViewBuilder.valuesCategoryGroup = lodashRange(20).map(
+      defaultDataViewBuilder.valuesCategoryGroup = range(20).map(
         (value: number) => {
           return [value + "xxxxxxxxxxx", value + "yyyyyyyyyyyyyy"];
         }
       );
 
-      defaultDataViewBuilder.valuesValue = lodashRange(
+      defaultDataViewBuilder.valuesValue = range(
         1,
         defaultDataViewBuilder.valuesCategoryGroup.length
       );
@@ -248,10 +245,11 @@ describe("ChordChart", () => {
         const rightLabels: SVGElement[] = Array.from(
           visualBuilder.dataLabels
         ).filter((element: SVGElement) => {
-          return parseFloat(element.getAttribute("x")) > 0;
+          return parseFloat(element.getAttribute("x") || "") > 0;
         });
 
-        expect(rightLabels).toBeInDOM;
+        expect(rightLabels).toBeTruthy();
+        expect(rightLabels.length).toBeGreaterThan(0);
 
         done();
       });
@@ -271,12 +269,13 @@ describe("ChordChart", () => {
       it("show", () => {
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.sliceTicks).toBeInDOM;
+        expect(visualBuilder.sliceTicks).toBeTruthy();
+        expect(visualBuilder.sliceTicks.length).toBeGreaterThan(0);
 
         (<any>dataView.metadata.objects).axis.show = false;
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.sliceTicks).not.toBeInDOM;
+        expect(visualBuilder.sliceTicks.length).toBe(0);
       });
     });
 
@@ -292,12 +291,13 @@ describe("ChordChart", () => {
       it("show", () => {
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.dataLabels).toBeInDOM;
+        expect(visualBuilder.dataLabels).toBeTruthy();
+        expect(visualBuilder.dataLabels.length).toBeGreaterThan(0);
 
         (<any>dataView.metadata.objects).labels.show = false;
         visualBuilder.updateFlushAllD3Transitions(dataView);
 
-        expect(visualBuilder.dataLabels).not.toBeInDOM;
+        expect(visualBuilder.dataLabels.length).toBe(0);
       });
 
       it("color", () => {
@@ -350,14 +350,13 @@ describe("ChordChart", () => {
           },
         };
 
-        const category: DataViewCategoryColumn =
-            dataView.categorical.categories[0],
-          colors: string[] = getRandomUniqueHexColors(category.values.length);
+        const category: DataViewCategoryColumn = dataView.categorical!.categories![0];
+        const colors: string[] = getRandomUniqueHexColors(category.values.length);
 
         category.objects = [];
 
         category.values.forEach((value: PrimitiveValue, index: number) => {
-          category.objects[index] = <DataViewObjects>{
+          category.objects![index] = <DataViewObjects>{
             dataPoint: {
               fill: getSolidColorStructuralObject(colors[index]),
             },
@@ -380,7 +379,8 @@ describe("ChordChart", () => {
         color: string
       ): boolean {
         return elements.some((element: SVGElement) => {
-          return areColorsEqual(element.style["fill"], color);
+          const fill = getComputedStyle(element).fill;
+          return areColorsEqual(fill, color);
         });
       }
     });
@@ -433,6 +433,7 @@ describe("ChordChart", () => {
         });
 
       chordChartData = ChordChart.CONVERTER(
+        settings,
         defaultDataViewBuilder.getDataView(),
         visualBuilder.visualHost,
         visualBuilder.visualHost.colorPalette,
@@ -447,7 +448,7 @@ describe("ChordChart", () => {
     ): void {
       arcDescriptors.forEach((arcDescriptor: ChordGroup) => {
         for (let propertyName of Object.keys(arcDescriptor)) {
-          if (lodashIsNumber(arcDescriptor[propertyName])) {
+          if (isNumber(arcDescriptor[propertyName])) {
             expect(isNaN(arcDescriptor[propertyName])).toBeFalsy();
           }
         }
@@ -459,7 +460,8 @@ describe("ChordChart", () => {
     it("shouldn't throw any unexpected exceptions when Values field is undefined", () => {
       expect(() => {
         let chordChartData: ChordChartDataInterface = ChordChart.CONVERTER(
-          defaultDataViewBuilder.getDataView(null, true),
+          settings,
+          defaultDataViewBuilder.getDataView(undefined, true),
           visualBuilder.visualHost,
           visualBuilder.visualHost.colorPalette,
           null
@@ -492,27 +494,107 @@ describe("ChordChart", () => {
   });
 
   describe("Selection", () => {
-    describe("Power BI Bookmarks", () => {
-      it("first identity should be selected", (done) => {
-        visualBuilder.updateRenderTimeout(dataView, () => {
-          const firstSelectionId: ISelectionId = <ISelectionId>(
-            visualBuilder.instance["data"]["groups"][0]["identity"]
-          );
+    it("datapoint should be selected on click", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        const randomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+        const element: SVGElement = visualBuilder.slices[randomIndex];
 
-          visualBuilder.selectionManager.sendSelectionToCallback([
-            firstSelectionId,
-          ]);
+        const { datum, opacity } = getDatumAndOpacity(element);
 
-          const isSelected: boolean = (<SelectableDataPoint>(
-            select(visualBuilder.slices[0]).datum()
-          )).selected;
+        element.dispatchEvent(new MouseEvent("click"));
+        expect(datum.selected).toBeTrue();
+        expect(opacity).toBe(Behavior.FullOpacity);
 
-          expect(isSelected).toBeTruthy();
-
-          done();
-        });
+        done();
       });
-    });
+    })
+
+    it("multiple datapoints should be selected on click", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        testClickEvent({ ctrlKey: true });
+        testClickEvent({ metaKey: true });
+        testClickEvent({ shiftKey: true });
+
+        done();
+      });
+
+    })
+
+    it("clicking on single datapoint makes other style with dimmed opacity", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        const randomIndex = Math.floor(Math.random() * visualBuilder.slices.length);
+        const element: SVGElement = visualBuilder.slices[randomIndex];
+
+        element.dispatchEvent(new MouseEvent("click"));
+        const randomElementOpacity: number = parseFloat(getComputedStyle(element).opacity);
+        expect(randomElementOpacity).toBe(Behavior.FullOpacity);
+
+        for (let i = 0; i < visualBuilder.slices.length; i++) {
+          if (i === randomIndex) continue;
+
+          const opacity: number = parseFloat(getComputedStyle(visualBuilder.slices[i]).opacity);
+          expect(opacity).toBe(Behavior.DimmedOpacity);
+        }
+
+        done();
+      });
+    })
+
+    it("clicking on empty space should clear selection", (done) => {
+      visualBuilder.updateRenderTimeout(dataView, () => {
+        const randomIndex = Math.floor(Math.random() * visualBuilder.slices.length);
+        const element: SVGElement = visualBuilder.slices[randomIndex];
+        const svg: SVGElement = visualBuilder.svg;
+        const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();;
+
+        expect(datum.selected).toBeFalse();
+        element.dispatchEvent(new MouseEvent("click"));
+        expect(datum.selected).toBeTrue();
+        svg.dispatchEvent(new MouseEvent("click"));
+
+        for (let i = 0; i < visualBuilder.slices.length; i++) {
+          const { datum: dataPoint, opacity } = getDatumAndOpacity(visualBuilder.slices[i]);
+          expect(dataPoint.selected).toBeFalse();
+          expect(opacity).toBe(Behavior.FullOpacity);
+        }
+
+        done();
+      });
+    })
+
+    function testClickEvent(eventInitDict: MouseEventInit) {
+      const firstRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+      let secondRandomIndex: number = Math.floor(Math.random() * visualBuilder.slices.length);
+      if (firstRandomIndex === secondRandomIndex) {
+        secondRandomIndex = (secondRandomIndex + 1) % visualBuilder.slices.length;
+      }
+
+      const firstElement: SVGElement = visualBuilder.slices[firstRandomIndex];
+      const secondElement: SVGElement = visualBuilder.slices[secondRandomIndex];
+
+      firstElement.dispatchEvent(new MouseEvent("click"));
+      secondElement.dispatchEvent(new MouseEvent("click", eventInitDict));
+
+      const { datum: firstDatum, opacity: firstOpacity } = getDatumAndOpacity(firstElement);
+      const { datum: secondDatum, opacity: secondOpacity } = getDatumAndOpacity(secondElement);
+
+      expect(firstDatum.selected).toBeTrue();
+      expect(secondDatum.selected).toBeTrue();
+      expect(firstOpacity).toBe(Behavior.FullOpacity);
+      expect(firstOpacity).toBe(secondOpacity);
+
+      for (let i = 0; i < visualBuilder.slices.length; i++) {
+        if (i === firstRandomIndex || i === secondRandomIndex) {
+          continue;
+        }
+
+        const element: SVGElement = visualBuilder.slices[i];
+        const { datum, opacity } : { datum: SelectableDataPoint, opacity: number } = getDatumAndOpacity(element);
+
+        expect(datum.selected).toBeFalse();
+        expect(opacity).toBe(Behavior.DimmedOpacity);
+      }
+    }
   });
 
   describe("Accessibility", () => {
@@ -536,8 +618,8 @@ describe("ChordChart", () => {
           const slices: SVGElement[] = Array.from(visualBuilder.slices);
           const chords: SVGElement[] = Array.from(visualBuilder.chords);
 
-          expect(isColorAppliedToElements(slices, null, "fill"));
-          expect(isColorAppliedToElements(chords, null, "fill"));
+          expect(isColorAppliedToElements(slices, undefined, "fill"));
+          expect(isColorAppliedToElements(chords, undefined, "fill"));
 
           done();
         });
@@ -573,3 +655,43 @@ describe("ChordChart", () => {
     });
   });
 });
+
+describe("ChordChart highlights", () => {
+  let visualBuilder: ChordChartBuilder,
+    defaultDataViewBuilder: ChordChartData,
+    dataView: DataView;
+
+  it("should highlight data points", (done) => {
+    visualBuilder = new ChordChartBuilder(1000, 500);
+    defaultDataViewBuilder = new ChordChartData();
+
+    dataView = defaultDataViewBuilder.getDataView();
+
+    if (!dataView?.categorical?.values) return;
+
+    dataView.categorical.values[0].highlights = dataView.categorical.values[0].values;
+
+    visualBuilder.updateRenderTimeout(dataView, () => {
+      for (let i = 0; i < visualBuilder.chords.length; i++) {
+        const chord: HighlightedChord = <HighlightedChord>select(visualBuilder.chords[i]).datum();
+        const opacity: number = parseFloat(getComputedStyle(visualBuilder.chords[i]).opacity);
+
+        if (chord.hasHighlight) {
+          expect(opacity).toBe(Behavior.FullOpacity);
+        } else {
+          expect(opacity).toBe(Behavior.DimmedOpacity);
+        }
+      }
+
+      done();
+    })
+  });
+});
+
+
+function getDatumAndOpacity(element: SVGElement) {
+  const datum: SelectableDataPoint = <SelectableDataPoint>select(element).datum();
+  const opacity: number = parseFloat(getComputedStyle(element).opacity);
+
+  return { datum, opacity };
+}

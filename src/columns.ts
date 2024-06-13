@@ -26,7 +26,6 @@
 
 // powerbi.extensibility.utils.dataview
 import { converterHelper as ConverterHelper } from "powerbi-visuals-utils-dataviewutils";
-import converterHelper = ConverterHelper.converterHelper;
 
 // powerbi
 import powerbiVisualsApi from "powerbi-visuals-api";
@@ -40,57 +39,54 @@ import DataViewCategorical = powerbiVisualsApi.DataViewCategorical;
 import DataViewCategoricalColumn = powerbiVisualsApi.DataViewCategoricalColumn;
 import PrimitiveValue = powerbiVisualsApi.PrimitiveValue;
 
-import {
-    toArray as lodashToArray,
-    mapValues as lodashMapValues,
-    isEmpty as lodashIsEmpty
-} from "lodash";
+import { isEmpty, mapValues } from "./utils";
 
 export type ChordChartCategoricalColumns = DataViewCategoryColumn & DataViewValueColumn[] & DataViewValueColumns;
 
 export class ChordChartColumns<T> {
     public static GET_COLUMN_SOURCES(dataView: DataView): ChordChartColumns<DataViewMetadataColumn> {
-        return this.getColumnSourcesT<DataViewMetadataColumn>(dataView);
+        return this.getColumnSourcesT(dataView);
     }
 
     public static GET_TABLE_VALUES(dataView: DataView): ChordChartColumns<any> {
-        let table: DataViewTable = dataView && dataView.table;
-        let columns: ChordChartColumns<any> = this.getColumnSourcesT<any[]>(dataView);
-        return columns && table && lodashMapValues(
-            columns, (n: DataViewMetadataColumn, i) => n && table.rows.map(row => row[n.index]));
+        const table: DataViewTable = dataView && dataView.table;
+        const columns: ChordChartColumns<any> = this.getColumnSourcesT(dataView);
+
+        return columns && table && mapValues(
+            columns, (n: DataViewMetadataColumn) => n && table.rows.map(row => row[n.index]));
     }
 
     public static GET_TABLE_ROWS(dataView: DataView): ChordChartColumns<any>[] {
-        let table: DataViewTable = dataView && dataView.table;
-        let columns: ChordChartColumns<any> = this.getColumnSourcesT<any[]>(dataView);
+        const table: DataViewTable = dataView && dataView.table;
+        const columns: ChordChartColumns<any> = this.getColumnSourcesT(dataView);
         return columns && table && table.rows.map(row =>
-            lodashMapValues(columns, (n: DataViewMetadataColumn, i) => n && row[n.index]));
+            mapValues(columns, (n: DataViewMetadataColumn) => n && row[n.index]));
     }
 
     public static GET_CATEGORICAL_VALUES(dataView: DataView): ChordChartColumns<any> {
-        let categorical: DataViewCategorical = dataView && dataView.categorical;
-        let categories: (DataViewCategoryColumn | DataViewValueColumn)[] = categorical && categorical.categories || [];
+        const categorical: DataViewCategorical = dataView && dataView.categorical;
+        const categories: (DataViewCategoryColumn | DataViewValueColumn)[] = categorical && categorical.categories || [];
         if (!categorical.values || categorical.values.length === 0) {
             return null;
         }
-        let values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
-        let series: PrimitiveValue[] = categorical && values.source && this.GET_SERIES_VALUES(dataView);
-        return categorical && lodashMapValues(new this<any[]>(), (n, i) =>
-            (<(DataViewCategoryColumn | DataViewValueColumn)[]>lodashToArray(categories)).concat(lodashToArray(values))
+        const values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
+        const series: PrimitiveValue[] = categorical && values.source && this.GET_SERIES_VALUES(dataView);
+        return categorical && mapValues(new this<any[]>(), (n, i) =>
+            (<(DataViewCategoryColumn | DataViewValueColumn)[]>categories).concat(values)
                 .filter(x => x.source.roles && x.source.roles[i]).map(x => x.values)[0]
             || values.source && values.source.roles && values.source.roles[i] && series);
     }
 
     public static GET_SERIES_VALUES(dataView: DataView) {
         return dataView && dataView.categorical && dataView.categorical.values
-            && dataView.categorical.values.map(x => converterHelper.getSeriesName(x.source));
+            && dataView.categorical.values.map(x => ConverterHelper.getSeriesName(x.source));
     }
 
     public static GET_CATEGORICAL_COLUMNS(dataView: DataView): ChordChartColumns<ChordChartCategoricalColumns> {
-        let categorical: DataViewCategorical = dataView && dataView.categorical;
-        let categories: DataViewCategoricalColumn[] = categorical && categorical.categories || [];
-        let values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
-        return categorical && lodashMapValues(
+        const categorical: DataViewCategorical = dataView && dataView.categorical;
+        const categories: DataViewCategoricalColumn[] = categorical && categorical.categories || [];
+        const values: DataViewValueColumns = categorical && categorical.values || <DataViewValueColumns>[];
+        return categorical && mapValues(
             new this<ChordChartCategoricalColumns>(),
             (n, i) => {
                 let result: any = categories.filter(x => x.source.roles && x.source.roles[i])[0];
@@ -99,7 +95,7 @@ export class ChordChartColumns<T> {
                 }
                 if (!result) {
                     result = values.filter(x => x.source.roles && x.source.roles[i]);
-                    if (lodashIsEmpty(result)) {
+                    if (isEmpty(result)) {
                         result = undefined;
                     }
                 }
@@ -109,17 +105,17 @@ export class ChordChartColumns<T> {
     }
 
     public static GET_GROUPED_VALUE_COLUMNS(dataView: DataView): ChordChartColumns<DataViewValueColumn>[] {
-        let categorical = dataView && dataView.categorical;
-        let values = categorical && categorical.values;
-        let grouped = values && values.grouped();
-        return grouped && grouped.map(g => lodashMapValues(
+        const categorical = dataView && dataView.categorical;
+        const values = categorical && categorical.values;
+        const grouped = values && values.grouped();
+        return grouped && grouped.map(g => mapValues(
             new this<DataViewValueColumn>(),
             (n, i) => g.values.filter(v => v.source.roles[i])[0]));
     }
 
-    private static getColumnSourcesT<T>(dataView: DataView): ChordChartColumns<any> {
-        let columns = dataView && dataView.metadata && dataView.metadata.columns;
-        return columns && lodashMapValues(
+    private static getColumnSourcesT(dataView: DataView): ChordChartColumns<any> {
+        const columns = dataView && dataView.metadata && dataView.metadata.columns;
+        return columns && mapValues(
             new this<any>(),
             (n, i) => columns.filter(x => x.roles && x.roles[i])[0]);
     }

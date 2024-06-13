@@ -1,3 +1,18 @@
+## 2.3.0
+* Update powerbi-visuals-api to 5.9.1
+* Update powerbi-visuals-tools to 5.4.3
+* Update other powerbi dependencies, 
+* Migrate from puppeteer to playwright-chromium
+* Migrate from tslint to eslint, fix eslint errors
+* Replace larget package 'snyk' with '@snyk/protect'
+* Update outdated packages
+* Remove powerbi-visuals-interactivity-utils
+* Refactor 'getChordTicksArcDescriptors' to show ticks for each chord
+
+## 2.2.0
+* Add context menu handling
+* Update powerbi-visuals-api to 3.8.2
+
 ## 2.1.0
 * API update
 * browser tab crash fix

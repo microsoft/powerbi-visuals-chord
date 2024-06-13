@@ -26,28 +26,25 @@
 
 // powerbi
 import powerbiVisualsApi from "powerbi-visuals-api";
-import ISelectionId = powerbiVisualsApi.visuals.ISelectionId;
+import ISelectionManager = powerbiVisualsApi.extensibility.ISelectionManager;
 
 // powerbi.extensibility
 import VisualConstructorOptions = powerbiVisualsApi.extensibility.visual.VisualConstructorOptions;
 
 // powerbi.extensibility.utils.test
-import { VisualBuilderBase, MockISelectionManager } from "powerbi-visuals-utils-testutils";
+import { VisualBuilderBase } from "powerbi-visuals-utils-testutils";
 
 import { ChordChart } from "../src/chordChart";
 
 export class ChordChartBuilder extends VisualBuilderBase<ChordChart> {
-    public selectionManager: SelectionManagerWithBookmarks;
+    public selectionManager: ISelectionManager;;
 
     constructor(width: number, height: number) {
         super(width, height, "ChordChart1444757060245");
     }
 
     protected build(options: VisualConstructorOptions): ChordChart {
-        options.host.createSelectionManager = () => {
-            this.selectionManager = new SelectionManagerWithBookmarks();
-            return this.selectionManager;
-        };
+        this.selectionManager = this.visualHost.createSelectionManager();
 
         return new ChordChart(options);
     }
@@ -57,8 +54,11 @@ export class ChordChartBuilder extends VisualBuilderBase<ChordChart> {
     }
 
     public get mainElement(): SVGElement {
-        return this.element
-            .querySelector("g");
+        return this.element.querySelector("g")!;
+    }
+
+    public get svg(): SVGElement {
+        return this.element.querySelector<SVGElement>("svg.chordChart")!;
     }
 
     public get dataLabels(): NodeListOf<SVGElement> {
@@ -79,23 +79,5 @@ export class ChordChartBuilder extends VisualBuilderBase<ChordChart> {
     public get slices(): NodeListOf<SVGElement> {
         return this.mainElement
             .querySelectorAll("path.slice");
-    }
-}
-
-export class SelectionManagerWithBookmarks extends MockISelectionManager {
-    private selectionCallback: (ids: ISelectionId[]) => void;
-    private selectedSelectionIds: ISelectionId[] = [];
-
-    public registerOnSelectCallback(callback: (ids: ISelectionId[]) => void): void {
-        this.selectionCallback = callback;
-    }
-
-    public sendSelectionToCallback(selectionIds: ISelectionId[]): void {
-        this.selectedSelectionIds = selectionIds;
-        this.selectionCallback(selectionIds);
-    }
-
-    public getSelectionIds(): ISelectionId[] {
-        return <ISelectionId[]>this.selectedSelectionIds;
     }
 }
