@@ -1,5 +1,6 @@
 ## 2.3.1
 * Fix rendering when "Clear selection" is clicked
+* Update API to 5.11.0, tools to 5.5.1
 
 ## 2.3.0
 * Update powerbi-visuals-api to 5.9.1

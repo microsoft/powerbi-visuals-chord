@@ -838,7 +838,7 @@ export class ChordChart implements IVisual {
       })
 
       // Check if there is a selection or highlights, and render them if they exist
-      this.behavior.renderSelectionAndHighlights();
+      this.behavior.syncAndRender();
     }
 
     this.tooltipServiceWrapper.addTooltip(chordShapes, (chordLink: Chord) => {
