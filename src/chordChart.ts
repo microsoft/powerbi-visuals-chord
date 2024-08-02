@@ -386,7 +386,7 @@ export class ChordChart implements IVisual {
           ? columns.Category.objects[index]
           : undefined;
 
-        barFillColor = colorHelper.getColorForSeriesValue(
+        barFillColor = colorHelper.getColorForMeasure(
           thisCategoryObjects,
           categoricalValues.Category[index]
         );
@@ -418,7 +418,7 @@ export class ChordChart implements IVisual {
           .createSelectionId();
         isCategory = false;
 
-        barFillColor = colorHelper.getColorForSeriesValue(
+        barFillColor = colorHelper.getColorForMeasure(
           seriesObjects,
           seriesNameStr ? seriesNameStr : `${ChordChart.defaultValue1}`
         );
