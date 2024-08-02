@@ -41,6 +41,12 @@ export class Behavior {
 
     constructor(selectionManager: ISelectionManager) {
         this.selectionManager = selectionManager;
+        this.selectionManager.registerOnSelectCallback((selectionIds: ISelectionId[]) => {
+            for (const dataPoint of this.options.dataPoints) { 
+                dataPoint.selected = this.isDataPointSelected(dataPoint, selectionIds);
+            }
+            this.renderSelectionAndHighlights();
+        });
     }
 
     public bindEvents(options: BehaviorOptions): void {
@@ -98,16 +104,20 @@ export class Behavior {
 
         const selectionIdsToSelect: ISelectionId[] = [dataPoint.identity];
         this.selectionManager.select(selectionIdsToSelect, multiSelect);
-        this.renderSelectionAndHighlights();
+        this.syncAndRender();
     }
 
     private clear(): void {
         this.selectionManager.clear();
+        this.syncAndRender();
+    }
+
+    public syncAndRender(): void {
+        this.syncSelectionState();
         this.renderSelectionAndHighlights();
     }
 
-    public renderSelectionAndHighlights(): void {
-        this.syncSelectionState();
+    private renderSelectionAndHighlights(): void {
         if (this.hasSelection || this.options.hasHighlights) {
             this.renderDataPoints();
         } else if (!this.hasSelection && !this.options.hasHighlights && this.options.hasHighlightsObject) {
