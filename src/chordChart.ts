@@ -796,6 +796,7 @@ export class ChordChart implements IVisual {
     arcShapes
       .style("fill", (d) => d.data.barFillColor)
       .style("stroke", (d) => d.data.barStrokeColor)
+      .attr("tabindex", 0)
       .attr("d", (d) => arcVal(<any>d));
     this.tooltipServiceWrapper.addTooltip(
       arcShapes,

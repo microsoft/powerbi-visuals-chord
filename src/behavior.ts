@@ -55,6 +55,7 @@ export class Behavior {
         this.bindClick();
         this.bindContextMenu();
         this.bindContextMenuToClearCatcher();
+        this.bindKeyboardEvents();
     }
 
     private bindClick(): void {
@@ -89,6 +90,14 @@ export class Behavior {
 
             event.preventDefault();
             event.stopPropagation();
+        });
+    }
+
+    private bindKeyboardEvents(): void {
+        this.options.arcSelection.on("keydown", (event: KeyboardEvent, dataPoint: ChordArcDescriptor) => {
+            if (event.code === "Enter" || event.code === "Space") {
+                this.selectDataPoint(dataPoint, event.ctrlKey || event.metaKey || event.shiftKey);
+            }
         });
     }
 

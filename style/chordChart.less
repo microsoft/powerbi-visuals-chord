@@ -32,6 +32,18 @@
 @regularFontFamily: helvetica, arial, sans-serif;
 @neutralSecondaryAltColor: #777777;
 
+@keyframes pulse {
+  0% {
+    stroke-width: 2;
+  }
+  50% {
+    stroke-width: 5;
+  }
+  100% {
+    stroke-width: 2;
+  }
+}
+
 .chordChart {
     font-family: @regularFontFamily;
     font-size: 12px;
@@ -47,5 +59,17 @@
 
     .tick-text {
         pointer-events: none;
+    }
+
+    .slice {
+        &:focus, &:focus-visible {
+            outline: none;
+        }
+
+        &:focus-visible {
+            // I'll try not change the color but add a shadow effect and an animation
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); /* Add a shadow effect */
+            animation: pulse 1s infinite;
+        }
     }
 }
