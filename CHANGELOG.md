@@ -1,9 +1,12 @@
 ## 2.3.1
+### Visual changes
+* Add keyboard navigation
+* Add report page tooltip support
+
+### Code improvements
 * Fix rendering when "Clear selection" is clicked
 * Update API to 5.11.0, tools to 5.5.1
-* Add keyboard navigation
 * Fix data point colors assignment, making it stable
-* Add report page tooltip support
 
 ## 2.3.0
 * Update powerbi-visuals-api to 5.9.1

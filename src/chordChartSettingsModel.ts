@@ -66,21 +66,41 @@ class LabelsSettingsCard extends Card {
         value: { value: "#777777" },
     });
 
-    fontSize = new formattingSettings.NumUpDown({
-        name: "fontSize",
-        displayName: "Text size",
-        displayNameKey: "Visual_Text_Size",
-        value: 9,
-        options: {
-            minValue: { value: 0, type: ValidatorType.Min },
-        }
+    font = new formattingSettings.FontControl({
+        name: "font",
+        displayNameKey: "Visual_Font",
+        fontSize: new formattingSettings.NumUpDown({
+            name: "fontSize",
+            displayName: "Text size",
+            displayNameKey: "Visual_Text_Size",
+            value: 9,
+            options: {
+                minValue: { value: 0, type: ValidatorType.Min },
+            }
+        }),
+        fontFamily: new formattingSettings.FontPicker({
+            name: "fontFamily",
+            value: "Arial, sans-serif"
+        }),
+        bold: new formattingSettings.ToggleSwitch({
+            name: "bold",
+            value: false,
+        }),
+        italic: new formattingSettings.ToggleSwitch({
+            name: "italic",
+            value: false,
+        }),
+        underline: new formattingSettings.ToggleSwitch({
+            name: "underline",
+            value: false,
+        }),
     });
 
     name: string = "labels";
     displayName: string = "Labels";
     displayNameKey: string = "Visual_Labels";
     topLevelSlice = this.show;
-    slices = [this.color, this.fontSize];
+    slices = [this.color, this.font];
 }
 
 class ChordSettingsCard extends Card {

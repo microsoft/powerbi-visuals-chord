@@ -4,7 +4,7 @@
 
 > A chord diagram is a graphical method of displaying the inter-relationships between data in a matrix.
 
-![Chord diagramm screenshot](https://raw.githubusercontent.com/microsoft/powerbi-visuals-chord/master/assets/screenshot.png)Cancel changes
+![Chord diagramm screenshot](/assets/screenshot.png)
 # Overview
 This type of diagram visualizes the inter-relationships between entities. The connections between entities are used to display that they share something in common. This makes Chord Diagrams ideal for comparing the similarities within a dataset or between different groups of data.
 

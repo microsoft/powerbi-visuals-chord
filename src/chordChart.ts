@@ -439,7 +439,7 @@ export class ChordChart implements IVisual {
         labelColor: settings.labels.color.value.value,
         isGrouped: !!grouped,
         labelFontSize: PixelConverter.fromPointToPixel(
-          settings.labels.fontSize.value
+          settings.labels.font.fontSize.value
         ),
       });
 
@@ -650,7 +650,7 @@ export class ChordChart implements IVisual {
 
       this.layout.resetMargin();
       this.layout.margin.top = this.layout.margin.bottom =
-        PixelConverter.fromPointToPixel(this.settings.labels.fontSize.value) / 2;
+        PixelConverter.fromPointToPixel(this.settings.labels.font.fontSize.value) / 2;
 
       this.render();
       this.eventService.renderingFinished(options);
@@ -1185,7 +1185,7 @@ export class ChordChart implements IVisual {
           label: d.data.label,
           maxWidth: maxLabelWidth,
           fontSize: PixelConverter.fromPointToPixel(
-            this.settings.labels.fontSize.value
+            this.settings.labels.font.fontSize.value
           ),
         });
       },
@@ -1202,10 +1202,12 @@ export class ChordChart implements IVisual {
         d !== null && d.data !== null && d.data.label !== null,
       style: {
         fill: (d: ChordArcDescriptor) => d.data.labelColor,
-        "text-anchor": (d: ChordArcDescriptor) =>
-          midAngle(d) < Math.PI ? "start" : "end",
-        "font-size": () =>
-          PixelConverter.fromPoint(this.settings.labels.fontSize.value),
+        "text-anchor": (d: ChordArcDescriptor) => midAngle(d) < Math.PI ? "start" : "end",
+        "font-size": () => PixelConverter.fromPoint(this.settings.labels.font.fontSize.value),
+        "font-family": () => this.settings.labels.font.fontFamily.value.valueOf() || dataLabelUtils.StandardFontFamily,
+        "font-weight": () => this.settings.labels.font.bold.value ? "bold" : "normal",
+        "font-style": () => this.settings.labels.font.italic.value ? "italic" : "normal",
+        "text-decoration": () => this.settings.labels.font.underline.value ? "underline" : "normal",
       },
     };
   }
