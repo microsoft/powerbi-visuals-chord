@@ -104,6 +104,8 @@ class LabelsSettingsCard extends Card {
 }
 
 class ChordSettingsCard extends Card {
+    public highContrastStrokeWidth: number = 1;
+
     strokeColor = new formattingSettings.ColorPicker({
         name: "strokeColor",
         displayName: "Stroke color",
@@ -117,15 +119,26 @@ class ChordSettingsCard extends Card {
         displayNameKey: "Visual_StrokeWidth",
         value: 0.5,
         options: {
-            minValue: { value: 0.5,  type: ValidatorType.Min },
-            maxValue: { value: 1, type: ValidatorType.Max },
+            minValue: { value: 0,  type: ValidatorType.Min },
+            maxValue: { value: 5, type: ValidatorType.Max },
+        }
+    });
+
+    strokeOpacity = new formattingSettings.Slider({
+        name: "strokeOpacity",
+        displayName: "Opacity",
+        displayNameKey: "Visual_Opacity",
+        value: 100,
+        options: {
+            minValue: { value: 0, type: ValidatorType.Min },
+            maxValue: { value: 100, type: ValidatorType.Max },
         }
     });
 
     name: string = "chord";
     displayName: string = "Chord";
     displayNameKey: string = "Visual_Chord";
-    slices = [this.strokeColor, this.strokeWidth];
+    slices = [this.strokeColor, this.strokeWidth, this.strokeOpacity];
 }
 
 export class ChordChartSettingsModel extends Model {

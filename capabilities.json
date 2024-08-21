@@ -211,6 +211,11 @@
                     "type": {
                         "numeric": true
                     }
+                },
+                "strokeOpacity": {
+                    "type": {
+                        "numeric": true
+                    }
                 }
             }
         }

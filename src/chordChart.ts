@@ -261,9 +261,7 @@ export class ChordChart implements IVisual {
     }
 
     if (colorPalette && colorHelper.isHighContrast) {
-      settings.chord.strokeWidth.value = settings.chord.strokeWidth.options.maxValue.value;
-    } else {
-      settings.chord.strokeWidth.value = settings.chord.strokeWidth.options.minValue.value;
+      settings.chord.strokeWidth.value = settings.chord.highContrastStrokeWidth;
     }
   }
 
@@ -819,10 +817,8 @@ export class ChordChart implements IVisual {
     chordShapes
       .style("fill", (chordLink: Chord) => this.data.groups[chordLink.target.index].data.barFillColor)
       .style("stroke", this.settings.chord.strokeColor.value.value)
-      .style(
-        "stroke-width",
-        PixelConverter.toString(this.settings.chord.strokeWidth.value)
-      )
+      .style("stroke-width", PixelConverter.toString(this.settings.chord.strokeWidth.value))
+      .style("stroke-opacity", this.settings.chord.strokeOpacity.value.valueOf() / 100)
       .attr("d", path);
     this.drawTicks();
     this.drawCategoryLabels();
