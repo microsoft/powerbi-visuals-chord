@@ -4,6 +4,7 @@ import { Chord, Chords } from "d3-chord";
 import { ChordArcDescriptor } from './interfaces';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import ISelectionId = powerbi.visuals.ISelectionId;
+import { LegendDataPoint } from "powerbi-visuals-utils-chartutils/lib/legend/legendInterfaces";
 
 export interface BaseDataPoint {
     selected: boolean;
@@ -41,12 +42,7 @@ export class Behavior {
 
     constructor(selectionManager: ISelectionManager) {
         this.selectionManager = selectionManager;
-        this.selectionManager.registerOnSelectCallback((selectionIds: ISelectionId[]) => {
-            for (const dataPoint of this.options.dataPoints) { 
-                dataPoint.selected = this.isDataPointSelected(dataPoint, selectionIds);
-            }
-            this.renderSelectionAndHighlights();
-        });
+        this.selectionManager.registerOnSelectCallback(this.onSelectCallback.bind(this));
     }
 
     public bindEvents(options: BehaviorOptions): void {
@@ -113,16 +109,34 @@ export class Behavior {
 
         const selectionIdsToSelect: ISelectionId[] = [dataPoint.identity];
         this.selectionManager.select(selectionIdsToSelect, multiSelect);
-        this.syncAndRender();
+        this.onSelectCallback();
     }
 
     private clear(): void {
         this.selectionManager.clear();
-        this.syncAndRender();
+        this.onSelectCallback();
+    }
+
+    private setSelectedToDataPoints(dataPoints: SelectableDataPoint[] | LegendDataPoint[], ids?: ISelectionId[], hasHighlightsParameter?: boolean): void {
+        const selectedIds: ISelectionId[] = ids || <ISelectionId[]>this.selectionManager.getSelectionIds();
+        const hasHighlights: boolean = hasHighlightsParameter || (this.options && this.options.hasHighlights);
+
+        if (hasHighlights && this.hasSelection) {
+            this.selectionManager.clear();
+        }
+
+        for (const dataPoint of dataPoints) { 
+            dataPoint.selected = this.isDataPointSelected(dataPoint, selectedIds);
+        }
     }
 
     public syncAndRender(): void {
-        this.syncSelectionState();
+        this.onSelectCallback();
+    }
+
+    private onSelectCallback(selectionIds?: ISelectionId[]): void {
+        const selectedIds: ISelectionId[] = selectionIds || <ISelectionId[]>this.selectionManager.getSelectionIds();
+        this.setSelectedToDataPoints(this.options.dataPoints, selectedIds);
         this.renderSelectionAndHighlights();
     }
 
@@ -143,7 +157,7 @@ export class Behavior {
         }
     }
 
-    private isDataPointSelected(dataPoint: SelectableDataPoint, selectedIds: ISelectionId[]): boolean {
+    private isDataPointSelected(dataPoint: SelectableDataPoint | LegendDataPoint, selectedIds: ISelectionId[]): boolean {
         return selectedIds.some((value: ISelectionId) => value.equals(<ISelectionId>dataPoint.identity));
     }
 
