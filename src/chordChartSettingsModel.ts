@@ -148,7 +148,7 @@ class ChordSettingsCard extends Card {
         name: "strokeWidth",
         displayName: "Stroke width",
         displayNameKey: "Visual_StrokeWidth",
-        value: 0.5,
+        value: 1,
         options: {
             minValue: { value: 0,  type: ValidatorType.Min },
             maxValue: { value: 5, type: ValidatorType.Max },
