@@ -1,4 +1,4 @@
-## 2.3.1
+## 2.4.0
 ### Visual changes
 * Add keyboard navigation
 * Add report page tooltip support
