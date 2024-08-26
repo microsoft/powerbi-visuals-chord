@@ -2,6 +2,7 @@
 ### Visual changes
 * Add keyboard navigation
 * Add report page tooltip support
+* Add font settings for axis
 
 ### Code improvements
 * Fix rendering when "Clear selection" is clicked

@@ -1061,11 +1061,16 @@ export class ChordChart implements IVisual {
         .classed(ChordChart.tickTextClass.className, true)
         .attr("x", ChordChart.DefaultTickShiftX)
         .attr("dy", ChordChart.DefaultDY)
-        .text((d) => (<any>d).label)
-        .style("text-anchor", (d) => ((<any>d).angle > Math.PI ? "end" : null))
+        .text((d) => d.label)
+        .style("text-anchor", (d) => (d.angle > Math.PI ? "end" : null))
         .style("fill", this.settings.axis.color.value.value)
+        .style("font-size", this.settings.axis.font.fontSize.value)
+        .style("font-family", this.settings.axis.font.fontFamily.value)
+        .style("font-weight", this.settings.axis.font.bold.value ? "bold" : "normal")
+        .style("font-style", this.settings.axis.font.italic.value ? "italic" : "normal")
+        .style("text-decoration", this.settings.axis.font.underline.value ? "underline" : "none")
         .attr("transform", (d) =>
-          (<any>d).angle > Math.PI ? "rotate(180)translate(-16)" : null
+          d.angle > Math.PI ? "rotate(180)translate(-16)" : null
         );
     } else {
       this.clearTicks();

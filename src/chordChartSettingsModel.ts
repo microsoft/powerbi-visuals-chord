@@ -22,11 +22,42 @@ class AxisSettingsCard extends Card {
         value: { value: "#212121" },
     });
 
+    font = new formattingSettings.FontControl({
+        name: "font",
+        displayNameKey: "Visual_Font",
+        fontSize: new formattingSettings.NumUpDown({
+            name: "fontSize",
+            displayName: "Text size",
+            displayNameKey: "Visual_Text_Size",
+            value: 12,
+            options: {
+                minValue: { value: 0, type: ValidatorType.Min },
+            }
+        }),
+        fontFamily: new formattingSettings.FontPicker({
+            name: "fontFamily",
+            value: "Arial, sans-serif"
+        }),
+        bold: new formattingSettings.ToggleSwitch({
+            name: "bold",
+            value: false,
+        }),
+        italic: new formattingSettings.ToggleSwitch({
+            name: "italic",
+            value: false,
+        }),
+        underline: new formattingSettings.ToggleSwitch({
+            name: "underline",
+            value: false,
+        }),
+    });
+
+
     name: string = "axis";
     displayName: string = "Axis";
     displayNameKey: string = "Visual_Axis";
     topLevelSlice = this.show;
-    slices = [this.color];
+    slices = [this.color, this.font];
 }
 
 class DataPointSettingsCard extends Card {
