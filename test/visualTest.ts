@@ -470,29 +470,6 @@ describe("ChordChart", () => {
     });
   });
 
-  describe("Capabilities tests", () => {
-    it("all items having displayName should have displayNameKey property", async () => {
-      let r = await fetch("base/capabilities.json");
-      let jsonData = await r.json();
-
-      let objectsChecker: Function = (obj) => {
-        for (let property of Object.keys(obj)) {
-          let value: any = obj[property];
-
-          if (value.displayName) {
-            expect(value.displayNameKey).toBeDefined();
-          }
-
-          if (typeof value === "object") {
-            objectsChecker(value);
-          }
-        }
-      };
-
-      objectsChecker(jsonData);
-    });
-  });
-
   describe("Selection", () => {
     it("datapoint should be selected on click", (done) => {
       visualBuilder.updateRenderTimeout(dataView, () => {

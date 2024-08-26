@@ -84,12 +84,8 @@
     ],
     "objects": {
         "dataPoint": {
-            "displayName": "Data colors",
-            "displayNameKey": "Visual_Data_Colors",
             "properties": {
                 "defaultColor": {
-                    "displayName": "Default color",
-                    "displayNameKey": "Visual_Default_Color",
                     "type": {
                         "fill": {
                             "solid": {
@@ -99,15 +95,11 @@
                     }
                 },
                 "showAllDataPoints": {
-                    "displayName": "Show all",
-                    "displayNameKey": "Visual_Show_All",
                     "type": {
                         "bool": true
                     }
                 },
                 "fill": {
-                    "displayName": "Color",
-                    "displayNameKey": "Visual_Color",
                     "type": {
                         "fill": {
                             "solid": {
@@ -119,12 +111,8 @@
             }
         },
         "axis": {
-            "displayName": "Axis",
-            "displayNameKey": "Visual_Axis",
             "properties": {
                 "show": {
-                    "displayName": "Show",
-                    "displayNameKey": "Visual_Show",
                     "type": {
                         "bool": true
                     }
@@ -141,20 +129,13 @@
             }
         },
         "labels": {
-            "displayName": "Labels",
-            "displayNameKey": "Visual_Labels",
             "properties": {
                 "show": {
-                    "displayName": "Show",
-                    "displayNameKey": "Visual_Show",
                     "type": {
                         "bool": true
                     }
                 },
                 "color": {
-                    "displayName": "Color",
-                    "displayNameKey": "Visual_Color",
-                    "description": "Set the reference line data label color",
                     "type": {
                         "fill": {
                             "solid": {
@@ -164,8 +145,6 @@
                     }
                 },
                 "fontSize": {
-                    "displayName": "Text size",
-                    "displayNameKey": "Visual_Text_Size",
                     "type": {
                         "formatting": {
                             "fontSize": true
