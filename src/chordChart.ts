@@ -818,7 +818,7 @@ export class ChordChart implements IVisual {
       .style("fill", (chordLink: Chord) => this.data.groups[chordLink.target.index].data.barFillColor)
       .style("stroke", this.settings.chord.strokeColor.value.value)
       .style("stroke-width", PixelConverter.toString(this.settings.chord.strokeWidth.value))
-      .style("stroke-opacity", this.settings.chord.strokeOpacity.value.valueOf() / 100)
+      .style("stroke-opacity", this.settings.chord.strokeOpacity.value / 100)
       .attr("d", path);
     this.drawTicks();
     this.drawCategoryLabels();
@@ -1202,13 +1202,13 @@ export class ChordChart implements IVisual {
       filter: (d: ChordArcDescriptor) =>
         d !== null && d.data !== null && d.data.label !== null,
       style: {
-        fill: (d: ChordArcDescriptor) => d.data.labelColor,
+        "fill": (d: ChordArcDescriptor) => d.data.labelColor,
         "text-anchor": (d: ChordArcDescriptor) => midAngle(d) < Math.PI ? "start" : "end",
-        "font-size": () => PixelConverter.fromPoint(this.settings.labels.font.fontSize.value),
-        "font-family": () => this.settings.labels.font.fontFamily.value.valueOf() || dataLabelUtils.StandardFontFamily,
-        "font-weight": () => this.settings.labels.font.bold.value ? "bold" : "normal",
-        "font-style": () => this.settings.labels.font.italic.value ? "italic" : "normal",
-        "text-decoration": () => this.settings.labels.font.underline.value ? "underline" : "normal",
+        "font-size": PixelConverter.fromPoint(this.settings.labels.font.fontSize.value),
+        "font-family": this.settings.labels.font.fontFamily.value || dataLabelUtils.StandardFontFamily,
+        "font-weight": this.settings.labels.font.bold.value ? "bold" : "normal",
+        "font-style": this.settings.labels.font.italic.value ? "italic" : "normal",
+        "text-decoration": this.settings.labels.font.underline.value ? "underline" : "none",
       },
     };
   }
