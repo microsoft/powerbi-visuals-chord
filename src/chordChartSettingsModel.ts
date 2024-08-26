@@ -157,8 +157,8 @@ class ChordSettingsCard extends Card {
 
     strokeOpacity = new formattingSettings.Slider({
         name: "strokeOpacity",
-        displayName: "Opacity",
-        displayNameKey: "Visual_Opacity",
+        displayName: "Stroke opacity",
+        displayNameKey: "Visual_StrokeOpacity",
         value: 100,
         options: {
             minValue: { value: 0, type: ValidatorType.Min },
