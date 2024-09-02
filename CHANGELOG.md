@@ -3,6 +3,7 @@
 * Add keyboard navigation
 * Add report page tooltip support
 * Add font settings for axis
+* Extended "Chord" settings
 
 ### Code improvements
 * Fix rendering when "Clear selection" is clicked
