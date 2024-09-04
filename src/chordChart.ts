@@ -188,8 +188,8 @@ export class ChordChart implements IVisual {
     createClassAndSelector("tick-line");
   private static tickPairClass: ClassAndSelector =
     createClassAndSelector("tick-pair");
-  private static tickTextClass: ClassAndSelector =
-    createClassAndSelector("tick-text");
+  private static tickTextClass: ClassAndSelector = createClassAndSelector("tick-text");
+  private static tickBackgroundClass: ClassAndSelector = createClassAndSelector("tick-background");
   private static ticksClass: ClassAndSelector = createClassAndSelector("ticks");
 
   private labels: Selection<any, any, any, any>;
@@ -899,6 +899,7 @@ export class ChordChart implements IVisual {
       ChordChart.tickPairClass,
       ChordChart.tickTextClass,
       ChordChart.sliceTicksClass,
+      ChordChart.tickBackgroundClass,
     ]);
   }
 
@@ -988,6 +989,7 @@ export class ChordChart implements IVisual {
   }
 
   // Draw axis(ticks) around the arc
+  // eslint-disable-next-line max-lines-per-function
   private drawTicks(): void {
     if (this.settings.axis.show.value) {
 
@@ -1072,6 +1074,43 @@ export class ChordChart implements IVisual {
         .attr("transform", (d) =>
           d.angle > Math.PI ? "rotate(180)translate(-16)" : null
         );
+
+      // draw background circles for better visibility
+      let tickBackgrounds = tickPairs
+        .selectAll(ChordChart.tickBackgroundClass.selectorName)
+        .data((d) => [d]);
+
+      tickBackgrounds.exit().remove();
+
+      if (this.settings.axis.showBackground.value) {
+        tickBackgrounds = tickBackgrounds.merge(
+          tickBackgrounds
+            .enter()
+            .append("rect")
+            .lower()
+            .classed(ChordChart.tickBackgroundClass.className, true)
+        );
+
+        tickBackgrounds.each((datum: { angle: number; label: string; }, i: number, nodes: SVGRectElement[]) => {
+          const element = select(nodes[i]);
+          const domElement = element.node();
+          const parent = domElement.parentNode as SVGGElement;
+
+          const textElement = parent.querySelector("text");
+          const width = textElement.getComputedTextLength() + ChordChart.DefaultTickShiftX; // add line shift
+          const height = parseFloat(getComputedStyle(textElement).fontSize) + this.convertEmToPx(parseFloat(ChordChart.DefaultDY)); // add line height
+
+          element
+            .attr("x", 0)
+            .attr("y", height / 2 * -1)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", this.settings.axis.backgroundColor.value.value)
+            .attr("opacity", this.settings.axis.backgroundOpacity.value / 100);
+        });
+      } else {
+        tickBackgrounds.remove();
+      }
     } else {
       this.clearTicks();
     }
@@ -1235,4 +1274,9 @@ export class ChordChart implements IVisual {
     }
     return res;
   }
+
+  private convertEmToPx(em: number) {
+    return em * parseFloat(getComputedStyle(document.body).fontSize);
+  }
 }
+

@@ -4,10 +4,12 @@ import { ChordArcDescriptor, ChordArcLabelData } from "./interfaces";
 import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 import Model = formattingSettings.Model;
 import Card = formattingSettings.SimpleCard;
+import CompositeCard = formattingSettings.CompositeCard;
+import Group = formattingSettings.Group;
 import ValidatorType = powerbi.visuals.ValidatorType;
 import ISelectionId = powerbi.visuals.ISelectionId;
 
-class AxisSettingsCard extends Card {
+class AxisSettingsCard extends CompositeCard {
     show = new formattingSettings.ToggleSwitch({
         name: "show",
         displayName: "Show",
@@ -52,12 +54,51 @@ class AxisSettingsCard extends Card {
         }),
     });
 
+    generalGroup = new Group({
+        name: "general",
+        displayName: "General",
+        displayNameKey: "Visual_General",
+        slices: [this.color, this.font]
+    });
+
+    showBackground = new formattingSettings.ToggleSwitch({
+        name: "showBackground",
+        displayName: "Show",
+        displayNameKey: "Visual_Show",
+        value: false,
+    });
+
+    backgroundColor = new formattingSettings.ColorPicker({
+        name: "backgroundColor",
+        displayName: "Color",
+        displayNameKey: "Visual_Color",
+        value: { value: "#FFFFFF" }
+    });
+
+    backgroundOpacity = new formattingSettings.Slider({
+        name: "backgroundOpacity",
+        displayName: "Opacity",
+        displayNameKey: "Visual_Opacity",
+        value: 100,
+        options: {
+            minValue: { value: 0, type: ValidatorType.Min },
+            maxValue: { value: 100, type: ValidatorType.Max },
+        }
+    });
+
+    backgroundGroup = new Group({
+        name: "background",
+        displayName: "Background",
+        displayNameKey: "Visual_Background",
+        topLevelSlice: this.showBackground,
+        slices: [this.backgroundColor, this.backgroundOpacity],
+    });
 
     name: string = "axis";
     displayName: string = "Axis";
     displayNameKey: string = "Visual_Axis";
     topLevelSlice = this.show;
-    slices = [this.color, this.font];
+    groups = [this.generalGroup, this.backgroundGroup];
 }
 
 class DataPointSettingsCard extends Card {

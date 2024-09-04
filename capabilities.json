@@ -154,6 +154,25 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "showBackground": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "backgroundColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundOpacity": {
+                    "type": {
+                        "numeric": true
+                    }
                 }
             }
         },
