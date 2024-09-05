@@ -54,11 +54,18 @@ class AxisSettingsCard extends CompositeCard {
         }),
     });
 
+    rotateTicks = new formattingSettings.ToggleSwitch({
+        name: "rotateTicks",
+        displayName: "Rotate ticks",
+        displayNameKey: "Visual_Rotate_Ticks",
+        value: true,
+    });
+
     generalGroup = new Group({
         name: "general",
         displayName: "General",
         displayNameKey: "Visual_General",
-        slices: [this.color, this.font]
+        slices: [this.color, this.font, this.rotateTicks],
     });
 
     showBackground = new formattingSettings.ToggleSwitch({

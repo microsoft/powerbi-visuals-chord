@@ -1043,13 +1043,17 @@ export class ChordChart implements IVisual {
           .classed(ChordChart.tickLineClass.className, true)
       );
 
-      tickLines
-        .style("stroke", this.settings.axis.color?.value?.value || ChordChart.DefaultTickLineColorValue)
-        .attr("x1", 1)
-        .attr("y1", 0)
-        .attr("x2", 5)
-        .attr("y2", 0)
-        .merge(tickLines);
+      if (this.settings.axis.rotateTicks.value) {
+        tickLines
+          .style("stroke", this.settings.axis.color?.value?.value || ChordChart.DefaultTickLineColorValue)
+          .attr("x1", 1)
+          .attr("y1", 0)
+          .attr("x2", 5)
+          .attr("y2", 0)
+          .merge(tickLines);
+      } else {
+        tickLines.remove();
+      }
 
       let tickText = tickPairs
         .selectAll("text" + ChordChart.tickTextClass.selectorName)
@@ -1071,9 +1075,20 @@ export class ChordChart implements IVisual {
         .style("font-weight", this.settings.axis.font.bold.value ? "bold" : "normal")
         .style("font-style", this.settings.axis.font.italic.value ? "italic" : "normal")
         .style("text-decoration", this.settings.axis.font.underline.value ? "underline" : "none")
-        .attr("transform", (d) =>
-          d.angle > Math.PI ? "rotate(180)translate(-16)" : null
-        );
+
+      if (this.settings.axis.rotateTicks.value) {
+        tickText.attr("transform", (d) =>
+            d.angle > Math.PI ? "rotate(180)translate(-16)" : null
+          )
+      } else {
+        tickText.attr("transform", function(d) {
+          const elem = select(this);
+          const x = elem.attr("x") || "0";
+          const y = elem.attr("y") || "0";
+          const angle = ((d.angle * 180) / Math.PI - 90) * -1;
+          return `rotate(${angle},${x},${y})`;
+        })
+      }
 
       // draw background circles for better visibility
       let tickBackgrounds = tickPairs

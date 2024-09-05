@@ -18,5 +18,6 @@
     "Visual_Text_Size": "Text size",
     "Visual_Tooltip_Highlighted": "Highlighted",
     "Visual_Font": "Font",
-    "Visual_Background": "Background"
+    "Visual_Background": "Background",
+    "Visual_Rotate_Ticks": "Rotate ticks"
 }
