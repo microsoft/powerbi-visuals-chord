@@ -10,6 +10,7 @@
 * Update API to 5.11.0, tools to 5.5.1
 * Fix data point colors assignment, making it stable
 * Fix npm vulnerabilities
+* Remove "coveralls" package
 
 ## 2.3.0
 * Update powerbi-visuals-api to 5.9.1
