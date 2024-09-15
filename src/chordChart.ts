@@ -168,6 +168,13 @@ export class ChordChart implements IVisual {
   private static MaxUnitSize: number = 5;
   private static DefaultFormatValue: string = "0.##";
   private static DefaultTickLineColorValue: string = "#000";
+  private static TickLineX1Position: number = 1;
+  private static TickLineX2Position: number = 5;
+
+  private static get TickLineWidth(): number {
+    return this.TickLineX2Position - this.TickLineX1Position;
+  }
+
   private eventService: IVisualEventService;
 
   private static chordClass: ClassAndSelector = createClassAndSelector("chord");
@@ -189,6 +196,7 @@ export class ChordChart implements IVisual {
   private static tickPairClass: ClassAndSelector =
     createClassAndSelector("tick-pair");
   private static tickTextClass: ClassAndSelector = createClassAndSelector("tick-text");
+  private static ticksBackgroundClass: ClassAndSelector = createClassAndSelector("tick-background");
   private static tickBackgroundClass: ClassAndSelector = createClassAndSelector("tick-background");
   private static ticksClass: ClassAndSelector = createClassAndSelector("ticks");
 
@@ -196,6 +204,8 @@ export class ChordChart implements IVisual {
   private lines: Selection<any, any, any, any>;
   private mainGraphicsContext: Selection<any, any, any, any>;
   private arcs: Selection<any, any, any, any>;
+  private ticksBackground: Selection<any, any, any, any>;
+  private ticks: Selection<any, any, any, any>;
   private svg: Selection<any, any, any, any>;
 
   private colors: IColorPalette;
@@ -603,7 +613,8 @@ export class ChordChart implements IVisual {
 
     this.arcs = svgSelection.append("g").classed("slices", true);
 
-    svgSelection.append("g").classed(ChordChart.ticksClass.className, true);
+    this.ticksBackground = svgSelection.append("g").classed(ChordChart.ticksBackgroundClass.className, true);
+    this.ticks = svgSelection.append("g").classed(ChordChart.ticksClass.className, true);
 
     this.labels = svgSelection
       .append("g")
@@ -994,8 +1005,7 @@ export class ChordChart implements IVisual {
     if (this.settings.axis.show.value) {
 
       let tickShapes: Selection<any, any, any, any> =
-        this.mainGraphicsContext
-          .select(ChordChart.ticksClass.selectorName)
+        this.ticks
           .selectAll("g" + ChordChart.sliceTicksClass.selectorName)
           .data(this.data.groups);
 
@@ -1043,17 +1053,13 @@ export class ChordChart implements IVisual {
           .classed(ChordChart.tickLineClass.className, true)
       );
 
-      if (this.settings.axis.rotateTicks.value) {
-        tickLines
-          .style("stroke", this.settings.axis.color?.value?.value || ChordChart.DefaultTickLineColorValue)
-          .attr("x1", 1)
-          .attr("y1", 0)
-          .attr("x2", 5)
-          .attr("y2", 0)
-          .merge(tickLines);
-      } else {
-        tickLines.remove();
-      }
+      tickLines
+        .style("stroke", this.settings.axis.color?.value?.value || ChordChart.DefaultTickLineColorValue)
+        .attr("x1", ChordChart.TickLineX1Position)
+        .attr("y1", 0)
+        .attr("x2", ChordChart.TickLineX2Position)
+        .attr("y2", 0)
+        .merge(tickLines);
 
       let tickText = tickPairs
         .selectAll("text" + ChordChart.tickTextClass.selectorName)
@@ -1081,54 +1087,112 @@ export class ChordChart implements IVisual {
             d.angle > Math.PI ? "rotate(180)translate(-16)" : null
           )
       } else {
-        tickText.attr("transform", function(d) {
-          const elem = select(this);
-          const x = elem.attr("x") || "0";
-          const y = elem.attr("y") || "0";
-          const angle = ((d.angle * 180) / Math.PI - 90) * -1;
-          return `rotate(${angle},${x},${y})`;
+        tickText.attr("transform", (d, i, nodes) => {
+          const tickLineWidth: number = ChordChart.TickLineWidth;
+          const elem = select(nodes[i]);
+          const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
+          let x: number = parseFloat(elem.attr("x")) || 0;
+
+          if (-90 <= angle && angle <= 90) {
+            x += tickLineWidth;
+            return `rotate(${angle} ${x} 0)`
+          } else {
+            x -= tickLineWidth;
+            return `translate(${x * 2}) rotate(${angle} ${x} 0)`
+          }
         })
       }
 
-      // draw background circles for better visibility
-      let tickBackgrounds = tickPairs
-        .selectAll(ChordChart.tickBackgroundClass.selectorName)
-        .data((d) => [d]);
-
-      tickBackgrounds.exit().remove();
-
-      if (this.settings.axis.showBackground.value) {
-        tickBackgrounds = tickBackgrounds.merge(
-          tickBackgrounds
-            .enter()
-            .append("rect")
-            .lower()
-            .classed(ChordChart.tickBackgroundClass.className, true)
-        );
-
-        tickBackgrounds.each((datum: { angle: number; label: string; }, i: number, nodes: SVGRectElement[]) => {
-          const element = select(nodes[i]);
-          const domElement = element.node();
-          const parent = domElement.parentNode as SVGGElement;
-
-          const textElement = parent.querySelector("text");
-          const width = textElement.getComputedTextLength() + ChordChart.DefaultTickShiftX; // add line shift
-          const height = parseFloat(getComputedStyle(textElement).fontSize) + this.convertEmToPx(parseFloat(ChordChart.DefaultDY)); // add line height
-
-          element
-            .attr("x", 0)
-            .attr("y", height / 2 * -1)
-            .attr("width", width)
-            .attr("height", height)
-            .attr("fill", this.settings.axis.backgroundColor.value.value)
-            .attr("opacity", this.settings.axis.backgroundOpacity.value / 100);
-        });
-      } else {
-        tickBackgrounds.remove();
-      }
+      this.drawTicksBackground();
     } else {
       this.clearTicks();
     }
+  }
+
+  private drawTicksBackground(): void {
+    let tickGroups = this.ticksBackground
+      .selectAll("g.tick-shape-background-group")
+      .data(this.data.groups);
+
+    tickGroups.exit().remove();
+    tickGroups = tickGroups.merge(
+      tickGroups
+        .enter()
+        .append("g")
+        .classed("tick-shape-background-group", true)
+    );
+
+    if (!this.settings.axis.showBackground.value) {
+      tickGroups.remove();
+      return;
+    }
+
+    let tickShapes = tickGroups
+      .selectAll("g.tick-shape-background")
+      .data((d) => d.angleLabels);
+
+    tickShapes.exit().remove();
+
+    tickShapes = tickShapes.merge(
+      tickShapes
+        .enter()
+        .append("g")
+        .classed("tick-shape-background", true)
+    );
+
+    tickShapes.attr("transform", (d) => 
+      translateAndRotate(
+        this.innerRadius,
+        0,
+        -this.innerRadius,
+        0,
+        (d.angle * 180) / Math.PI - 90
+      )
+    )
+
+    let tickText = tickShapes
+      .selectAll("text")
+      .data((d) => [d]);
+
+    tickText.exit().remove();
+    tickText = tickText.merge(tickText.enter().append("text"));
+    tickText
+      .style("font-size", this.settings.axis.font.fontSize.value)
+      .style("font-family", this.settings.axis.font.fontFamily.value)
+      .style("font-weight", this.settings.axis.font.bold.value ? "bold" : "normal")
+      .style("font-style", this.settings.axis.font.italic.value ? "italic" : "normal")
+      .style("text-decoration", this.settings.axis.font.underline.value ? "underline" : "none")
+      .style("fill", "none") // transparent, because we only need the width
+      .text((d) => d.label);
+
+    let tickBackgrounds = tickShapes
+      .selectAll(ChordChart.tickBackgroundClass.selectorName)
+      .data((d) => [d]);
+    
+    tickBackgrounds.exit().remove();
+    tickBackgrounds = tickBackgrounds.merge(
+      tickBackgrounds
+        .enter()
+        .append("rect")
+        .classed(ChordChart.tickBackgroundClass.className, true)
+    );
+
+    tickBackgrounds.each((datum: { angle: number; label: string; }, i: number, nodes: SVGRectElement[]) => {
+      const rect = select(nodes[i]);
+      const parent = select(rect.node().parentNode as SVGGElement);
+      const text = parent.select("text").node() as SVGTextElement;
+
+      const width = text.getComputedTextLength() + ChordChart.DefaultTickShiftX + ChordChart.TickLineWidth;
+      const height = parseFloat(getComputedStyle(text).fontSize);
+
+      rect
+        .attr("x", 0)
+        .attr("y", height / 2 * -1)
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", this.settings.axis.backgroundColor.value.value)
+        .attr("opacity", this.settings.axis.backgroundOpacity.value / 100)
+    });
   }
 
   private renderLabels(
