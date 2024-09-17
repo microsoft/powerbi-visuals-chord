@@ -1087,19 +1087,11 @@ export class ChordChart implements IVisual {
             d.angle > Math.PI ? "rotate(180)translate(-16)" : null
           )
       } else {
-        tickText.attr("transform", (d, i, nodes) => {
-          const tickLineWidth: number = ChordChart.TickLineWidth;
-          const elem = select(nodes[i]);
+        tickText.attr("transform", (d) => {
           const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
-          let x: number = parseFloat(elem.attr("x")) || 0;
+          const x: number = ChordChart.DefaultTickShiftX;
 
-          if (-90 <= angle && angle <= 90) {
-            x += tickLineWidth;
-            return `rotate(${angle} ${x} 0)`
-          } else {
-            x -= tickLineWidth;
-            return `translate(${x * 2}) rotate(${angle} ${x} 0)`
-          }
+          return `rotate(${angle} ${x} 0)`
         })
       }
 
@@ -1109,6 +1101,7 @@ export class ChordChart implements IVisual {
     }
   }
 
+  // eslint-disable-next-line max-lines-per-function
   private drawTicksBackground(): void {
     let tickGroups = this.ticksBackground
       .selectAll("g.tick-shape-background-group")
@@ -1157,13 +1150,30 @@ export class ChordChart implements IVisual {
     tickText.exit().remove();
     tickText = tickText.merge(tickText.enter().append("text"));
     tickText
+      .attr("x", ChordChart.DefaultTickShiftX)
+      .attr("dy", ChordChart.DefaultDY)
+      .style("fill", "none") // transparent, because we only need the width
+      .style("text-anchor", (d) => (d.angle > Math.PI ? "end" : null))
       .style("font-size", this.settings.axis.font.fontSize.value)
       .style("font-family", this.settings.axis.font.fontFamily.value)
       .style("font-weight", this.settings.axis.font.bold.value ? "bold" : "normal")
       .style("font-style", this.settings.axis.font.italic.value ? "italic" : "normal")
       .style("text-decoration", this.settings.axis.font.underline.value ? "underline" : "none")
-      .style("fill", "none") // transparent, because we only need the width
       .text((d) => d.label);
+
+
+    if (this.settings.axis.rotateTicks.value) {
+      tickText.attr("transform", (d) =>
+          d.angle > Math.PI ? "rotate(180)translate(-16)" : null
+        )
+    } else {
+      tickText.attr("transform", (d) => {
+        const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
+        const x: number = ChordChart.DefaultTickShiftX;
+
+        return `rotate(${angle} ${x} 0)`;
+      })
+    }
 
     let tickBackgrounds = tickShapes
       .selectAll(ChordChart.tickBackgroundClass.selectorName)
@@ -1177,22 +1187,42 @@ export class ChordChart implements IVisual {
         .classed(ChordChart.tickBackgroundClass.className, true)
     );
 
+    tickBackgrounds
+      .attr("fill", this.settings.axis.backgroundColor.value.value)
+      .attr("opacity", this.settings.axis.backgroundOpacity.value / 100);
+
+
     tickBackgrounds.each((datum: { angle: number; label: string; }, i: number, nodes: SVGRectElement[]) => {
       const rect = select(nodes[i]);
       const parent = select(rect.node().parentNode as SVGGElement);
       const text = parent.select("text").node() as SVGTextElement;
 
-      const width = text.getComputedTextLength() + ChordChart.DefaultTickShiftX + ChordChart.TickLineWidth;
+      const width = text.getComputedTextLength() + ChordChart.DefaultTickShiftX;
       const height = parseFloat(getComputedStyle(text).fontSize);
 
       rect
         .attr("x", 0)
         .attr("y", height / 2 * -1)
         .attr("width", width)
-        .attr("height", height)
-        .attr("fill", this.settings.axis.backgroundColor.value.value)
-        .attr("opacity", this.settings.axis.backgroundOpacity.value / 100)
+        .attr("height", height);
     });
+
+    if (this.settings.axis.rotateTicks.value) {
+      tickBackgrounds.attr("transform", null);
+    } else {
+      tickBackgrounds.attr("transform", (d) => {
+        const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
+        const x: number = ChordChart.DefaultTickShiftX;
+
+        if (-90 <= angle && angle <= 90) {
+          return `rotate(${angle} ${x} 0)`
+        }
+        else {
+          return `rotate(${angle + 180} ${x} 0)`
+        } 
+      });
+    }
+
   }
 
   private renderLabels(
