@@ -118,6 +118,8 @@ import { Behavior, HighlightedChord, ChordsHighlighted } from './behavior';
 import { mapValues, invert, isEmpty } from "./utils";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import powerbi from 'powerbi-visuals-api';
+import { IEnumMemberWithDisplayNameKeyAnShape } from "./chordChartSettingsModel";
+import { SVG_Shape } from "../enums";
 
 export interface ChordChartData {
   settings: ChordChartSettingsModel;
@@ -171,9 +173,6 @@ export class ChordChart implements IVisual {
   private static TickLineX1Position: number = 1;
   private static TickLineX2Position: number = 5;
 
-  private static get TickLineWidth(): number {
-    return this.TickLineX2Position - this.TickLineX1Position;
-  }
 
   private eventService: IVisualEventService;
 
@@ -248,25 +247,25 @@ export class ChordChart implements IVisual {
     const colorHelper: ColorHelper = new ColorHelper(colorPalette);
 
     if (colorHelper.isHighContrast) {
-    settings.axis.color.value.value = colorHelper.getHighContrastColor(
-      "foreground",
-      settings.axis.color.value.value
-    );
+      settings.axis.color.value.value = colorHelper.getHighContrastColor(
+        "foreground",
+        settings.axis.color.value.value
+      );
 
-    settings.dataPoint.defaultColor.value.value = colorHelper.getHighContrastColor(
-      "background",
-      settings.dataPoint.defaultColor.value.value
-    );
+      settings.dataPoint.defaultColor.value.value = colorHelper.getHighContrastColor(
+        "background",
+        settings.dataPoint.defaultColor.value.value
+      );
 
-    settings.labels.color.value.value = colorHelper.getHighContrastColor(
-      "foreground",
-      settings.labels.color.value.value
-    );
+      settings.labels.color.value.value = colorHelper.getHighContrastColor(
+        "foreground",
+        settings.labels.color.value.value
+      );
 
-    settings.chord.strokeColor.value.value = colorHelper.getHighContrastColor(
-      "foreground",
-      settings.chord.strokeColor.value.value
-    );
+      settings.chord.strokeColor.value.value = colorHelper.getHighContrastColor(
+        "foreground",
+        settings.chord.strokeColor.value.value
+      );
 
     }
 
@@ -347,7 +346,7 @@ export class ChordChart implements IVisual {
     if (
       ChordChart.getValidArrayLength(totalFields) ===
       ChordChart.getValidArrayLength(categoricalValues.Category) +
-        ChordChart.getValidArrayLength(categoricalValues.Series)
+      ChordChart.getValidArrayLength(categoricalValues.Series)
     ) {
       isDiffFromTo = true;
     }
@@ -406,14 +405,14 @@ export class ChordChart implements IVisual {
         const seriesData: DataViewValueColumn = columns.Y
           ? columns.Y[index]
           : {
-              objects: null,
-              source: {
-                displayName: "Value",
-                queryName: "Value",
-                groupName: "Value",
-              },
-              values: [ChordChart.defaultValue1],
-            };
+            objects: null,
+            source: {
+              displayName: "Value",
+              queryName: "Value",
+              groupName: "Value",
+            },
+            values: [ChordChart.defaultValue1],
+          };
 
         const seriesNameStr: PrimitiveValue = seriesData
           ? getSeriesName(seriesData.source)
@@ -533,7 +532,7 @@ export class ChordChart implements IVisual {
     chordLayout.padAngle(ChordChart.ChordLayoutPadding);
     const chords: Chords = chordLayout(renderingDataMatrix);
 
-    const highlightedChords: HighlightedChord[] = chords.map((chord) => Object.assign({}, chord, { hasHighlight: false }) );
+    const highlightedChords: HighlightedChord[] = chords.map((chord) => Object.assign({}, chord, { hasHighlight: false }));
     const chordsWithHighlight: ChordsHighlighted = Object.assign(chords, { highlightedChords: highlightedChords });
 
     const groups: ChordArcDescriptor[] = ChordChart.getChordArcDescriptors(
@@ -674,9 +673,9 @@ export class ChordChart implements IVisual {
   }
 
   private dataViewHasHighlights(dataView: DataView): boolean {
-      const values = (dataView?.categorical?.values?.length && dataView.categorical.values) || <DataViewValueColumns>[];
-      const highlightsExist = values.some(({ highlights }) => highlights?.some(Number.isInteger));
-      return !!highlightsExist;
+    const values = (dataView?.categorical?.values?.length && dataView.categorical.values) || <DataViewValueColumns>[];
+    const highlightsExist = values.some(({ highlights }) => highlights?.some(Number.isInteger));
+    return !!highlightsExist;
   }
 
   private dataViewHasHighlightsObject(dataView: DataView): boolean {
@@ -1084,8 +1083,8 @@ export class ChordChart implements IVisual {
 
       if (this.settings.axis.rotateTicks.value) {
         tickText.attr("transform", (d) =>
-            d.angle > Math.PI ? "rotate(180)translate(-16)" : null
-          )
+          d.angle > Math.PI ? "rotate(180)translate(-16)" : null
+        )
       } else {
         tickText.attr("transform", (d) => {
           const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
@@ -1133,7 +1132,7 @@ export class ChordChart implements IVisual {
         .classed("tick-shape-background", true)
     );
 
-    tickShapes.attr("transform", (d) => 
+    tickShapes.attr("transform", (d) =>
       translateAndRotate(
         this.innerRadius,
         0,
@@ -1164,8 +1163,8 @@ export class ChordChart implements IVisual {
 
     if (this.settings.axis.rotateTicks.value) {
       tickText.attr("transform", (d) =>
-          d.angle > Math.PI ? "rotate(180)translate(-16)" : null
-        )
+        d.angle > Math.PI ? "rotate(180)translate(-16)" : null
+      )
     } else {
       tickText.attr("transform", (d) => {
         const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
@@ -1175,36 +1174,91 @@ export class ChordChart implements IVisual {
       })
     }
 
-    let tickBackgrounds = tickShapes
+    const backgroundShape: string = (this.settings.axis.backgroundShapeDropdown.value as IEnumMemberWithDisplayNameKeyAnShape).shape;
+
+    let tickBackgrounds: Selection<any, any, any, any> = tickShapes
       .selectAll(ChordChart.tickBackgroundClass.selectorName)
       .data((d) => [d]);
-    
-    tickBackgrounds.exit().remove();
-    tickBackgrounds = tickBackgrounds.merge(
-      tickBackgrounds
+
+    if (tickBackgrounds?.node()?.tagName === backgroundShape) {
+      tickBackgrounds.exit().remove();
+      tickBackgrounds = tickBackgrounds.merge(
+        tickBackgrounds
+          .enter()
+          .append(backgroundShape)
+          .classed(ChordChart.tickBackgroundClass.className, true)
+      );
+    } else {
+      //remove all 'tickBackgrounds' elements to replace it by new tagName elements, since we cant chage tagName
+      tickBackgrounds.remove();
+      tickBackgrounds = tickShapes
+        .selectAll(ChordChart.tickBackgroundClass.selectorName)
+        .data((d) => [d])
         .enter()
-        .append("rect")
-        .classed(ChordChart.tickBackgroundClass.className, true)
-    );
+        .append(backgroundShape)
+        .classed(ChordChart.tickBackgroundClass.className, true);
+    }
+
+    const strokeWidth = this.settings.chord.strokeWidth.value;
+    const strokeCornerRadius = 5;
+    const strokeIndentation = strokeWidth + strokeCornerRadius * 0.5;
 
     tickBackgrounds
       .attr("fill", this.settings.axis.backgroundColor.value.value)
-      .attr("opacity", this.settings.axis.backgroundOpacity.value / 100);
-
+      .attr("fill-opacity", this.settings.axis.backgroundOpacity.value / 100)
+      .attr("stroke", this.settings.chord.strokeColor.value.value)
+      .attr("stroke-width", strokeWidth)
+      .attr("stroke-opacity", this.settings.chord.strokeOpacity.value / 100);
 
     tickBackgrounds.each((datum: { angle: number; label: string; }, i: number, nodes: SVGRectElement[]) => {
-      const rect = select(nodes[i]);
-      const parent = select(rect.node().parentNode as SVGGElement);
+      const element = select(nodes[i]);
+      const parent = select(element.node().parentNode as SVGGElement);
       const text = parent.select("text").node() as SVGTextElement;
+      const tickLineLength = ChordChart.TickLineX2Position - ChordChart.TickLineX1Position
+      const width = text.getComputedTextLength() + ChordChart.DefaultTickShiftX + strokeIndentation;
+      const radius = (width + tickLineLength) / 2 - ChordChart.InnerArcRadiusRatio;
+      const height = parseFloat(getComputedStyle(text).fontSize) + strokeIndentation;
 
-      const width = text.getComputedTextLength() + ChordChart.DefaultTickShiftX;
-      const height = parseFloat(getComputedStyle(text).fontSize);
+      const setAttributes = (svgElement, attributes) => {
+        for (const key in attributes) {
+          svgElement.attr(key, attributes[key])
+        }
+      }
 
-      rect
-        .attr("x", 0)
-        .attr("y", height / 2 * -1)
-        .attr("width", width)
-        .attr("height", height);
+      const rectAttributes = {
+        x: 0,
+        y: height * -0.5,
+        rx: strokeCornerRadius,
+        ry: strokeCornerRadius,
+        width: width,
+        height: height,
+      }
+
+      const circleAttributes = {
+        r: radius,
+        cx: radius,
+        cy: 0,
+      }
+
+      const ellipseAttributes = {
+        rx: radius,
+        ry: height * 0.7,
+        cx: radius,
+        cy: 0,
+      }
+
+      switch (backgroundShape) {
+        case SVG_Shape.rect:
+          setAttributes(element, rectAttributes);
+          break;
+        case SVG_Shape.circle:
+          setAttributes(element, circleAttributes);
+          break;
+        case SVG_Shape.ellipse:
+          setAttributes(element, ellipseAttributes);
+          break;
+      }
+
     });
 
     if (this.settings.axis.rotateTicks.value) {
@@ -1219,7 +1273,7 @@ export class ChordChart implements IVisual {
         }
         else {
           return `rotate(${angle + 180} ${x} 0)`
-        } 
+        }
       });
     }
 
@@ -1388,4 +1442,3 @@ export class ChordChart implements IVisual {
     return em * parseFloat(getComputedStyle(document.body).fontSize);
   }
 }
-
