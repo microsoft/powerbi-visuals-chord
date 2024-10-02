@@ -4,7 +4,7 @@
 * Add report page tooltip support
 * Add font settings for axis
 * Extended "Chord" settings
-* Add axis background settings
+* Add axis background settings, add background shapes
 
 ### Code improvements
 * Fix rendering when "Clear selection" is clicked

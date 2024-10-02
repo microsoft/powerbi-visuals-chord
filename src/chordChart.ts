@@ -195,7 +195,7 @@ export class ChordChart implements IVisual {
   private static tickPairClass: ClassAndSelector =
     createClassAndSelector("tick-pair");
   private static tickTextClass: ClassAndSelector = createClassAndSelector("tick-text");
-  private static ticksBackgroundClass: ClassAndSelector = createClassAndSelector("tick-background");
+  private static ticksBackgroundClass: ClassAndSelector = createClassAndSelector("ticks-background");
   private static tickBackgroundClass: ClassAndSelector = createClassAndSelector("tick-background");
   private static ticksClass: ClassAndSelector = createClassAndSelector("ticks");
 
