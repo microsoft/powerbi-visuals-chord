@@ -31,7 +31,7 @@ import "./../style/chordChart.less";
 import { sum } from "d3-array";
 import { arc, Arc, DefaultArcObject } from "d3-shape";
 import { chord, ribbon, Chord, Chords, ChordLayout, ChordGroup } from "d3-chord";
-import { select, Selection } from "d3-selection";
+import { select, Selection } from 'd3-selection';
 
 // powerbi
 import powerbiVisualsApi from "powerbi-visuals-api";
@@ -120,6 +120,7 @@ import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel
 import powerbi from 'powerbi-visuals-api';
 import { IEnumMemberWithDisplayNameKeyAnShape } from "./chordChartSettingsModel";
 import { SVG_Shape } from "../enums";
+import { isRectCollide } from './rectUtils';
 
 export interface ChordChartData {
   settings: ChordChartSettingsModel;
@@ -1176,7 +1177,7 @@ export class ChordChart implements IVisual {
 
     const backgroundShape: string = (this.settings.axis.backgroundShapeDropdown.value as IEnumMemberWithDisplayNameKeyAnShape).shape;
 
-    let tickBackgrounds: Selection<any, any, any, any> = tickShapes
+    let tickBackgrounds: Selection<any, { angle: number, label: string }, any, any> = tickShapes
       .selectAll(ChordChart.tickBackgroundClass.selectorName)
       .data((d) => [d]);
 
@@ -1200,7 +1201,7 @@ export class ChordChart implements IVisual {
     }
 
     const strokeWidth = this.settings.chord.strokeWidth.value;
-    const strokeCornerRadius = 5;
+    const strokeCornerRadius = 0;
     const strokeIndentation = strokeWidth + strokeCornerRadius * 0.5;
 
     tickBackgrounds
@@ -1275,6 +1276,33 @@ export class ChordChart implements IVisual {
           return `rotate(${angle + 180} ${x} 0)`
         }
       });
+    }
+
+    const nodes = tickBackgrounds.nodes();
+    const data = tickBackgrounds.data();
+
+    for (let i = 1; i < nodes.length; i++) {
+      const prevElement = nodes[i - 1] as SVGRectElement;
+      const prevBBox = prevElement.getBBox();
+      const prevMatrix = prevElement.getCTM();
+
+      const currElement = nodes[i] as SVGRectElement;
+      const currBBox = currElement.getBBox();
+      const currMatrix = currElement.getCTM();
+
+      const isOverlapping = isRectCollide({
+        rectBBox: prevBBox,
+        rectMatrix: prevMatrix,
+        rectDegrees: data[i - 1].angle * 180 / Math.PI - 90,
+        onRectBBox: currBBox,
+        onRectMatrix: currMatrix,
+        onRectDegrees: data[i].angle * 180 / Math.PI - 90,
+      });
+
+      if (isOverlapping) {
+        // prevElement.style.display = "none";
+        prevElement.style.fillOpacity = "0.5";
+      }
     }
 
   }
