@@ -8,6 +8,19 @@ import CompositeCard = formattingSettings.CompositeCard;
 import Group = formattingSettings.Group;
 import ValidatorType = powerbi.visuals.ValidatorType;
 import ISelectionId = powerbi.visuals.ISelectionId;
+import IEnumMember = powerbi.IEnumMember;
+import { SVG_Shape, SVG_Shape_Display_Name } from "../enums";
+
+export interface IEnumMemberWithDisplayNameKeyAnShape extends IEnumMember {
+    key: string;
+    shape: string;
+}
+
+const backgroundShapeOptions: IEnumMemberWithDisplayNameKeyAnShape[] = [
+    { value: SVG_Shape_Display_Name.rect, displayName: SVG_Shape_Display_Name.rect, key: "Visual_Shape_Rectangle", shape: SVG_Shape.rect },
+    { value: SVG_Shape_Display_Name.circle, displayName: SVG_Shape_Display_Name.circle, key: "Visual_Shape_Circle", shape: SVG_Shape.circle },
+    { value: SVG_Shape_Display_Name.ellipse, displayName: SVG_Shape_Display_Name.ellipse, key: "Visual_Shape_Ellipse", shape: SVG_Shape.ellipse }
+];
 
 class AxisSettingsCard extends CompositeCard {
     show = new formattingSettings.ToggleSwitch({
@@ -75,6 +88,14 @@ class AxisSettingsCard extends CompositeCard {
         value: false,
     });
 
+    backgroundShapeDropdown = new formattingSettings.ItemDropdown({
+        name: "backgroundShape",
+        items: backgroundShapeOptions,
+        value: backgroundShapeOptions[0],
+        displayName: "Shape",
+        displayNameKey: "Visual_Shape"
+    });
+
     backgroundColor = new formattingSettings.ColorPicker({
         name: "backgroundColor",
         displayName: "Color",
@@ -98,7 +119,7 @@ class AxisSettingsCard extends CompositeCard {
         displayName: "Background",
         displayNameKey: "Visual_Background",
         topLevelSlice: this.showBackground,
-        slices: [this.backgroundColor, this.backgroundOpacity],
+        slices: [this.backgroundShapeDropdown, this.backgroundColor, this.backgroundOpacity],
     });
 
     name: string = "axis";
@@ -198,7 +219,7 @@ class ChordSettingsCard extends Card {
         displayNameKey: "Visual_StrokeWidth",
         value: 1,
         options: {
-            minValue: { value: 0,  type: ValidatorType.Min },
+            minValue: { value: 0, type: ValidatorType.Min },
             maxValue: { value: 5, type: ValidatorType.Max },
         }
     });
