@@ -8,19 +8,6 @@ import CompositeCard = formattingSettings.CompositeCard;
 import Group = formattingSettings.Group;
 import ValidatorType = powerbi.visuals.ValidatorType;
 import ISelectionId = powerbi.visuals.ISelectionId;
-import IEnumMember = powerbi.IEnumMember;
-import { SVG_Shape, SVG_Shape_Display_Name } from "../enums";
-
-export interface IEnumMemberWithDisplayNameKeyAnShape extends IEnumMember {
-    key: string;
-    shape: string;
-}
-
-const backgroundShapeOptions: IEnumMemberWithDisplayNameKeyAnShape[] = [
-    { value: SVG_Shape_Display_Name.rect, displayName: SVG_Shape_Display_Name.rect, key: "Visual_Shape_Rectangle", shape: SVG_Shape.rect },
-    { value: SVG_Shape_Display_Name.circle, displayName: SVG_Shape_Display_Name.circle, key: "Visual_Shape_Circle", shape: SVG_Shape.circle },
-    { value: SVG_Shape_Display_Name.ellipse, displayName: SVG_Shape_Display_Name.ellipse, key: "Visual_Shape_Ellipse", shape: SVG_Shape.ellipse }
-];
 
 class AxisSettingsCard extends CompositeCard {
     show = new formattingSettings.ToggleSwitch({
@@ -74,11 +61,18 @@ class AxisSettingsCard extends CompositeCard {
         value: true,
     });
 
+    hideOverlappingTicks = new formattingSettings.ToggleSwitch({
+        name: "hideOverlappingTicks",
+        displayName: "Hide overlapping ticks",
+        displayNameKey: "Visual_Hide_Overlapping_Ticks",
+        value: false,
+    });
+
     generalGroup = new Group({
         name: "general",
         displayName: "General",
         displayNameKey: "Visual_General",
-        slices: [this.color, this.font, this.rotateTicks],
+        slices: [this.color, this.font, this.rotateTicks, this.hideOverlappingTicks],
     });
 
     showBackground = new formattingSettings.ToggleSwitch({
@@ -86,14 +80,6 @@ class AxisSettingsCard extends CompositeCard {
         displayName: "Show",
         displayNameKey: "Visual_Show",
         value: false,
-    });
-
-    backgroundShapeDropdown = new formattingSettings.ItemDropdown({
-        name: "backgroundShape",
-        items: backgroundShapeOptions,
-        value: backgroundShapeOptions[0],
-        displayName: "Shape",
-        displayNameKey: "Visual_Shape"
     });
 
     backgroundColor = new formattingSettings.ColorPicker({
@@ -119,7 +105,7 @@ class AxisSettingsCard extends CompositeCard {
         displayName: "Background",
         displayNameKey: "Visual_Background",
         topLevelSlice: this.showBackground,
-        slices: [this.backgroundShapeDropdown, this.backgroundColor, this.backgroundOpacity],
+        slices: [this.backgroundColor, this.backgroundOpacity],
     });
 
     name: string = "axis";

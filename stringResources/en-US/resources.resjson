@@ -13,6 +13,7 @@
     "Visual_Labels": "Labels",
     "Visual_Opacity": "Opacity",
     "Visual_Rotate_Ticks": "Rotate ticks",
+    "Visual_Hide_Overlapping_Ticks": "Show overlapping ticks",
     "Visual_Shape_Circle": "Circle",
     "Visual_Shape_Ellipse": "Ellipse",
     "Visual_Shape_Rectangle": "Rectangle",

@@ -160,14 +160,14 @@
                         "bool": true
                     }
                 },
-                "showBackground": {
+                "hideOverlappingTicks": {
                     "type": {
                         "bool": true
                     }
                 },
-                "backgroundShape": {
+                "showBackground": {
                     "type": {
-                        "enumeration": []
+                        "bool": true
                     }
                 },
                 "backgroundColor": {

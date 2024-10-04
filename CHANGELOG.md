@@ -5,6 +5,7 @@
 * Add font settings for axis
 * Extended "Chord" settings
 * Add axis background settings, add background shapes
+* Add settings to hide overlapping ticks
 
 ### Code improvements
 * Fix rendering when "Clear selection" is clicked

@@ -11,23 +11,20 @@ export function createRect(bbox: DOMRect, matrix: DOMMatrix, degrees: number) {
 }
 
 export function isRectCollide({
-    rectBBox,
-    rectMatrix,
+    rectElement,
     rectDegrees,
-    onRectBBox,
-    onRectMatrix,
+    onRectElement,
     onRectDegrees,
 }: {
-    rectBBox: DOMRect,
-    rectMatrix: DOMMatrix,
+    rectElement: SVGGraphicsElement,
     rectDegrees: number,
-    onRectBBox: DOMRect,
-    onRectMatrix: DOMMatrix,
+    onRectElement: SVGGraphicsElement,
     onRectDegrees: number,
-}) {
-    const rect = createRect(rectBBox, rectMatrix, rectDegrees);
-    const onRect = createRect(onRectBBox, onRectMatrix, onRectDegrees);
-    return isProjectionCollide(rect, onRect) && isProjectionCollide;
+}): boolean {
+
+    const rect = createRect(rectElement.getBBox(), rectElement.getCTM(), rectDegrees);
+    const onRect = createRect(onRectElement.getBBox(), onRectElement.getCTM(), onRectDegrees);
+    return isProjectionCollide(rect, onRect) && isProjectionCollide(onRect, rect);
 }
 
 export function isProjectionCollide (rect: Rect, onRect: Rect) {
