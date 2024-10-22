@@ -43,15 +43,21 @@ export function isRectCollide({
     rectDegrees,
     onRectElement,
     onRectDegrees,
+    cornerRadius,
 }: {
     rectElement: SVGGraphicsElement,
     rectDegrees: number,
     onRectElement: SVGGraphicsElement,
     onRectDegrees: number,
+    cornerRadius: number,
 }): boolean {
+    const rectBBox = rectElement.getBBox();
+    const onRectBBox = onRectElement.getBBox();
+    rectBBox.height += cornerRadius;
+    onRectBBox.height += cornerRadius;
 
-    const rect = createRect(rectElement.getBBox(), rectElement.getCTM(), rectDegrees);
-    const onRect = createRect(onRectElement.getBBox(), onRectElement.getCTM(), onRectDegrees);
+    const rect = createRect(rectBBox, rectElement.getCTM(), rectDegrees);
+    const onRect = createRect(onRectBBox, onRectElement.getCTM(), onRectDegrees);
     return isProjectionCollide(rect, onRect) && isProjectionCollide(onRect, rect);
 }
 
@@ -213,17 +219,9 @@ class Rect {
 
 
 function transformPoint(point: Point, matrix: DOMMatrix) {
-    const myMatrix: number[][] = [
-        [matrix.a, matrix.c, matrix.e],
-        [matrix.b, matrix.d, matrix.f],
-        [0, 0, 1],
-    ];
-    const vector = [point.x, point.y, 1];
-    const multiplicationResult = myMatrix.map((row) =>
-        row.reduce((acc, value, index) => acc + value * vector[index], 0)
-    );
-
-    return { x: multiplicationResult[0], y: multiplicationResult[1] };
+    const x = matrix.a * point.x + matrix.c * point.y + matrix.e;
+    const y = matrix.b * point.x + matrix.d * point.y + matrix.f;
+    return { x, y };
 }
 
 export function getTransformedCorners(bbox: DOMRect, matrix: DOMMatrix) {
@@ -253,7 +251,7 @@ export function getTransformedCorners(bbox: DOMRect, matrix: DOMMatrix) {
     bottomLeft = transformPoint(bottomLeft, matrix);
 
     function calculateDistance(point1: Point, point2: Point): number {
-        return Math.floor(Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)));
+        return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
     }
 
     const width = calculateDistance(topLeft, topRight);

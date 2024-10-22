@@ -171,7 +171,7 @@ export class ChordChart implements IVisual {
   private static DefaultTickLineColorValue: string = "#000";
   private static TickLineX1Position: number = 1;
   private static TickLineX2Position: number = 5;
-
+  private static BackgroundCornerRadius: number = 5;
 
   private eventService: IVisualEventService;
 
@@ -194,7 +194,6 @@ export class ChordChart implements IVisual {
   private static tickPairClass: ClassAndSelector =
     createClassAndSelector("tick-pair");
   private static tickTextClass: ClassAndSelector = createClassAndSelector("tick-text");
-  private static ticksBackgroundClass: ClassAndSelector = createClassAndSelector("ticks-background");
   private static tickBackgroundClass: ClassAndSelector = createClassAndSelector("tick-background");
   private static ticksClass: ClassAndSelector = createClassAndSelector("ticks");
 
@@ -1123,7 +1122,7 @@ export class ChordChart implements IVisual {
 
   private drawBackground(tickBackground: Selection<SVGRectElement, { angle: number; label: string }, SVGGElement, { angle: number; label: string }>) {
     const strokeWidth = this.settings.chord.strokeWidth.value;
-    const strokeCornerRadius = 5;
+    const strokeCornerRadius = ChordChart.BackgroundCornerRadius;
     const strokeIndentation = strokeWidth + strokeCornerRadius * 0.5;
 
     tickBackground
@@ -1191,12 +1190,21 @@ export class ChordChart implements IVisual {
           rectDegrees: prevAngle,
           onRectElement: currElement,
           onRectDegrees: currAngle,
+          cornerRadius: ChordChart.BackgroundCornerRadius,
         });
 
         return isRectOverlapping;
       };
 
+      // check first two elements
+      if (nodes.length > 2 && areCollading(nodes, data, 0, 1)) {
+        select(nodes[1]).remove();
+        tickPairs = element.selectAll<SVGGElement, { angle: number; label: string; }>("g" + ChordChart.tickPairClass.selectorName);
+        nodes = tickPairs.nodes();
+        data = tickPairs.data();
+      }
 
+      // check last two elements
       if (nodes.length >= 2 && areCollading(nodes, data, nodes.length - 2, nodes.length - 1)) {
         select(nodes[nodes.length - 2]).remove();
         tickPairs = element.selectAll<SVGGElement, { angle: number; label: string; }>("g" + ChordChart.tickPairClass.selectorName);
@@ -1205,12 +1213,10 @@ export class ChordChart implements IVisual {
       }
 
       const colladingRects = [];
-
       for (let i = 0; i < nodes.length - 2; i++) {
-        const nextElement = nodes[i + 1];
-        const isRectOverlapping = areCollading(nodes, data, i, i + 1);
-        if (isRectOverlapping) {
-          colladingRects.push(nextElement);
+        const isOverlapping = areCollading(nodes, data, i, i + 1);
+        if (isOverlapping) {
+          colladingRects.push(nodes[i + 1]);
           i += 1;
         }
       }
