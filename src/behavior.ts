@@ -1,9 +1,36 @@
+/*
+ *  Power BI Visualizations
+ *
+ *  Copyright (c) Microsoft Corporation
+ *  All rights reserved.
+ *  MIT License
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the ""Software""), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ */
+
 import powerbi from "powerbi-visuals-api";
 import { Selection, select as d3Select } from "d3-selection";
 import { Chord, Chords } from "d3-chord";
 import { ChordArcDescriptor } from './interfaces';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import ISelectionId = powerbi.visuals.ISelectionId;
+import { LegendDataPoint } from "powerbi-visuals-utils-chartutils/lib/legend/legendInterfaces";
 
 export interface BaseDataPoint {
     selected: boolean;
@@ -41,6 +68,7 @@ export class Behavior {
 
     constructor(selectionManager: ISelectionManager) {
         this.selectionManager = selectionManager;
+        this.selectionManager.registerOnSelectCallback(this.onSelectCallback.bind(this));
     }
 
     public bindEvents(options: BehaviorOptions): void {
@@ -49,6 +77,7 @@ export class Behavior {
         this.bindClick();
         this.bindContextMenu();
         this.bindContextMenuToClearCatcher();
+        this.bindKeyboardEvents();
     }
 
     private bindClick(): void {
@@ -86,6 +115,14 @@ export class Behavior {
         });
     }
 
+    private bindKeyboardEvents(): void {
+        this.options.arcSelection.on("keydown", (event: KeyboardEvent, dataPoint: ChordArcDescriptor) => {
+            if (event.code === "Enter" || event.code === "Space") {
+                this.selectDataPoint(dataPoint, event.ctrlKey || event.metaKey || event.shiftKey);
+            }
+        });
+    }
+
     private get hasSelection(): boolean {
         const selectionIds = this.selectionManager.getSelectionIds();
         return selectionIds.length > 0;
@@ -98,16 +135,38 @@ export class Behavior {
 
         const selectionIdsToSelect: ISelectionId[] = [dataPoint.identity];
         this.selectionManager.select(selectionIdsToSelect, multiSelect);
-        this.renderSelectionAndHighlights();
+        this.onSelectCallback();
     }
 
     private clear(): void {
         this.selectionManager.clear();
+        this.onSelectCallback();
+    }
+
+    private setSelectedToDataPoints(dataPoints: SelectableDataPoint[] | LegendDataPoint[], ids?: ISelectionId[], hasHighlightsParameter?: boolean): void {
+        const selectedIds: ISelectionId[] = ids || <ISelectionId[]>this.selectionManager.getSelectionIds();
+        const hasHighlights: boolean = hasHighlightsParameter || (this.options && this.options.hasHighlights);
+
+        if (hasHighlights && this.hasSelection) {
+            this.selectionManager.clear();
+        }
+
+        for (const dataPoint of dataPoints) { 
+            dataPoint.selected = this.isDataPointSelected(dataPoint, selectedIds);
+        }
+    }
+
+    public syncAndRender(): void {
+        this.onSelectCallback();
+    }
+
+    private onSelectCallback(selectionIds?: ISelectionId[]): void {
+        const selectedIds: ISelectionId[] = selectionIds || <ISelectionId[]>this.selectionManager.getSelectionIds();
+        this.setSelectedToDataPoints(this.options.dataPoints, selectedIds);
         this.renderSelectionAndHighlights();
     }
 
-    public renderSelectionAndHighlights(): void {
-        this.syncSelectionState();
+    private renderSelectionAndHighlights(): void {
         if (this.hasSelection || this.options.hasHighlights) {
             this.renderDataPoints();
         } else if (!this.hasSelection && !this.options.hasHighlights && this.options.hasHighlightsObject) {
@@ -124,7 +183,7 @@ export class Behavior {
         }
     }
 
-    private isDataPointSelected(dataPoint: SelectableDataPoint, selectedIds: ISelectionId[]): boolean {
+    private isDataPointSelected(dataPoint: SelectableDataPoint | LegendDataPoint, selectedIds: ISelectionId[]): boolean {
         return selectedIds.some((value: ISelectionId) => value.equals(<ISelectionId>dataPoint.identity));
     }
 

@@ -1,3 +1,19 @@
+## 2.4.0
+### Visual changes
+* Add keyboard navigation
+* Add report page tooltip support
+* Add font settings for axis
+* Extended "Chord" settings
+* Add axis background settings, add background shapes
+* Add settings to hide overlapping ticks
+
+### Code improvements
+* Fix rendering when "Clear selection" is clicked
+* Update API to 5.11.0, tools to 5.5.1
+* Fix data point colors assignment, making it stable
+* Fix npm vulnerabilities
+* Remove "coveralls" package
+
 ## 2.3.0
 * Update powerbi-visuals-api to 5.9.1
 * Update powerbi-visuals-tools to 5.4.3

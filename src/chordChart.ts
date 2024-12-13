@@ -31,7 +31,7 @@ import "./../style/chordChart.less";
 import { sum } from "d3-array";
 import { arc, Arc, DefaultArcObject } from "d3-shape";
 import { chord, ribbon, Chord, Chords, ChordLayout, ChordGroup } from "d3-chord";
-import { select, Selection } from "d3-selection";
+import { select, selectAll, Selection } from 'd3-selection';
 
 // powerbi
 import powerbiVisualsApi from "powerbi-visuals-api";
@@ -118,6 +118,7 @@ import { Behavior, HighlightedChord, ChordsHighlighted } from './behavior';
 import { mapValues, invert, isEmpty } from "./utils";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import powerbi from 'powerbi-visuals-api';
+import { isRectCollide } from './rectUtils';
 
 export interface ChordChartData {
   settings: ChordChartSettingsModel;
@@ -168,6 +169,10 @@ export class ChordChart implements IVisual {
   private static MaxUnitSize: number = 5;
   private static DefaultFormatValue: string = "0.##";
   private static DefaultTickLineColorValue: string = "#000";
+  private static TickLineX1Position: number = 1;
+  private static TickLineX2Position: number = 5;
+  private static BackgroundCornerRadius: number = 5;
+
   private eventService: IVisualEventService;
 
   private static chordClass: ClassAndSelector = createClassAndSelector("chord");
@@ -188,14 +193,15 @@ export class ChordChart implements IVisual {
     createClassAndSelector("tick-line");
   private static tickPairClass: ClassAndSelector =
     createClassAndSelector("tick-pair");
-  private static tickTextClass: ClassAndSelector =
-    createClassAndSelector("tick-text");
+  private static tickTextClass: ClassAndSelector = createClassAndSelector("tick-text");
+  private static tickBackgroundClass: ClassAndSelector = createClassAndSelector("tick-background");
   private static ticksClass: ClassAndSelector = createClassAndSelector("ticks");
 
   private labels: Selection<any, any, any, any>;
   private lines: Selection<any, any, any, any>;
   private mainGraphicsContext: Selection<any, any, any, any>;
   private arcs: Selection<any, any, any, any>;
+  private ticks: Selection<any, any, any, any>;
   private svg: Selection<any, any, any, any>;
 
   private colors: IColorPalette;
@@ -238,32 +244,30 @@ export class ChordChart implements IVisual {
     const colorHelper: ColorHelper = new ColorHelper(colorPalette);
 
     if (colorHelper.isHighContrast) {
-    settings.axis.color.value.value = colorHelper.getHighContrastColor(
-      "foreground",
-      settings.axis.color.value.value
-    );
+      settings.axis.color.value.value = colorHelper.getHighContrastColor(
+        "foreground",
+        settings.axis.color.value.value
+      );
 
-    settings.dataPoint.defaultColor.value.value = colorHelper.getHighContrastColor(
-      "background",
-      settings.dataPoint.defaultColor.value.value
-    );
+      settings.dataPoint.defaultColor.value.value = colorHelper.getHighContrastColor(
+        "background",
+        settings.dataPoint.defaultColor.value.value
+      );
 
-    settings.labels.color.value.value = colorHelper.getHighContrastColor(
-      "foreground",
-      settings.labels.color.value.value
-    );
+      settings.labels.color.value.value = colorHelper.getHighContrastColor(
+        "foreground",
+        settings.labels.color.value.value
+      );
 
-    settings.chord.strokeColor.value.value = colorHelper.getHighContrastColor(
-      "foreground",
-      settings.chord.strokeColor.value.value
-    );
+      settings.chord.strokeColor.value.value = colorHelper.getHighContrastColor(
+        "foreground",
+        settings.chord.strokeColor.value.value
+      );
 
     }
 
     if (colorPalette && colorHelper.isHighContrast) {
-      settings.chord.strokeWidth.value = settings.chord.strokeWidth.options.maxValue.value;
-    } else {
-      settings.chord.strokeWidth.value = settings.chord.strokeWidth.options.minValue.value;
+      settings.chord.strokeWidth.value = settings.chord.highContrastStrokeWidth;
     }
   }
 
@@ -339,7 +343,7 @@ export class ChordChart implements IVisual {
     if (
       ChordChart.getValidArrayLength(totalFields) ===
       ChordChart.getValidArrayLength(categoricalValues.Category) +
-        ChordChart.getValidArrayLength(categoricalValues.Series)
+      ChordChart.getValidArrayLength(categoricalValues.Series)
     ) {
       isDiffFromTo = true;
     }
@@ -386,7 +390,7 @@ export class ChordChart implements IVisual {
           ? columns.Category.objects[index]
           : undefined;
 
-        barFillColor = colorHelper.getColorForSeriesValue(
+        barFillColor = colorHelper.getColorForMeasure(
           thisCategoryObjects,
           categoricalValues.Category[index]
         );
@@ -398,14 +402,14 @@ export class ChordChart implements IVisual {
         const seriesData: DataViewValueColumn = columns.Y
           ? columns.Y[index]
           : {
-              objects: null,
-              source: {
-                displayName: "Value",
-                queryName: "Value",
-                groupName: "Value",
-              },
-              values: [ChordChart.defaultValue1],
-            };
+            objects: null,
+            source: {
+              displayName: "Value",
+              queryName: "Value",
+              groupName: "Value",
+            },
+            values: [ChordChart.defaultValue1],
+          };
 
         const seriesNameStr: PrimitiveValue = seriesData
           ? getSeriesName(seriesData.source)
@@ -418,7 +422,7 @@ export class ChordChart implements IVisual {
           .createSelectionId();
         isCategory = false;
 
-        barFillColor = colorHelper.getColorForSeriesValue(
+        barFillColor = colorHelper.getColorForMeasure(
           seriesObjects,
           seriesNameStr ? seriesNameStr : `${ChordChart.defaultValue1}`
         );
@@ -439,7 +443,7 @@ export class ChordChart implements IVisual {
         labelColor: settings.labels.color.value.value,
         isGrouped: !!grouped,
         labelFontSize: PixelConverter.fromPointToPixel(
-          settings.labels.fontSize.value
+          settings.labels.font.fontSize.value
         ),
       });
 
@@ -525,7 +529,7 @@ export class ChordChart implements IVisual {
     chordLayout.padAngle(ChordChart.ChordLayoutPadding);
     const chords: Chords = chordLayout(renderingDataMatrix);
 
-    const highlightedChords: HighlightedChord[] = chords.map((chord) => Object.assign({}, chord, { hasHighlight: false }) );
+    const highlightedChords: HighlightedChord[] = chords.map((chord) => Object.assign({}, chord, { hasHighlight: false }));
     const chordsWithHighlight: ChordsHighlighted = Object.assign(chords, { highlightedChords: highlightedChords });
 
     const groups: ChordArcDescriptor[] = ChordChart.getChordArcDescriptors(
@@ -605,7 +609,7 @@ export class ChordChart implements IVisual {
 
     this.arcs = svgSelection.append("g").classed("slices", true);
 
-    svgSelection.append("g").classed(ChordChart.ticksClass.className, true);
+    this.ticks = svgSelection.append("g").classed(ChordChart.ticksClass.className, true);
 
     this.labels = svgSelection
       .append("g")
@@ -650,11 +654,12 @@ export class ChordChart implements IVisual {
 
       this.layout.resetMargin();
       this.layout.margin.top = this.layout.margin.bottom =
-        PixelConverter.fromPointToPixel(this.settings.labels.fontSize.value) / 2;
+        PixelConverter.fromPointToPixel(this.settings.labels.font.fontSize.value) / 2;
 
       this.render();
       this.eventService.renderingFinished(options);
     } catch (e) {
+      console.error(e);
       this.eventService.renderingFailed(options, e);
     }
   }
@@ -665,9 +670,9 @@ export class ChordChart implements IVisual {
   }
 
   private dataViewHasHighlights(dataView: DataView): boolean {
-      const values = (dataView?.categorical?.values?.length && dataView.categorical.values) || <DataViewValueColumns>[];
-      const highlightsExist = values.some(({ highlights }) => highlights?.some(Number.isInteger));
-      return !!highlightsExist;
+    const values = (dataView?.categorical?.values?.length && dataView.categorical.values) || <DataViewValueColumns>[];
+    const highlightsExist = values.some(({ highlights }) => highlights?.some(Number.isInteger));
+    return !!highlightsExist;
   }
 
   private dataViewHasHighlightsObject(dataView: DataView): boolean {
@@ -796,6 +801,7 @@ export class ChordChart implements IVisual {
     arcShapes
       .style("fill", (d) => d.data.barFillColor)
       .style("stroke", (d) => d.data.barStrokeColor)
+      .attr("tabindex", 0)
       .attr("d", (d) => arcVal(<any>d));
     this.tooltipServiceWrapper.addTooltip(
       arcShapes,
@@ -818,10 +824,8 @@ export class ChordChart implements IVisual {
     chordShapes
       .style("fill", (chordLink: Chord) => this.data.groups[chordLink.target.index].data.barFillColor)
       .style("stroke", this.settings.chord.strokeColor.value.value)
-      .style(
-        "stroke-width",
-        PixelConverter.toString(this.settings.chord.strokeWidth.value)
-      )
+      .style("stroke-width", PixelConverter.toString(this.settings.chord.strokeWidth.value))
+      .style("stroke-opacity", this.settings.chord.strokeOpacity.value / 100)
       .attr("d", path);
     this.drawTicks();
     this.drawCategoryLabels();
@@ -838,7 +842,7 @@ export class ChordChart implements IVisual {
       })
 
       // Check if there is a selection or highlights, and render them if they exist
-      this.behavior.renderSelectionAndHighlights();
+      this.behavior.syncAndRender();
     }
 
     this.tooltipServiceWrapper.addTooltip(chordShapes, (chordLink: Chord) => {
@@ -902,6 +906,7 @@ export class ChordChart implements IVisual {
       ChordChart.tickPairClass,
       ChordChart.tickTextClass,
       ChordChart.sliceTicksClass,
+      ChordChart.tickBackgroundClass,
     ]);
   }
 
@@ -991,13 +996,13 @@ export class ChordChart implements IVisual {
   }
 
   // Draw axis(ticks) around the arc
+  // eslint-disable-next-line max-lines-per-function
   private drawTicks(): void {
     if (this.settings.axis.show.value) {
 
-      let tickShapes: Selection<any, any, any, any> =
-        this.mainGraphicsContext
-          .select(ChordChart.ticksClass.selectorName)
-          .selectAll("g" + ChordChart.sliceTicksClass.selectorName)
+      let tickShapes: Selection<SVGGElement, ChordArcDescriptor, any, any> =
+        this.ticks
+          .selectAll<SVGGElement, ChordArcDescriptor>("g" + ChordChart.sliceTicksClass.selectorName)
           .data(this.data.groups);
 
       tickShapes.exit().remove();
@@ -1010,7 +1015,7 @@ export class ChordChart implements IVisual {
       );
 
       let tickPairs = tickShapes
-        .selectAll("g" + ChordChart.tickPairClass.selectorName)
+        .selectAll<SVGGElement, { angle: number; label: string; }>("g" + ChordChart.tickPairClass.selectorName)
         .data((d: ChordArcDescriptor) => d.angleLabels);
 
       tickPairs.exit().remove();
@@ -1046,9 +1051,9 @@ export class ChordChart implements IVisual {
 
       tickLines
         .style("stroke", this.settings.axis.color?.value?.value || ChordChart.DefaultTickLineColorValue)
-        .attr("x1", 1)
+        .attr("x1", ChordChart.TickLineX1Position)
         .attr("y1", 0)
-        .attr("x2", 5)
+        .attr("x2", ChordChart.TickLineX2Position)
         .attr("y2", 0)
         .merge(tickLines);
 
@@ -1064,15 +1069,160 @@ export class ChordChart implements IVisual {
         .classed(ChordChart.tickTextClass.className, true)
         .attr("x", ChordChart.DefaultTickShiftX)
         .attr("dy", ChordChart.DefaultDY)
-        .text((d) => (<any>d).label)
-        .style("text-anchor", (d) => ((<any>d).angle > Math.PI ? "end" : null))
+        .text((d) => d.label)
+        .style("text-anchor", (d) => (d.angle > Math.PI ? "end" : null))
         .style("fill", this.settings.axis.color.value.value)
-        .attr("transform", (d) =>
-          (<any>d).angle > Math.PI ? "rotate(180)translate(-16)" : null
-        );
+        .style("font-size", this.settings.axis.font.fontSize.value)
+        .style("font-family", this.settings.axis.font.fontFamily.value)
+        .style("font-weight", this.settings.axis.font.bold.value ? "bold" : "normal")
+        .style("font-style", this.settings.axis.font.italic.value ? "italic" : "normal")
+        .style("text-decoration", this.settings.axis.font.underline.value ? "underline" : "none")
+
+      if (this.settings.axis.rotateTicks.value) {
+        tickText.attr("transform", (d) =>
+          d.angle > Math.PI ? "rotate(180)translate(-16)" : null
+        )
+      } else {
+        tickText.attr("transform", (d) => {
+          const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
+          const x: number = ChordChart.DefaultTickShiftX;
+
+          return `rotate(${angle} ${x} 0)`
+        })
+      }
+
+      this.drawTicksBackground(tickPairs);
+      this.handleOverlappingTicks(tickShapes);
     } else {
       this.clearTicks();
     }
+  }
+
+  private drawTicksBackground(tickPairs: Selection<SVGGElement, { angle: number; label: string }, any, any>) {
+    let tickBackground = tickPairs
+      .selectAll<SVGRectElement, { angle: number; label: string; }>(ChordChart.tickBackgroundClass.selectorName)
+      .data(d => [d]);
+
+    tickBackground.exit().remove();
+    tickBackground = tickBackground.merge(
+      tickBackground
+        .enter()
+        .append("rect")
+        .classed(ChordChart.tickBackgroundClass.className, true)
+    ).lower();
+
+    if (!this.settings.axis.showBackground.value) {
+      tickBackground.remove();
+      return;
+    }
+
+    this.drawBackground(tickBackground);
+    this.rotateBackground(tickBackground);
+  }
+
+  private drawBackground(tickBackground: Selection<SVGRectElement, { angle: number; label: string }, SVGGElement, { angle: number; label: string }>) {
+    const strokeWidth = this.settings.chord.strokeWidth.value;
+    const strokeCornerRadius = ChordChart.BackgroundCornerRadius;
+    const strokeIndentation = strokeWidth + strokeCornerRadius * 0.5;
+
+    tickBackground
+      .attr("fill", this.settings.axis.backgroundColor.value.value)
+      .attr("fill-opacity", this.settings.axis.backgroundOpacity.value / 100)
+      .attr("stroke", this.settings.chord.strokeColor.value.value)
+      .attr("stroke-width", strokeWidth)
+      .attr("stroke-opacity", this.settings.chord.strokeOpacity.value / 100);
+
+    tickBackground.each((datum, i, nodes) => {
+      const element = select(nodes[i]);
+      const parent = select(element.node().parentNode as SVGGElement);
+      const text = parent.select("text").node() as SVGTextElement;
+      const width = text.getComputedTextLength() + ChordChart.DefaultTickShiftX + strokeIndentation;
+      const height = parseFloat(getComputedStyle(text).fontSize) + strokeIndentation;
+
+      element
+        .attr("x", 0)
+        .attr("y", height * -0.5)
+        .attr("rx", strokeCornerRadius)
+        .attr("ry", strokeCornerRadius)
+        .attr("width", width)
+        .attr("height", height);
+    });
+  }
+
+  private rotateBackground(tickBackground: Selection<SVGRectElement, { angle: number; label: string }, SVGGElement, { angle: number; label: string }>) {
+    if (this.settings.axis.rotateTicks.value) {
+      tickBackground.attr("transform", null);
+    } else {
+      tickBackground.attr("transform", (d) => {
+        const angle: number = ((d.angle * 180) / Math.PI - 90) * -1;
+        const x: number = ChordChart.DefaultTickShiftX;
+
+        if (-90 <= angle && angle <= 90) {
+          return `rotate(${angle} ${x} 0)`;
+        }
+        else {
+          return `rotate(${angle + 180} ${x} 0)`;
+        }
+      });
+    }
+  }
+
+  private handleOverlappingTicks(tickShapes: Selection<SVGGElement, ChordArcDescriptor, any, any>) {
+    if (!this.settings.axis.hideOverlappingTicks.value) {
+      return;
+    }
+    
+    tickShapes.each((_, index, n) => {
+      const element = select(n[index]);
+      let tickPairs = element.selectAll<SVGGElement, { angle: number; label: string; }>("g" + ChordChart.tickPairClass.selectorName);
+      let nodes = tickPairs.nodes();
+      let data = tickPairs.data();
+
+      const areCollading = (n: SVGGElement[], d: { angle: number; label: string; }[], prevIndex: number, currIndex: number) => {
+        const prevElement = n[prevIndex];
+        const currElement = n[currIndex];
+
+        const prevAngle = d[prevIndex].angle * 180 / Math.PI - 90;
+        const currAngle = d[currIndex].angle * 180 / Math.PI - 90;
+
+        const isRectOverlapping = isRectCollide({
+          rectElement: prevElement,
+          rectDegrees: prevAngle,
+          onRectElement: currElement,
+          onRectDegrees: currAngle,
+          cornerRadius: ChordChart.BackgroundCornerRadius,
+        });
+
+        return isRectOverlapping;
+      };
+
+      // check first two elements
+      if (nodes.length > 2 && areCollading(nodes, data, 0, 1)) {
+        select(nodes[1]).remove();
+        tickPairs = element.selectAll<SVGGElement, { angle: number; label: string; }>("g" + ChordChart.tickPairClass.selectorName);
+        nodes = tickPairs.nodes();
+        data = tickPairs.data();
+      }
+
+      // check last two elements
+      if (nodes.length >= 2 && areCollading(nodes, data, nodes.length - 2, nodes.length - 1)) {
+        select(nodes[nodes.length - 2]).remove();
+        tickPairs = element.selectAll<SVGGElement, { angle: number; label: string; }>("g" + ChordChart.tickPairClass.selectorName);
+        nodes = tickPairs.nodes();
+        data = tickPairs.data();
+      }
+
+      const colladingRects = [];
+      for (let i = 0; i < nodes.length - 2; i++) {
+        const isOverlapping = areCollading(nodes, data, i, i + 1);
+        if (isOverlapping) {
+          colladingRects.push(nodes[i + 1]);
+          i += 1;
+        }
+      }
+
+      selectAll(colladingRects).remove();
+    });
   }
 
   private renderLabels(
@@ -1184,7 +1334,7 @@ export class ChordChart implements IVisual {
           label: d.data.label,
           maxWidth: maxLabelWidth,
           fontSize: PixelConverter.fromPointToPixel(
-            this.settings.labels.fontSize.value
+            this.settings.labels.font.fontSize.value
           ),
         });
       },
@@ -1200,11 +1350,13 @@ export class ChordChart implements IVisual {
       filter: (d: ChordArcDescriptor) =>
         d !== null && d.data !== null && d.data.label !== null,
       style: {
-        fill: (d: ChordArcDescriptor) => d.data.labelColor,
-        "text-anchor": (d: ChordArcDescriptor) =>
-          midAngle(d) < Math.PI ? "start" : "end",
-        "font-size": () =>
-          PixelConverter.fromPoint(this.settings.labels.fontSize.value),
+        "fill": (d: ChordArcDescriptor) => d.data.labelColor,
+        "text-anchor": (d: ChordArcDescriptor) => midAngle(d) < Math.PI ? "start" : "end",
+        "font-size": PixelConverter.fromPoint(this.settings.labels.font.fontSize.value),
+        "font-family": this.settings.labels.font.fontFamily.value || dataLabelUtils.StandardFontFamily,
+        "font-weight": this.settings.labels.font.bold.value ? "bold" : "normal",
+        "font-style": this.settings.labels.font.italic.value ? "italic" : "normal",
+        "text-decoration": this.settings.labels.font.underline.value ? "underline" : "none",
       },
     };
   }
@@ -1230,5 +1382,9 @@ export class ChordChart implements IVisual {
       }
     }
     return res;
+  }
+
+  private convertEmToPx(em: number) {
+    return em * parseFloat(getComputedStyle(document.body).fontSize);
   }
 }
