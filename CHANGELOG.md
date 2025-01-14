@@ -1,3 +1,7 @@
+## 2.4.1
+### Visual changes
+* Set background color for axis ticks in high contrast mode
+
 ## 2.4.0
 ### Visual changes
 * Add keyboard navigation
