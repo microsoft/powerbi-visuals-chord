@@ -244,26 +244,11 @@ export class ChordChart implements IVisual {
     const colorHelper: ColorHelper = new ColorHelper(colorPalette);
 
     if (colorHelper.isHighContrast) {
-      settings.axis.color.value.value = colorHelper.getHighContrastColor(
-        "foreground",
-        settings.axis.color.value.value
-      );
-
-      settings.dataPoint.defaultColor.value.value = colorHelper.getHighContrastColor(
-        "background",
-        settings.dataPoint.defaultColor.value.value
-      );
-
-      settings.labels.color.value.value = colorHelper.getHighContrastColor(
-        "foreground",
-        settings.labels.color.value.value
-      );
-
-      settings.chord.strokeColor.value.value = colorHelper.getHighContrastColor(
-        "foreground",
-        settings.chord.strokeColor.value.value
-      );
-
+      settings.axis.color.value.value = colorHelper.getHighContrastColor("foreground", settings.axis.color.value.value);
+      settings.dataPoint.defaultColor.value.value = colorHelper.getHighContrastColor("background", settings.dataPoint.defaultColor.value.value);
+      settings.labels.color.value.value = colorHelper.getHighContrastColor("foreground", settings.labels.color.value.value);
+      settings.chord.strokeColor.value.value = colorHelper.getHighContrastColor("foreground", settings.chord.strokeColor.value.value);
+      settings.axis.backgroundColor.value.value = colorHelper.getHighContrastColor("background", settings.axis.backgroundColor.value.value);
     }
 
     if (colorPalette && colorHelper.isHighContrast) {
