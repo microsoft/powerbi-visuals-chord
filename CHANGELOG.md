@@ -1,3 +1,38 @@
+## 2.4.1
+### Visual changes
+* Set background color for axis ticks in high contrast mode
+
+## 2.4.0
+### Visual changes
+* Add keyboard navigation
+* Add report page tooltip support
+* Add font settings for axis
+* Extended "Chord" settings
+* Add axis background settings, add background shapes
+* Add settings to hide overlapping ticks
+
+### Code improvements
+* Fix rendering when "Clear selection" is clicked
+* Update API to 5.11.0, tools to 5.5.1
+* Fix data point colors assignment, making it stable
+* Fix npm vulnerabilities
+* Remove "coveralls" package
+
+## 2.3.0
+* Update powerbi-visuals-api to 5.9.1
+* Update powerbi-visuals-tools to 5.4.3
+* Update other powerbi dependencies, 
+* Migrate from puppeteer to playwright-chromium
+* Migrate from tslint to eslint, fix eslint errors
+* Replace larget package 'snyk' with '@snyk/protect'
+* Update outdated packages
+* Remove powerbi-visuals-interactivity-utils
+* Refactor 'getChordTicksArcDescriptors' to show ticks for each chord
+
+## 2.2.0
+* Add context menu handling
+* Update powerbi-visuals-api to 3.8.2
+
 ## 2.1.0
 * API update
 * browser tab crash fix

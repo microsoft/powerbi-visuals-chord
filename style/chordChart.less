@@ -28,11 +28,23 @@
  * Imports external styles.
  * We compile it as a less file in order to wrap the external CSS rules.
  */
-// @import (less) "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.css";
-// @import (less) "node_modules/powerbi-visuals-utils-chartutils/lib/index.css";
 
 @regularFontFamily: helvetica, arial, sans-serif;
 @neutralSecondaryAltColor: #777777;
+
+@keyframes pulse {
+    0% {
+        stroke-width: 2;
+    }
+
+    50% {
+        stroke-width: 5;
+    }
+
+    100% {
+        stroke-width: 2;
+    }
+}
 
 .chordChart {
     font-family: @regularFontFamily;
@@ -49,5 +61,19 @@
 
     .tick-text {
         pointer-events: none;
+    }
+
+    .slice {
+
+        &:focus,
+        &:focus-visible {
+            outline: none;
+        }
+
+        &:focus-visible {
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+            /* Add a shadow effect */
+            animation: pulse 1s infinite;
+        }
     }
 }

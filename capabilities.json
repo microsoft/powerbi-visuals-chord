@@ -84,12 +84,8 @@
     ],
     "objects": {
         "dataPoint": {
-            "displayName": "Data colors",
-            "displayNameKey": "Visual_Data_Colors",
             "properties": {
                 "defaultColor": {
-                    "displayName": "Default color",
-                    "displayNameKey": "Visual_Default_Color",
                     "type": {
                         "fill": {
                             "solid": {
@@ -99,15 +95,11 @@
                     }
                 },
                 "showAllDataPoints": {
-                    "displayName": "Show all",
-                    "displayNameKey": "Visual_Show_All",
                     "type": {
                         "bool": true
                     }
                 },
                 "fill": {
-                    "displayName": "Color",
-                    "displayNameKey": "Visual_Color",
                     "type": {
                         "fill": {
                             "solid": {
@@ -119,33 +111,13 @@
             }
         },
         "axis": {
-            "displayName": "Axis",
-            "displayNameKey": "Visual_Axis",
             "properties": {
                 "show": {
-                    "displayName": "Show",
-                    "displayNameKey": "Visual_Show",
-                    "type": {
-                        "bool": true
-                    }
-                }
-            }
-        },
-        "labels": {
-            "displayName": "Labels",
-            "displayNameKey": "Visual_Labels",
-            "properties": {
-                "show": {
-                    "displayName": "Show",
-                    "displayNameKey": "Visual_Show",
                     "type": {
                         "bool": true
                     }
                 },
                 "color": {
-                    "displayName": "Color",
-                    "displayNameKey": "Visual_Color",
-                    "description": "Set the reference line data label color",
                     "type": {
                         "fill": {
                             "solid": {
@@ -155,17 +127,144 @@
                     }
                 },
                 "fontSize": {
-                    "displayName": "Text size",
-                    "displayNameKey": "Visual_Text_Size",
                     "type": {
                         "formatting": {
                             "fontSize": true
                         }
                     }
+                },
+                "fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "bold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "italic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "underline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "rotateTicks": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "hideOverlappingTicks": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "showBackground": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "backgroundColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundOpacity": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "labels": {
+            "properties": {
+                "show": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "color": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontSize": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "bold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "italic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "underline": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "chord": {
+            "properties": {
+                "strokeColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "strokeWidth": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "strokeOpacity": {
+                    "type": {
+                        "numeric": true
+                    }
                 }
             }
         }
     },
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": ["tooltips"]
+    },
+    "privileges": [],
     "supportsHighlight": true,
     "supportsKeyboardFocus": true,
     "supportsMultiVisualSelection": true
