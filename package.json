@@ -1,6 +1,7 @@
 {
-  "name": "powerbi-visuals-chordchart",
+  "name": "@microsoft/powerbi-visuals-chordchart",
   "version": "2.4.1.0",
+  "private": true,
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
