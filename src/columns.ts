@@ -124,4 +124,6 @@ export class ChordChartColumns<T> {
     public Category: T = null;
     public Series: T = null;
     public Y: T = null;
+    public CategoryLabel: T = null;
+    public SeriesLabel: T = null;
 }

@@ -358,12 +358,16 @@ export class ChordChart implements IVisual {
       let isCategory: boolean = false;
       let index: number;
 
-      const label: string =
+      let label: string =
         sources.Series && i < categoricalValues.Series.length
           ? seriesColumnFormatter.format(totalFields[i])
           : categoryColumnFormatter.format(totalFields[i]);
 
       if ((index = catIndex[totalFields[i]]) !== undefined) {
+        // This is a Category (From) - check if custom label is provided
+        if (categoricalValues.CategoryLabel && categoricalValues.CategoryLabel[index] != null) {
+          label = String(categoricalValues.CategoryLabel[index]);
+        }
         selectionId = host
           .createSelectionIdBuilder()
           .withCategory(columns.Category, index)
@@ -380,6 +384,11 @@ export class ChordChart implements IVisual {
           categoricalValues.Category[index]
         );
       } else if ((index = seriesIndex[totalFields[i]]) !== undefined) {
+        // This is a Series (To) - check if custom label is provided
+        if (categoricalValues.SeriesLabel && categoricalValues.SeriesLabel[index] != null) {
+          label = String(categoricalValues.SeriesLabel[index]);
+        }
+
         const seriesObjects: DataViewObjects = grouped
           ? grouped[index].objects
           : null;

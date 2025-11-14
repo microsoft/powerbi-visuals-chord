@@ -17,6 +17,18 @@
             "displayNameKey": "Role_Values",
             "name": "Y",
             "kind": "Measure"
+        },
+        {
+            "displayName": "From Label",
+            "displayNameKey": "Role_FromLabel",
+            "name": "CategoryLabel",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "To Label",
+            "displayNameKey": "Role_ToLabel",
+            "name": "SeriesLabel",
+            "kind": "Grouping"
         }
     ],
     "dataViewMappings": [
@@ -28,6 +40,12 @@
                     },
                     "Series": {
                         "max": 0
+                    },
+                    "CategoryLabel": {
+                        "max": 1
+                    },
+                    "SeriesLabel": {
+                        "max": 1
                     }
                 },
                 {
@@ -39,6 +57,12 @@
                         "max": 1
                     },
                     "Y": {
+                        "max": 1
+                    },
+                    "CategoryLabel": {
+                        "max": 1
+                    },
+                    "SeriesLabel": {
                         "max": 1
                     }
                 },
@@ -52,14 +76,29 @@
                     "Y": {
                         "min": 0,
                         "max": 1
+                    },
+                    "CategoryLabel": {
+                        "max": 1
+                    },
+                    "SeriesLabel": {
+                        "max": 1
                     }
                 }
             ],
             "categorical": {
                 "categories": {
-                    "for": {
-                        "in": "Category"
-                    },
+                    "select": [
+                        {
+                            "for": {
+                                "in": "Category"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "CategoryLabel"
+                            }
+                        }
+                    ],
                     "dataReductionAlgorithm": {
                         "top": {}
                     }
@@ -71,6 +110,11 @@
                             {
                                 "bind": {
                                     "to": "Y"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "SeriesLabel"
                                 }
                             }
                         ],
